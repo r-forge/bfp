@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs with Hyper-g-prior
 ## 
-## Time-stamp: <[NAMESPACE] by DSB Die 29/09/2009 16:41 (CEST)>
+## Time-stamp: <[NAMESPACE] by DSB Die 29/09/2009 17:41 (CEST)>
 ##
 ## Description:
 ## Namespace file for bfp package.
@@ -13,7 +13,7 @@
 ## 13/11/2008   add pit and crps functions.
 ## 26/02/2009   add transformMfp function and C++ interfaces getPostExpectedg,
 ##              getPostExpectedShrinkage
-## 29/09/2009   remove pit/crps stuff for bfp package on R-forge.
+## 29/09/2009   remove pit/crps stuff for bfp package on R-forge
 #####################################################################################
 
 ## export new methods and functions
