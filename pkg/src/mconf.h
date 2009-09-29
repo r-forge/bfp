@@ -1,0 +1,1 @@
+/home/daniel/workspace/HypergBayesMfp/mconf.h
