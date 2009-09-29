@@ -1,3 +1,7 @@
+2009-09-29  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Upload to R-forge SVN.
+
 2009-09-21  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Only allow identical FP degrees for the covariates, to ensure
