@@ -1,0 +1,13 @@
+Package: bfp
+Version: 0.0-9
+Date: 29/09/2009
+Title: Bayesian Fractional Polynomials
+Author: Daniel Sabanes Bove <daniel.sabanesbove@ifspm.uzh.ch>
+Maintainer: Daniel Sabanes Bove <daniel.sabanesbove@ifspm.uzh.ch>
+Depends: R (>= 2.9.0)
+Imports: mvtnorm
+Suggests: doBy
+Description: The package implements the Bayesian paradigm for fractional
+ polynomial models under the assumption of normally distributed error terms.
+License: GPL (>= 2) 
+Packaged: 2009-09-30 12:11:58 UTC; daniel

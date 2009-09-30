@@ -1,0 +1,40 @@
+2009-09-29  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Upload to R-forge SVN.
+
+2009-09-21  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Only allow identical FP degrees for the covariates, to ensure
+	that the SWITCH always works.
+	* Start implementing the new SWITCH move type, which shall guard
+	us against bad mixing in data sets with near-collinear covariates.
+	* Note that the R CMD check warning for the marked UTF8 character
+	is the degree symbol in the labels of the ozone covariates.
+
+2009-09-14  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* start cleaning before the next major revisions
+
+2009-02-12  Daniel Sabanes Bove  <daniel.sabanesbove@campus.lmu.de>
+
+	* faster implementation for findModel.
+
+2008-12-26  Daniel Sabanes Bove  <daniel.sabanesbove@campus.lmu.de>
+
+	* test the corrected computation of marginal likelihood (see
+	hyperg.cpp).
+
+2008-11-29  Daniel Sabanes Bove  <daniel.sabanesbove@campus.lmu.de>
+
+	* Added flat model prior option as the default prior specification.
+
+2008-10-24  Daniel Sabanes Bove  <daniel.sabanesbove@campus.lmu.de>
+
+	* first version which is tested for the ozone data.
+
+2008-08-22  Daniel Sabanes Bove  <daniel.sabanesbove@campus.lmu.de>
+
+	* copied everything from original BayesMfp package. This shall be
+	a seperate implementation for the new methodology with
+	hyper-g-prior & Co.
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 5.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage2">
+<storageModule moduleId="org.eclipse.cdt.core.settings">
+<cconfiguration id="cdt.managedbuild.config.gnu.so.debug.1449267991">
+<storageModule externalCElementFile="cdt.managedbuild.config.gnu.so.debug.1449267991_org.eclipse.cdt.core.settings" id="cdt.managedbuild.config.gnu.so.debug.1449267991" name="Debug"/>
+<storageModule externalCElementFile="cdt.managedbuild.config.gnu.so.debug.1449267991_cdtBuildSystem" version="4.0.0"/>
+<storageModule externalCElementFile="cdt.managedbuild.config.gnu.so.debug.1449267991_scannerConfiguration"/>
+<storageModule externalCElementFile="cdt.managedbuild.config.gnu.so.debug.1449267991_org.eclipse.cdt.core.externalSettings"/>
+</cconfiguration>
+</storageModule>
+<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+<project id="bfp.cdt.managedbuild.target.gnu.so.1400085755" name="Shared Library" projectType="cdt.managedbuild.target.gnu.so"/>
+</storageModule>
+</cproject>

@@ -1,0 +1,38 @@
+# Time-stamp: <[Makevars] by DSB Mit 30/09/2009 13:32 (CEST)>
+
+# use makefile variables from the R installation
+MkInclude = $(R_HOME)/etc${R_ARCH}/Makeconf
+
+# flags are needed:
+PKG_CPPFLAGS = -D R_NO_REMAP 
+PKG_CXXFLAGS = -I. -Inewmat
+PKG_LIBS = -Lnewmat -lnewmat
+
+# what are the C and C++ source files?
+include scripts/SOURCES.mkf
+
+# derive object files
+OBJECTS_C = $(SOURCES_C:.c=.o)
+OBJECTS_CPP = $(SOURCES_CPP:.cpp=.o)
+OBJECTS = $(OBJECTS_C) $(OBJECTS_CPP)
+
+# start compilation
+all: 	  $(SHLIB)
+$(SHLIB): $(OBJECTS) sublib
+
+sublib: subclean
+	(cd newmat && CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" MkInclude="$(MkInclude)" $(MAKE) library) || exit 1;
+
+clean: subclean
+	$(RM) -r .libs _libs
+	$(RM) *.o $(SHLIB)
+
+subclean:
+	$(RM) *.a
+	(cd newmat && MkInclude="$(MkInclude)" $(MAKE) clean) || exit 1;
+
+
+
+# Local Variables:
+# mode: makefile
+# End:
