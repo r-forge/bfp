@@ -2,74 +2,91 @@
 \alias{plotCurveEstimate}
 \alias{plotCurveEstimate.BayesMfp}
 \alias{plotCurveEstimate.BmaSamples}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{generic function for plotting a fractional polynomial curve estimate}
+
+\title{Generic function for plotting a fractional polynomial curve estimate}
 \description{
   Plot a fractional polynomial curve estimate for either a single model
-  or a Bayesian model average over BayesMfp objects. Optionally,
+  or a Bayesian model average over \code{\link{BayesMfp}} objects. Optionally,
   credible intervals and / or bands can be added to the plot.
 }
 \usage{
 plotCurveEstimate(model, termName, plevel = 0.95, slevel = plevel, plot
 = TRUE, legendPos = "topleft", rug = FALSE, ...)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
-  \item{model}{ an object of class \code{\link{BayesMfp}} or \code{\link{BmaSamples}} }
-  \item{termName}{ string denoting an fp term as written by summary method }
-  \item{plevel}{credibility level for pointwise HPD, NULL means no pointwise HPD}
-  \item{slevel}{credibility level for simultaneous credible band (SCB), NULL means no SCB}
-  \item{plot}{if FALSE, only return values needed to produce the plot}
-  \item{legendPos}{position of coefficient estimates (for BayesMfp) or
-    sample size (for BmaSamples) in the plot, NULL suppresses the
-    printing}
+  \item{model}{an object of class \code{\link{BayesMfp}} or \code{\link{BmaSamples}}}
+  \item{termName}{string denoting an FP term, as written by the
+  \code{\link[=summary.BayesMfp]{summary}} method} 
+  \item{plevel}{credible level for pointwise HPD, and \code{NULL} means
+  no pointwise HPD (default: 0.95)}
+  \item{slevel}{credible level for simultaneous credible band (SCB),
+  \code{NULL} means no SCB (defaults to \code{plevel})}
+  \item{plot}{if \code{FALSE}, only return values needed to produce the
+  plot, but do not plot (default is \code{TRUE}, so a plot is made)}
+  \item{legendPos}{position of coefficient estimates (for \code{\link{BayesMfp}}) or
+    sample size (for \code{\link{BmaSamples}}) in the plot, \code{NULL} suppresses the
+    printing (default is \dQuote{topleft})}
   \item{rug}{add a rug to the plot? (default: \code{FALSE})}
-  \item{\dots}{ further arguments in case of a BayesMfp object (see details) and
-    arguments for plotting with \code{\link{matplot}} }
+  \item{\dots}{further arguments in case of a \code{\link{BayesMfp}}
+    object (see details) and arguments for plotting with
+  \code{\link{matplot}}} 
 }
 \details{
-  Further arguments for application on a BayesMfp object:
+  Further arguments for application on a \code{\link{BayesMfp}} object:
   \describe{
-    \item{grid}{vector of unscaled abscissae, default is a length \code{gridSize} grid
-      over observed range}
+    \item{grid}{vector of unscaled abscissae, default is a length
+      \code{gridSize} grid over the observed range specified by
+      providing the argument \code{NULL}.}
     \item{post}{list with posterior parameters of the model, which may be
       provided manually to accelerate plotting in a loop}
     \item{gridSize}{default number of grid points used when no
-      \code{grid} is supplied}
-    \item{numSim}{number of simulations for estimation of the SCB}
+      \code{grid} is supplied (default is 201)}
+    \item{numSim}{number of simulations for estimation of the SCB
+      (default is 500)}
   }
 }
 \value{
   a list of various plotting information:
   \item{original}{grid on the original covariate scale}
   \item{grid}{grid on the transformed scale}
-  \item{mode}{mode curve values, only for BayesMfp object}
-  \item{median}{pointwise median curve values, only for BmaSamples object}
-  \item{mean}{pointwise mean curve values, only for BmaSamples object}
+  \item{mode}{mode curve values, only for \code{\link{BayesMfp}} object}
+  \item{mean}{pointwise mean curve values, only for \code{\link{BmaSamples}} object}
   \item{plower}{lower boundaries for pointwise HPD}
   \item{pupper}{upper boundaries for pointwise HPD}
   \item{slower}{lower boundaries for SCB}
   \item{supper}{upper boundaries for SCB}
   \item{obsVals}{observed values of the covariate on the original scale}
-  \item{sampleSize}{sample size underlying the curve estimate, only for BmaSamples object}
+  \item{sampleSize}{sample size underlying the curve estimate, only for
+  \code{\link{BmaSamples}} object} 
   \item{partialResids}{partial residuals}
   \item{transform}{vector of shift and scale parameter}  
 }
 
 \seealso{\code{\link{BayesMfp}}, \code{\link{BmaSamples}}}
 \examples{
+## construct a BayesMfp object
 set.seed(19)
 x1 <- rnorm (n=15)
 x2 <- rbinom (n=15, size=20, prob=0.5) 
 x3 <- rexp (n=15)
 y <- rt (n=15, df=2)
 
-test <- BayesMfp (y ~ bfp (x2, max = 4) + uc (x1 + x3), nModels = 100, method="exhaustive")
-plotCurveEstimate (test[20], "x2")
+test <- BayesMfp (y ~ bfp (x2, max = 4) + uc (x1 + x3), nModels = 100,
+method="exhaustive")
 
+## plot the x2 curve estimate for the 20-th best model
+p1 <- plotCurveEstimate (test[20], "x2")
+
+## look at the returned list
+str(p1)
+
+## plot the BMA curve estimate for the same covariate
 testBma <- BmaSamples (test)
-plotCurveEstimate (testBma, "x2")
+p2 <- plotCurveEstimate (testBma, "x2")
 
+## look at the returned list
+str(p2)
 }
 
 \keyword{regression}

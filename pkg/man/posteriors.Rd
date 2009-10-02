@@ -1,46 +1,48 @@
 \name{posteriors}
 \alias{posteriors}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+
+\title{Extract posterior model probability estimates from BayesMfp objects}
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Extract posterior model probability estimates (either normalized
+  estimates or sampling frequencies) from \code{\link{BayesMfp}} objects.
 }
 \usage{
 posteriors(BayesMfpObject, ind = 1)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
-  \item{BayesMfpObject}{ ~~Describe \code{BayesMfpObject} here~~ }
-  \item{ind}{ ~~Describe \code{ind} here~~ }
-}
-\details{
-  ~~ If necessary, more details than the description above ~~
+  \item{BayesMfpObject}{a valid \code{\link{BayesMfp}} object,
+    containing the models the probabilites of which one wants to
+    estimate}
+  \item{ind}{\code{ind = 1} means normalized posteriors, \code{ind = 2}
+    means sampling frequencies}
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  The vector of probability estimates.
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\author{Daniel Saban\'es Bov\'e}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## construct a BayesMfp object
+set.seed(19)
+x1 <- rnorm (n=15)
+x2 <- rbinom (n=15, size=20, prob=0.5) 
+x3 <- rexp (n=15)
+y <- rt (n=15, df=2)
 
-## The function is currently defined as
-function (BayesMfpObject,
-                        ind = 1         # ind = 1 means normalized posteriors, ind = 2 sampling freqs
-                        )
-{
-    sapply (BayesMfpObject, function (one) one[["posterior"]] [ind])
-  }
+test <- BayesMfp (y ~ bfp (x1, max = 2) + bfp (x2, max = 2) + uc (x3), nModels = 100,
+method="exhaustive")
+
+## this works:
+posteriors(test)
+
+## this must not work:
+SoDA::muststop(posteriors(test, ind=2))
+
+## only if we do model sampling there are model frequencies:
+test2 <- BayesMfp (y ~ bfp (x1, max = 2) + bfp (x2, max = 2) + uc (x3), nModels = 100,
+method="sampling")
+posteriors(test2, ind=2)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+\keyword{utilities}
 
-\keyword{htest}
 

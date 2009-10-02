@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BayesMfpMethods.R] by DSB Sam 29/11/2008 18:53 (CET) on daniel@puc.home>
+## Time-stamp: <[BayesMfpMethods.R] by DSB Don 01/10/2009 15:59 (CEST)>
 ##
 ## Description:
 ## Additional convenience methods for BayesMfp class objects.
@@ -74,12 +74,13 @@ residuals.BayesMfp <- function (object, # valid BayesMfp object, only first elem
 
 ####################################################################################################
 
-## do a plug-in prediction at new data points, without credibility intervals.
+## do a plug-in prediction at new data points, without credible intervals.
 ## Intervals can be obtained by first running BmaSamples and then extracting with the predict method
 ## of the BmaSamples class.
 predict.BayesMfp <- function (object, # valid BayesMfp object, only first element will be recognized
-                              newdata, # new covariate data with exactly the names (and preferably ranges) as before
-                              ...       # unused
+                              newdata, # new covariate data with exactly the names (and preferably
+                                       # ranges) as before
+                              ...      # unused
                               )
 {
     tempMod <- mod <- object[1]
@@ -101,10 +102,10 @@ predict.BayesMfp <- function (object, # valid BayesMfp object, only first elemen
 ####################################################################################################
 
 as.data.frame.BayesMfp <- function (x,  # valid BayesMfp object
-                                    row.names = NULL, # optional rownames, default is to keep listnames
-                                    optional = FALSE, # unused
-                                    freq = TRUE, # should empirical frequencies be given?
-                                    ... # unused
+                                    row.names = NULL, # optional rownames, default is to keep
+                                        # listnames
+                                    ...,        # unused
+                                    freq = TRUE # should empirical frequencies be given?
                                     )
 {
     ## posterior probabilites:

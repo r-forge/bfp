@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BmaSamplesMethods.R] by DSB Sam 29/11/2008 19:09 (CET) on daniel@puc.home>
+## Time-stamp: <[BmaSamplesMethods.R] by DSB Don 01/10/2009 16:16 (CEST)>
 ##
 ## Description:
 ## Additional convenience methods for BmaSamples class objects.
@@ -56,7 +56,7 @@ residuals.BmaSamples <- function (object, ...)
 
 ## extract predictions and their intervals from a BmaSamples object
 predict.BmaSamples <- function (object, # valid BmaSamples object
-                                level=0.95, # credibility level for coefficients credible intervals
+                                level=0.95, # credible level for predictions credible intervals
                                 hpd = TRUE, # should emprical hpd intervals be used (default) or simple quantile-based?
                                 ...         # unused
                                 )
@@ -71,7 +71,7 @@ predict.BmaSamples <- function (object, # valid BmaSamples object
     ret$sampleSize <- ncol(object$predictions)
     ret$nModels <- nrow(object$modelData)
     
-    ## construct coefficients' summary matrix
+    ## construct predictions summary matrix
     ret$summaryMat <- matrix (nrow = nrow(ret$newdata),
                               ncol = 4,
                               dimnames =

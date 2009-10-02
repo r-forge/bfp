@@ -2,13 +2,16 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[scrHpd.R] by DSB Fre 04/07/2008 11:40 (CEST) on daniel@puc.home>
+## Time-stamp: <[scrHpd.R] by DSB Fre 02/10/2009 14:51 (CEST)>
 ##
 ## Description:
 ## Calculate a series of simultaneous credible bounds from a samples matrix.
 ##
 ## History:
 ## 04/07/2008   copy from thesis function collection.
+## 02/10/2009   remove superfluous grid argument, add some checks,
+##              really discard whole vectors and derive the SCB from the convex hull
+##              of the rest.
 #####################################################################################
 
 ## all methods assume that samples is a m by n matrix where
@@ -20,35 +23,61 @@
 
 scrHpd <- function(samples,          # sample matrix
                    mode = apply (samples, 2, median), # mode vector of length = ncol (samples)
-                   level = 0.95,     # credibility level
-                   grid = ncol (samples) # number of elements in each sample vector
+                   level = 0.95     # credible level
                    )
 {
-    n <- ncol(samples)
-    m <- nrow(samples)
+    ## extracts
+    nPars <- ncol(samples)                  # the number of parameters
+    nSamples <- nrow(samples)                  # the number of samples
 
-    if (n != length (mode))
+    ## checks
+    if (nPars != length (mode))
         stop ("mode vector must have same length as samples matrix!")
+    stopifnot(level > 0 && level < 1)
 
-    distance <- abs (sweep (samples, 2, mode)) # absolute distance from mode vector
+    ## absolute distance from mode vector
+    distance <- abs (sweep (samples, 2, mode)) 
 
-    k <- floor (level * m)
-    ## Calculates a simultaneous (k/m)*100% credible band
-    ## using the ranks approach
+    ## Calculate a simultaneous (k/ nSamples)*100% credible band
+    ## using the ranks approach:    
+    k <- floor (level * nSamples)
 
-    rankdistance <- apply (distance, 2, rank) # colwise (= elementwise) ranks of distances
+    ## colwise (= elementwise) ranks of distances
+    rankdistance <- apply (distance, 2, rank) 
 
-    tstari <- apply (rankdistance, 1, max) # maximum ranks in each sample
-    ordtstari <- sort.int (tstari, method = "quick") # and sort the maximum ranks
+    ## maximum ranks in each multivariate sample
+    tstari <- apply (rankdistance, 1, max)
 
-    tstar <- ordtstari[k]               # the required rank
+    ## sort the maximum ranks
+    ordtstari <- sort.int (tstari, method = "quick") 
 
-    selectMat <- rankdistance <= tstar
+    ## the required rank, which divides the samples in contained and rejected samples for the SCB,
+    ## is: 
+    tstar <- ordtstari[k]               
 
-    ret <- matrix (nrow = 2, ncol = n)
-    for (i in seq_len (n)){
-        ret[, i] <- range (samples[selectMat[,i], i])
-    }
+    ## now which vectors are inside the SCB?
+    whichInside <- tstari <= tstar
+    ## note that sum(whichInside) is possibly larger than k, so we have
+    ## a larger empirical coverage of the resulting SCB.
 
+    ## reduce the samples matrix accordingly.
+    samples <- samples[whichInside, ]
+
+    ## the parameterwise ranges of these vectors form the SCB
+    ## (just the convex hull of all sample vectors!) 
+    ret <- apply(samples, 2, range)
+    rownames(ret) <- c("lower", "upper")
+    
+    ## old code: it is not clear if here really a simultaenous credible band results!!
+    ## because not whole sample vectors are discarded
+    
+    ## selectMat <- rankdistance <= tstar
+
+    ## ret <- matrix (nrow = 2, ncol = nPars)
+    ## for (i in seq_len (nPars)){
+    ##     ret[, i] <- range (samples[selectMat[,i], i])
+    ## }
+
+    ## finally return the 2 x nPars matrix
     return (ret)
 }

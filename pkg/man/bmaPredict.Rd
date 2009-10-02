@@ -1,81 +1,52 @@
 \name{bmaPredict}
 \alias{bmaPredict}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~functions to do ... ~~ }
+
+\title{BMA prediction for new data points}
 \description{
-  ~~ A concise (1-5 lines) description of what the functions
-     bmaPredict do. ~~
+  Make a Bayesian model averaged prediction for new data points, from
+  those models saved in a \code{\link{BayesMfp}} object.
 }
 \usage{
-bmaPredict(BayesMfpObject, postProbs = posteriors(BayesMfpObject), newdata, ...)
+bmaPredict(BayesMfpObject, postProbs = posteriors(BayesMfpObject), newdata)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
-  \item{BayesMfpObject}{ ~~Describe \code{BayesMfpObject} here~~ }
-  \item{postProbs}{ ~~Describe \code{postProbs} here~~ }
-  \item{newdata}{ ~~Describe \code{newdata} here~~ }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
+  \item{BayesMfpObject}{\code{\link{BayesMfp}} object with the models
+  over which the predictions should be averaged}
+  \item{postProbs}{vector of posterior probabilities, which are then
+  normalized to the weights of the model average (defaults to the
+  normalized posterior probability estimates)}
+  \item{newdata}{new covariate data as data.frame}
 }
-\details{
-  ~~ If necessary, more details than the description above ~~
+\note{
+  Note that this function is not an S3 predict method for
+  \code{\link{BmaSamples}} objects, but a function working on
+  \code{\link{BayesMfp}} objects (because we do not need BMA samples to
+  do BMA point predictions).
 }
 \value{
-  ~Describe the values returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  The predicted values as a vector.
 }
-\references{ ~put references to the literature/web site here ~ }
 \author{Daniel Saban\'es Bov\'e}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\seealso{\code{\link{BmaSamples Methods}}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## generate a BayesMfp object
+set.seed(19)
 
-## The functions are currently defined as
-## bmaPredict
-function (BayesMfpObject, # models over which to average the predictions
-                        postProbs = posteriors (BayesMfpObject),
-                                        # vector of posterior probabilites that will be normalized within
-                        newdata,        # new data as data.frame
-                        ...             # unused
-                        )
-{
-    if (length (postProbs) != length (BayesMfpObject))
-        stop ("postProbs has wrong length")
+x1 <- rnorm(n=15)
+x2 <- rbinom(n=15, size=20, prob=0.5) 
+x3 <- rexp(n=15)
 
-    ## correct model matrix to new data
-    oldFormula <- attr (BayesMfpObject, "formula")
-    bfpTermNames <- attr (BayesMfpObject, "termNames")$bfp
+y <- rt(n=15, df=2)
 
-    newTerms <- terms (oldFormula, data = newdata) # get model matrix
-    mf <- model.frame (newTerms, data = newdata)
-    tempX <- model.matrix (newTerms, data = mf)
+test <- BayesMfp(y ~ bfp (x2, max = 4) + uc (x1 + x3), nModels = 100,
+                 method="exhaustive")
 
-    tr <- attr (BayesMfpObject, "shiftScaleMax")
-    for (bfp in bfpTermNames){          # and scale columns like for the old data
-        tempX[, bfp] <- (tempX[, bfp] + tr[bfp, "shift"]) / tr[bfp, "scale"]
-    }
-
-    ## and compute mean fit with respective original posterior coefficient mode for every model
-    fitmat <- matrix (nrow = length (BayesMfpObject), ncol = nrow (tempX))
-    for (i in seq_along (BayesMfpObject)){
-        tempMod <- BayesMfpObject[i]
-        attr (tempMod, "x") <- tempX
-        design <- getDesignMatrix (tempMod)
-        post <- getPosteriorParms (BayesMfpObject[i])
-        fitmat[i,] <- design \%*\% post$mStar
-    }
-
-    ## average with probabilites as weights
-    fitmat <- fitmat * (postProbs / sum (postProbs))
-
-    return (colSums (fitmat))
-  }
+## predict new responses at (again random) covariates
+bmaPredict(test,
+           newdata = list(x1 = rnorm(n=15),
+                          x2 = rbinom(n=15, size=5, prob=0.2) + 1,
+                          x3 = rexp(n=15)))
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{regression}
 

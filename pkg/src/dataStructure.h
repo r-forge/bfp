@@ -84,7 +84,8 @@ struct dataValues{
 	
 	ColumnVector onesVector;
 	
-	map<modelPar, modelInfo>::size_type totalNumber; // cardinality of model space
+	typedef map<modelPar, modelInfo>::size_type NumberType;
+	NumberType totalNumber; // cardinality of model space
 	
 	dataValues(const Matrix &x, const Matrix &xcentered, const ColumnVector &y, const double &totalNum);
 };

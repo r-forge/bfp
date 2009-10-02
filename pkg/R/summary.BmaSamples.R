@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[summary.BmaSamples.R] by DSB Don 04/09/2008 17:08 (CEST) on daniel@puc.home>
+## Time-stamp: <[summary.BmaSamples.R] by DSB Fre 02/10/2009 17:12 (CEST)>
 ##
 ## Description:
 ## Calculate and print the summary of a BmaSamples object.
@@ -14,7 +14,7 @@
 
 summary.BmaSamples <-
     function (object,
-              level = 0.95, # credibility level for coefficients credible intervals
+              level = 0.95, # credible level for coefficients credible intervals
               hpd = TRUE, # should emprical hpd intervals be used (default) or simple quantile-based?
               ...       # unused
               )

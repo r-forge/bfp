@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[getLogMargLik.R] by DSB Son 19/10/2008 17:37 (CEST) on daniel@puc.home>
+## Time-stamp: <[getLogMargLik.R] by DSB Don 01/10/2009 17:35 (CEST)>
 ##
 ## Description:
 ## Extract log marginal likelihood from a model.
@@ -23,6 +23,8 @@ getLogMargLik <- function (x,       # a valid BayesMfp-Object of length 1 (other
     ## select only the first element
     x <- x[1]
 
+    ## todo: compute the R2 here! otherwise it is pretty unsafe...
+    
     ## gather remaining arguments for logMargLik
     R2 <- x[[1]]$R2
     alpha <- attr(x, "priorSpecs")$a

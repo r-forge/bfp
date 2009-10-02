@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BmaSamples.R] by DSB Sam 29/11/2008 19:10 (CET) on daniel@puc.home>
+## Time-stamp: <[BmaSamples.R] by DSB Don 01/10/2009 15:38 (CEST)>
 ##
 ## Description:
 ## Sample from models in a BayesMfp object using "BmaSamples" for MC model averaging
@@ -23,6 +23,8 @@
 ## 13/11/2008   use new internal function for creating model matrix for newdata
 ## 14/11/2008   save the random seed when entering the function
 ## 29/11/2008   remove unnecessary "pr" copy of priorSpecs
+## 01/10/2009   coerce newdata to data.frame, so we don't need NROW here
+##              (so a list can also be passed without breaking everything)
 #####################################################################################
 
 ## Time-stamp: <[BmaSamples.R] by DSB Fre 04/07/2008 10:51 (CEST) on daniel@puc.home>
@@ -44,7 +46,9 @@ BmaSamples <-
     if(! (length(object) >= 1))
         stop(simpleError("There has to be at least one model in the BayesMfp object."))
 
-
+    ## coerce newdata to data frame
+    newdata <- as.data.frame(newdata)
+    
     ## start filling the return list
     ret <- list ()
     
@@ -156,7 +160,7 @@ BmaSamples <-
     ret$fitted <- matrix (nrow = length (object), ncol = nObs)
 
     ## for samples from the posterior predictive
-    nNewObs <- NROW(newdata)
+    nNewObs <- nrow(newdata)
     ret$predictions <-
         if(nNewObs)
             matrix(nrow=nNewObs,

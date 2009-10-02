@@ -1,42 +1,52 @@
 \name{BmaSamples Methods}
+\alias{BmaSamples Methods}
 \alias{fitted.BmaSamples}
 \alias{print.BmaSamples}
 \alias{residuals.BmaSamples}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~functions to do ... ~~ }
+
+\title{Other methods for BmaSamples objects}
 \description{
-  ~~ A concise (1-5 lines) description of what the functions
-     fitted.BmaSamples, print.BmaSamples, residuals.BmaSamples, predict.BmaSamples do. ~~
+  Print the object (\code{print}),
+  get fitted values (\code{fitted}) and corresponding residuals
+  (\code{residuals}).
 }
 \usage{
-\method{fitted}{BmaSamples}(object, ...)
 \method{print}{BmaSamples}(x, ...)
+\method{fitted}{BmaSamples}(object, ...)
 \method{residuals}{BmaSamples}(object, ...)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
-  \item{x}{ ~~Describe \code{object} here~~ }
-  \item{object}{ ~~Describe \code{object} here~~ }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
-  \item{newdata}{ ~~Describe \code{newdata} here~~ }
-  \item{postProbs}{ ~~Describe \code{postProbs} here~~ }
+  \item{x}{valid \code{\link{BmaSamples}} object}
+  \item{object}{valid \code{\link{BmaSamples}} object}
+  \item{\dots}{unused}
 }
-\details{
-  ~~ If necessary, more details than the description above ~~
-}
-\value{
-  ~Describe the values returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
-}
-\references{ ~put references to the literature/web site here ~ }
 \author{Daniel Saban\'es Bov\'e}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\seealso{\code{\link{predict.BmaSamples}}, \code{\link{summary.BmaSamples}}}
 \examples{
+## construct a BayesMfp object
+set.seed(19)
+
+x1 <- rnorm (n=15)
+x2 <- rbinom (n=15, size=20, prob=0.5) 
+x3 <- rexp (n=15)
+
+y <- rt (n=15, df=2)
+
+test <- BayesMfp (y ~ bfp (x2, max = 4) + uc (x1 + x3), nModels = 200, method="exhaustive")
+
+## now draw samples from the Bayesian model average
+testBma <- BmaSamples (test)
+
+## the print method:
+testBma
+
+## the fitted method:
+fitted(testBma)
+
+## and the corresponding residuals:
+residuals(testBma)
+
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{methods}
-\keyword{internal}

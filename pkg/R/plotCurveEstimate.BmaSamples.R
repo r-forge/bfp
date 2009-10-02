@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mit 16/09/2009 15:12 (CEST)>
+## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Fre 02/10/2009 11:35 (CEST)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on (MC) Bayesian model average.
@@ -13,6 +13,8 @@
 ## 25/02/2009   don't estimate/plot the median curve, as it complicates the matter
 ##              without real benefit.
 ## 16/09/2009   add rug argument, and plot curves last to obtain clearer graphics
+## 02/10/2009   adapt return list to the analogue function for BayesMfp objects
+##              ("original" instead of "originalGrid")
 #####################################################################################
 
 plotCurveEstimate.BmaSamples <-
@@ -36,7 +38,7 @@ plotCurveEstimate.BmaSamples <-
     ## x values
     ret$grid <- g <- as.vector (attr (mat, "scaledGrid"))
     tr <- model$shiftScaleMax[termName, c ("shift", "scale")]
-    ret$originalGrid <- g * tr[2] - tr[1]
+    ret$original <- g * tr[2] - tr[1]
 
     ## account for non-identifiability: subtract function means
     ## mat <- sweep (mat, 1, rowMeans (mat))
@@ -98,15 +100,15 @@ plotCurveEstimate.BmaSamples <-
             matplotList$col <- c ("black", "gray", "blue", "blue", "green", "green")
         if (is.null (matplotList$type))
             matplotList$type <- "l"
-        matplotList$x <- ret$originalGrid
-        matplotList$y <- subset (as.data.frame (ret), select = - c (originalGrid, grid))
+        matplotList$x <- ret$original
+        matplotList$y <- subset (as.data.frame (ret), select = - c (original, grid))
         if (is.null (matplotList$ylim))
             matplotList$ylim <- range (c (partialResids, matplotList$y))
 
         ## and plot:
 
         ## first the points
-        ret$obsVals <- ret$originalGrid[pos]
+        ret$obsVals <- ret$original[pos]
         ret$partialResids <- partialResids
         plot(ret$obsVals, ret$partialResids,
              type="p",

@@ -1,3 +1,10 @@
+2009-09-30  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Add some documentation to R functions.
+
+	* Clearer structure for src directory, so that all newmat stuff is
+	in a separate directory.
+
 2009-09-29  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Upload to R-forge SVN.

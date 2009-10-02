@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[bmaPredict.R] by DSB Don 13/11/2008 18:18 (CET) on daniel@puc.home>
+## Time-stamp: <[bmaPredict.R] by DSB Don 01/10/2009 11:53 (CEST)>
 ##
 ## Description:
 ## BMA prediction for new data points.
@@ -21,8 +21,7 @@
 bmaPredict <- function (BayesMfpObject, # models over which to average the predictions
                         postProbs = posteriors (BayesMfpObject),
                                         # vector of posterior probabilites that will be normalized within
-                        newdata,        # new data as data.frame
-                        ...             # unused
+                        newdata        # new data as data.frame
                         )
 {
     if (length (postProbs) != length (BayesMfpObject))

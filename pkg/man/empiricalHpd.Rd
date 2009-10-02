@@ -1,61 +1,33 @@
 \name{empiricalHpd}
 \alias{empiricalHpd}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~functions to do ... ~~ }
+
+\title{Construct an empirical HPD interval from samples}
 \description{
-  ~~ A concise (1-5 lines) description of what the functions
-     empiricalHpd do. ~~
+Construct an empirical highest posterior density (HPD) interval from
+samples which have been drawn from the distribution of a quantity of
+interest. 
 }
 \usage{
 empiricalHpd(theta, level)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{theta}{ ~~Describe \code{theta} here~~ }
-  \item{level}{ ~~Describe \code{level} here~~ }
-}
-\details{
-  ~~ If necessary, more details than the description above ~~
+  \item{theta}{the vector of samples}
+  \item{level}{the credible level}
 }
 \value{
-  ~Describe the values returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  A vector with the estimated lower and upper bounds of the HPD
+  interval. 
 }
-\references{ ~put references to the literature/web site here ~ }
 \author{Daniel Saban\'es Bov\'e}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## draw standard normal variates
+test <- rnorm(n=1000)
 
-## The functions are currently defined as
-## empiricalHpd
-function (theta,        # sample vector of parameter
-                          level         # credibility level
-                          )
-{
-    M <- length (theta)
-    thetaorder <- sort.int (theta, method = "quick")
+## estimate the 95% HPD interval with these samples:
+empiricalHpd(theta=test, level=0.95)
 
-    alpha <- 1 - level
-    maxSize <- ceiling (M * alpha)
-    ind <- seq_len (maxSize)
-
-    lower <- thetaorder[ind]
-    upper <- thetaorder[M - maxSize + ind]
-    size <- upper - lower
-    sizeMin <- which.min(size)
-
-    HPDLower <- thetaorder[sizeMin]
-    HPDUpper <- thetaorder[M - maxSize + sizeMin]
-    return (c (HPDLower, HPDUpper))
-  }
+## compare with true HPD:
+qnorm(p=c(0.025, 0.975))
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{htest}
-\keyword{internal}
+

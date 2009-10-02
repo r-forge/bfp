@@ -2,11 +2,12 @@
 \alias{'\%bt\%'}
 \alias{getFpTransforms}
 \alias{getTransformName}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~functions to do ... ~~ }
+
+\title{Internal functions to handle FP transforms.}
 \description{
-  ~~ A concise (1-5 lines) description of what the functions
-     \%bt\%, getFpTransforms, getTransformName do. ~~
+Transform a variable according to FP transformation formula and attach
+proper names to the resulting design matrix. The binary function
+\code{bt} is the Box-Tidwell transform.
 }
 \usage{
 '\%bt\%'(x, pow)
@@ -15,31 +16,20 @@ getTransformName(name, pow)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{ ~~Describe \code{x} here~~ }
-  \item{pow}{ ~~Describe \code{pow} here~~ }
-  \item{vec}{ ~~Describe \code{vec} here~~ }
-  \item{powers}{ ~~Describe \code{powers} here~~ }
-  \item{center}{should the columns be centered around zero?}
-  \item{name}{ ~~Describe \code{name} here~~ }
+  \item{x}{numeric vector}
+  \item{pow}{one single power (not vectorized in this argument)}
+  \item{vec}{positive (== already shifted and scaled) column vector (!) with
+    proper colname} 
+  \item{powers}{power vector with at least one element}
+  \item{center}{should the columns be centered around zero? (default)}
+  \item{name}{name of the covariate to be transformed with \code{bt}}
 }
-\details{
-  ~~ If necessary, more details than the description above ~~
-}
-\value{
-  ~Describe the values returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
-}
-\references{ ~put references to the literature/web site here ~ }
 \author{Daniel Saban\'es Bov\'e}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\seealso{\code{\link{getDesignMatrix}}}
 \examples{
-% todo
+bfp:::getFpTransforms(cbind(x=1:10), powers=c(-2, 0, 1))
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{utilities}
 \keyword{internal}
 

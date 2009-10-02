@@ -1,54 +1,56 @@
 \name{BayesMfp Methods}
-\alias{as.data.frame.BayesMfp}
-\alias{'[.BayesMfp'}
+\alias{BayesMfp Methods}
 \alias{fitted.BayesMfp}
-\alias{predict.BayesMfp}
 \alias{print.BayesMfp}
 \alias{residuals.BayesMfp}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~functions to do ... ~~ }
+
+\title{Other methods for BayesMfp objects}
 \description{
-  ~~ A concise (1-5 lines) description of what the functions
-     as.data.frame.BayesMfp, '[.BayesMfp', fitted.BayesMfp, predict.BayesMfp, print.BayesMfp, residuals.BayesMfp do. ~~
+  Print the object (\code{print}),
+  get fitted values (\code{fitted}) and corresponding residuals (\code{residuals}).
 }
 \usage{
-\method{as.data.frame}{BayesMfp}(x, row.names = NULL, optional = FALSE, freq = TRUE, ...)
-\method{[}{BayesMfp}(x, ...)
-\method{fitted}{BayesMfp}(object, design = getDesignMatrix(object), post
-= getPosteriorParms(object, design = design), ...)
-\method{predict}{BayesMfp}(object, newdata, ...)
 \method{print}{BayesMfp}(x, ...)
+\method{fitted}{BayesMfp}(object, design = getDesignMatrix(object), post =
+getPosteriorParms(object, design = design), ...) 
 \method{residuals}{BayesMfp}(object, ...)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
-  \item{x}{ ~~Describe \code{x} here~~ }
-  \item{row.names}{ ~~Describe \code{row.names} here~~ }
-  \item{optional}{ ~~Describe \code{optional} here~~ }
-  \item{freq}{ ~~Describe \code{freq} here~~ }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
-  \item{object}{ ~~Describe \code{object} here~~ }
-  \item{design}{ ~~Describe \code{design} here~~ }
-  \item{post}{ ~~Describe \code{post} here~~ }
-  \item{newdata}{ ~~Describe \code{newdata} here~~ }
+  \item{x}{valid \code{\link{BayesMfp}} object}
+  \item{object}{valid \code{\link{BayesMfp}} object, only the first model will be
+  used.} 
+  \item{design}{design matrix of the first model in the object, which
+  can be supplied by the caller if it is computed beforehand}
+  \item{post}{posterior parameters of the normal-gamma distribution
+  (defaults to the posterior expected mean, marginalized over the
+  covariance factor g)}
+  \item{\ldots}{unused}
 }
-\details{
-  ~~ If necessary, more details than the description above ~~
-}
-\value{
-  ~Describe the values returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
-}
-\references{ ~put references to the literature/web site here ~ }
+
 \author{Daniel Saban\'es Bov\'e}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\seealso{\code{\link{BayesMfp}}, \code{\link{BmaSamples Methods}}}
 \examples{
+## generate a BayesMfp object
+set.seed(19)
+
+x1 <- rnorm(n=15)
+x2 <- rbinom(n=15, size=20, prob=0.5) 
+x3 <- rexp(n=15)
+
+y <- rt(n=15, df=2)
+
+test <- BayesMfp(y ~ bfp (x2, max = 4) + uc (x1 + x3), nModels = 100,
+                 method="exhaustive")
+
+## the print method
+test
+
+## extract fitted values and corresponding residuals
+fitted(test)
+residuals(test)
 
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{methods}
-\keyword{internal}
+

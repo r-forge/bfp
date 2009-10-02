@@ -1,41 +1,62 @@
 \name{Summary of BmaSamples object}
 \alias{print.summary.BmaSamples}
 \alias{summary.BmaSamples}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~functions to do ... ~~ }
+
+\title{Calculate and print the summary of a BmaSamples object}
 \description{
-  ~~ A concise (1-5 lines) description of what the functions
-     print.summary.BmaSamples, summary.BmaSamples do. ~~
+  Calculate and print the summary of a \code{\link{BmaSamples}} object,
+  using S3 methods for the class. 
 }
 \usage{
-\method{print}{summary.BmaSamples}(x, table = TRUE, ...)
 \method{summary}{BmaSamples}(object, level = 0.95, hpd = TRUE, ...)
+\method{print}{summary.BmaSamples}(x, table = TRUE, ...)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
-  \item{x}{ ~~Describe \code{x} here~~ }
-  \item{table}{ ~~Describe \code{table} here~~ }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
-  \item{object}{ ~~Describe \code{object} here~~ }
-  \item{level}{ ~~Describe \code{level} here~~ }
-  \item{hpd}{ ~~Describe \code{hpd} here~~ }
-}
-\details{
-  ~~ If necessary, more details than the description above ~~
+  \item{object}{a valid \code{\link{BmaSamples}} object}
+  \item{level}{credible level for coefficients credible intervals}
+  \item{hpd}{should emprical hpd intervals be used (default) or simple quantile-based?}
+  \item{x}{a return value of \code{\link{summary.BmaSamples}}}
+  \item{table}{should the model table been shown? (default)}
+  \item{\dots}{unused}
 }
 \value{
-  ~Describe the values returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  The summary method returns an S3 object, where \dQuote{sampleSize},
+  \dQuote{modelData} and \dQuote{modelFreqs} are copied from the
+  \code{\link{BmaSamples}} object, please see its help page for the
+  details. \dQuote{intervalType} and \dQuote{level} copy the function's
+  parameters. 
+
+  \dQuote{summaryMat} contains the posterior summaries for the intercept
+  and uncertain fixed form covariates. \dQuote{sigma2Sum} and
+  \dQuote{shrinkageSum} contain the posterior summaries for the
+  regression variance and the shrinkage factor, respectively. The
+  summaries are always the median, mean, lower and upper credible
+  bounds for the coefficients.
 }
-\references{ ~put references to the literature/web site here ~ }
 \author{Daniel Saban\'es Bov\'e}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\seealso{\code{\link{summary.BayesMfp}}}
 \examples{
+## generate a BmaSamples object
+set.seed(19)
+
+x1 <- rnorm(n=15)
+x2 <- rbinom(n=15, size=20, prob=0.5) 
+x3 <- rexp(n=15)
+
+y <- rt(n=15, df=2)
+
+test <- BayesMfp(y ~ bfp (x2, max = 4) + uc (x1 + x3), nModels = 100,
+                 method="exhaustive")
+
+testBma <- BmaSamples(test)
+
+## look at the summary
+summary(testBma)
+
+## and its structure
+str(summary(testBma))
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{methods}
-\keyword{internal}% __ONLY ONE__ keyword per line
+

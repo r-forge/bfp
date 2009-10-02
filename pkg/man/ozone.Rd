@@ -10,27 +10,28 @@ Upland, CA, east of Los Angeles.
 \format{
   A data frame with 366 observations on the following 13 variables.
   \describe{
-    \item{\code{month}}{a numeric vector}
-    \item{\code{day}}{a numeric vector}
-    \item{\code{weekday}}{a factor with levels \code{Monday} \code{Tueday} \code{Wednesday} \code{Thursday} \code{Friday} \code{Saturday} \code{Sunday}}
-    \item{\code{hourAverageMax}}{a numeric}
-    \item{\code{pressure500Height}}{a numeric}
-    \item{\code{windSpeed}}{a numeric}
-    \item{\code{humidity}}{a numeric}
-    \item{\code{tempSandburg}}{a numeric}
-    \item{\code{tempElMonte}}{a numeric}
-    \item{\code{inversionBaseHeight}}{a numeric}
-    \item{\code{pressureGradientDaggett}}{a numeric}
-    \item{\code{inversionBaseTemp}}{a numeric}
-    \item{\code{visibility}}{a numeric}
+    \item{\code{month}}{month of the year}
+    \item{\code{day}}{day of the month}
+    \item{\code{weekday}}{day of the week: a factor with levels \code{Monday},
+      \code{Tueday}, \code{Wednesday}, \code{Thursday}, \code{Friday},
+      \code{Saturday}, \code{Sunday}} 
+    \item{\code{hourAverageMax}}{maximum 1-hour average ozone level [ppm]}
+    \item{\code{pressure500Height}}{500 millibar pressure height [meters]}
+    \item{\code{windSpeed}}{wind speed [mph]}
+    \item{\code{humidity}}{relative humidity [\%]}
+    \item{\code{tempSandburg}}{temperature at Sandberg, CA [degrees F]}
+    \item{\code{tempElMonte}}{temperature at El Monte, CA [degrees F]}
+    \item{\code{inversionBaseHeight}}{inversion base height [feet]}
+    \item{\code{pressureGradientDaggett}}{pressure gradient from LAX to
+      Daggett, CA [mm Hg]}
+    \item{\code{inversionBaseTemp}}{inversion base temperature [degrees F]}
+    \item{\code{visibility}}{visibility [miles]}
   }
 }
 
 
 \usage{data(ozone)}
 \source{Breiman, L and  Friedman, J.  (1985),
- \dQuote{Estimating Optimal Transformations for Multiple 
-Regression and Correlation},
- \emph{Journal of the American Statistical Association}, 80,  580-598.
-    }
+ \dQuote{Estimating Optimal Transformations for Multiple Regression and Correlation},
+ \emph{Journal of the American Statistical Association}, 80, 580-598.}
 \keyword{datasets}

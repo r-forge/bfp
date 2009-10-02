@@ -14,6 +14,7 @@
 #include <cassert>
 #include <climits>
 
+// using pretty much:
 using std::map;
 using std::set;
 using std::vector;
@@ -467,7 +468,7 @@ void computeModel(// compute (varying part of) marginal likelihood and prior of 
 		bookkeep.nanCounter++;
 	}
 	// increase static vars
-	if((++compCounter % max(data.totalNumber / 100, static_cast<unsigned int>(1)) == 0) && bookkeep.verbose)
+	if((++compCounter % max(data.totalNumber / 100, static_cast<dataValues::NumberType>(1)) == 0) && bookkeep.verbose)
 		Rprintf("-"); // display computation progress at each percent
 }
 

@@ -1,67 +1,46 @@
 \name{inclusionProbs}
 \alias{inclusionProbs}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+
+\title{ Compute (model averaged) posterior variable inclusion probabilites}
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Compute (model averaged) posterior inclusion probabilites for the
+  uncertain variables (including FP variables) based on a
+  \code{\link{BayesMfp}} object. 
 }
 \usage{
 inclusionProbs(BayesMfpObject, postProbs = posteriors(BayesMfpObject, ind = 1))
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
-  \item{BayesMfpObject}{ ~~Describe \code{BayesMfpObject} here~~ }
-  \item{postProbs}{ ~~Describe \code{postProbs} here~~ }
-}
-\details{
-  ~~ If necessary, more details than the description above ~~
+  \item{BayesMfpObject}{valid \code{\link{BayesMfp}} object}
+  \item{postProbs}{posterior probabilities to weight the models
+    (defaults to the normalized probability estimates)}
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  Named numeric vector with the estimated variable inclusion
+  probabilities. Note that these can differ noticeably from the
+  \dQuote{global} inclusion probabilities computed from all discovered
+  models, from which only the best were saved in the
+  \code{\link{BayesMfp}} object.
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\author{Daniel Saban\'es Bov\'e}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## construct a BayesMfp object
+set.seed(19)
 
-## The function is currently defined as
-function (            # compute posterior inclusion probabilites based on BayesMfpObject
-                            BayesMfpObject,
-                            postProbs = posteriors (BayesMfpObject, ind = 1)
-                            )
-{
-    postProbs <- postProbs / sum (postProbs)
-    inds <- attr (BayesMfpObject, "indices")
-    termNames <- attr (BayesMfpObject, "termNames")
+x1 <- rnorm (n=15)
+x2 <- rbinom (n=15, size=20, prob=0.5) 
+x3 <- rexp (n=15)
 
-    nams <- unlist (termNames[c ("bfp", "uc")])
-    ret <- numeric (length (nams))
-    names (ret) <- nams
+y <- rt (n=15, df=2)
 
-    i <- 0
+test <- BayesMfp (y ~ bfp (x2, max = 4) + uc (x1 + x3), nModels = 200, method="exhaustive")
 
-    for (j in seq_along (inds$bfp)){
-        i <- i + 1
-        present <- sapply (BayesMfpObject, function (one) as.logical (length (one$powers[[j]])))
-        ret[i] <- sum (present * postProbs)
-    }
+## now get the local inclusion probabilities
+local <- inclusionProbs(test)
 
-    for (j in seq_along (inds$ucList)){
-        i <- i + 1
-        present <- sapply (BayesMfpObject, function (one) any (j == one$ucTerms))
-        ret[i] <- sum (present * postProbs)
-    }
-
-    return (ret)
-  }
+## they can be compared with the global inclusion probabilities
+local - attr(test, "inclusionProbs")
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{htest}

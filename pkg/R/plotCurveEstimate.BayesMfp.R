@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Mit 16/09/2009 15:12 (CEST)>
+## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Fre 02/10/2009 11:38 (CEST)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on a single model.
@@ -14,6 +14,8 @@
 ##              Simulations marginalizing also g can only be done with BmaSamples.
 ##              Center the fp part stored in xMat.
 ## 04/09/2008   use the center argument of getFpTransforms
+## 02/10/2009   also return the transform parameters, safer indexing of them
+##              inside the function
 #####################################################################################
 
 `plotCurveEstimate.BayesMfp` <-
@@ -49,15 +51,15 @@ function (                          # plot fp estimate, optionally with credible
     fpCol <- inds$bfp[fpInd]
 
     ## x values
-    transform <- attr (model, "shiftScaleMax")[fpInd, c ("shift", "scale")]
+    tr <- attr (model, "shiftScaleMax")[fpInd, c ("shift", "scale")]
     obsVals <- attr (model, "x")[, fpCol]
 
     if (is.null (grid)){                # default grid
         grid <- seq (from = min (obsVals), to = max (obsVals), length = gridSize)
-        ret$original <- grid * transform[2] - transform[1]
+        ret$original <- grid * tr["scale"] - tr["shift"]
     } else {                            # scale grid
         ret$original <- grid
-        grid <- (grid + transform[1]) / transform[2]
+        grid <- (grid + tr["shift"]) / tr["scale"]
     }
     ret$grid <- grid
 
@@ -81,8 +83,8 @@ function (                          # plot fp estimate, optionally with credible
 
     ## simulate from coefficients marginal to obtain simultaneous credible band
     if (!is.null (slevel)){
-        simVals <- myrmvt (n = numSim, mu = mStarPart, sigma = post$bStar / post$aStar * VStarPart,
-                           df = 2 * post$aStar) # coefs in rows
+        simVals <- rmvt (n = numSim, mu = mStarPart, sigma = post$bStar / post$aStar * VStarPart,
+                         df = 2 * post$aStar) # coefs in rows
         simVals <- tcrossprod (simVals, xMat) # respective simulated means in cols
         bandData <- scrHpd (simVals, level = slevel, mode = ret$mode)
         ret$slower <- bandData[1, ]
@@ -101,16 +103,16 @@ function (                          # plot fp estimate, optionally with credible
             matplotList$xlab <- termName
         if (is.null (matplotList$ylab)){
             front <- paste ("alpha[", seq_len (ncol (xMat)), "] * ", colnames (xMat), collapse = " + ", sep = "")
-            if (any (transform != c (0, 1))){
+            if (any (tr != c (0, 1))){
                 middle <- " after the transform "
                 back <-
-                    if (transform[1] != 0){
-                        if (transform[2] != 1)
-                            paste(termName, "%<-% (", termName, " + ", transform[1], ") %/% ", transform[2])
+                    if (tr["shift"] != 0){
+                        if (tr["scale"] != 1)
+                            paste(termName, "%<-% (", termName, " + ", tr["shift"], ") %/% ", tr["scale"])
                         else
-                            paste(termName, "%<-%", termName, " + ", transform[1])
+                            paste(termName, "%<-%", termName, " + ", tr["shift"])
                     } else {
-                        paste(termName, "%<-%", termName, "%/%", transform[2])
+                        paste(termName, "%<-%", termName, "%/%", tr["scale"])
                     }
                 annotation <- substitute (expression (paste (f, m, b)),
                                           list (f = parse (text = front)[[1]],
@@ -136,7 +138,7 @@ function (                          # plot fp estimate, optionally with credible
 
         ## and plot:
 
-        ret$obsVals <- obsVals * transform[2] - transform[1]
+        ret$obsVals <- obsVals * tr["scale"] - tr["shift"]
         ret$partialResids <- partialResids
         
         ## first the points (the partial residuals)
@@ -166,6 +168,10 @@ function (                          # plot fp estimate, optionally with credible
         }
     }
 
+    ## also save the transform parameters in the return value
+    ret$transform <- tr
+
+    ## then invisibly return 
     invisible (ret)
 }
 

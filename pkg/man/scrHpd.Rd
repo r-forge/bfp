@@ -1,77 +1,51 @@
 \name{scrHpd}
 \alias{scrHpd}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~functions to do ... ~~ }
-\description{
-  ~~ A concise (1-5 lines) description of what the functions
-     scrHpd do. ~~
-}
-\usage{
-scrHpd(samples, mode = apply(samples, 2, median), level = 0.95, grid = ncol(samples))
-}
-%- maybe also 'usage' for other objects documented here.
+
+\title{Calculate an SCB from a samples matrix}
+
+\description{Calculate an SCB from a samples matrix, which minimizes
+the absolute distances of the contained samples to a mode vector, at
+each gridpoint. Therefore the SCB might be considered an \dQuote{HPD
+SCB}.}
+
+\usage{scrHpd(samples, mode = apply(samples, 2, median), level = 0.95)}
+
 \arguments{
-  \item{samples}{ ~~Describe \code{samples} here~~ }
-  \item{mode}{ ~~Describe \code{mode} here~~ }
-  \item{level}{ ~~Describe \code{level} here~~ }
-  \item{grid}{ ~~Describe \code{grid} here~~ }
+  \item{samples}{m by n matrix where m is the number of samples and n
+  the number of parameters, hence each (multivariate) sample is a row in
+  the matrix \code{samples}} 
+  \item{mode}{mode vector of length n (defaults to the vector of medians)}
+  \item{level}{credible level for the SCB (default: 0.95)}
 }
 \details{
-  ~~ If necessary, more details than the description above ~~
+  This function first computes the matrix of absolute distances of the
+  samples to the mode vector. Then based on this distance matrix, a
+  one-sided SCB as described in Besag et al. (1995) is computed, which
+  is then mapped back to the samples.
 }
 \value{
-  ~Describe the values returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  A matrix with rows \dQuote{lower} and \dQuote{upper}, with the lower
+  and upper SCB bounds.
 }
-\references{ ~put references to the literature/web site here ~ }
+\references{Besag, J.; Green, P.; Higdon, D. \& Mengersen, K. (1995):
+  \dQuote{Bayesian computation and stochastic systems (with
+    discussion)}, \emph{Statistical Science}, 10, 3-66.}
 \author{Daniel Saban\'es Bov\'e}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\seealso{\code{\link{empiricalHpd}}}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## create some samples
+time <- 1:10
+nSamples <- 50
+samples <- t(replicate(nSamples,
+                       time * rnorm(1) + rexp(1))) +
+           rnorm(length(time) * nSamples)
+matplot(time, t(samples), type="l", lty=1, col=1,
+        xlab="time", ylab="response")
 
-## The functions are currently defined as
-## scrHpd
-function(samples,          # sample matrix
-                   mode = apply (samples, 2, median), # mode vector of length = ncol (samples)
-                   level = 0.95,     # credibility level
-                   grid = ncol (samples) # number of elements in each sample vector
-                   )
-{
-    n <- ncol(samples)
-    m <- nrow(samples)
-
-    if (n != length (mode))
-        stop ("mode vector must have same length as samples matrix!")
-
-    distance <- abs (sweep (samples, 2, mode)) # absolute distance from mode vector
-
-    k <- floor (level * m)
-    ## Calculates a simultaneous (k/m)*100\% credible band
-    ## using the ranks approach
-
-    rankdistance <- apply (distance, 2, rank) # colwise (= elementwise) ranks of distances
-
-    tstari <- apply (rankdistance, 1, max) # maximum ranks in each sample
-    ordtstari <- sort.int (tstari, method = "quick") # and sort the maximum ranks
-
-    tstar <- ordtstari[k]               # the required rank
-
-    selectMat <- rankdistance <= tstar
-
-    ret <- matrix (nrow = 2, ncol = n)
-    for (i in seq_len (n)){
-        ret[, i] <- range (samples[selectMat[,i], i])
-    }
-
-    return (ret)
-  }
+## now test the function: 50% credible band
+scb <- scrHpd(samples, level=0.5)
+matlines(time, t(scb), col=2, lwd=2, lty=1)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{multivariate}
-\keyword{internal}
+\keyword{htest}
