@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[findModel.R] by DSB Don 12/02/2009 11:28 (CET) on daniel@linux-q6vk.site>
+## Time-stamp: <[findModel.R] by DSB Mon 05/10/2009 10:24 (CEST)>
 ##
 ## Description:
 ## Find a model with specific powers and nontransformed uncertainty terms
@@ -14,10 +14,10 @@
 #####################################################################################
 
 `findModel` <-
-function (                 # returns the first index of
-                       model,           # model in
-                       BayesMfpObject   # this model collection
-                       )                # model must be a list with elements powers and ucTerms
+    function (                              # returns the first index of
+              model,                        # model in
+              BayesMfpObject                # this model collection
+              )                             # model must be a list with elements powers and ucTerms
                                         # at best, copy a model object and change the elements appropriately!
 {
     ## the subset which is compared

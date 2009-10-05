@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Fre 02/10/2009 11:35 (CEST)>
+## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mon 05/10/2009 10:26 (CEST)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on (MC) Bayesian model average.
@@ -21,8 +21,8 @@ plotCurveEstimate.BmaSamples <-
     function (                          # plot fp estimate, optionally with credible intervals and / or bands
               model,                    # for this BmaSamples object
               termName,                 # string denoting an fp term as written by summary
-              plevel = 0.95,            # credibility level for pointwise HPD, NULL means no pwise HPD
-              slevel = plevel,          # credibility level for simultaneous credible band, NULL means no band
+              plevel = 0.95,            # credible level for pointwise HPD, NULL means no pwise HPD
+              slevel = plevel,          # credible level for simultaneous credible band, NULL means no band
               plot = TRUE,              # if FALSE, only return values to produce plot
               legendPos = "topleft",    # where to place sample size information? if NULL it is not
                                         # printed

@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[bmaPredict.R] by DSB Don 01/10/2009 11:53 (CEST)>
+## Time-stamp: <[bmaPredict.R] by DSB Mon 05/10/2009 10:12 (CEST)>
 ##
 ## Description:
 ## BMA prediction for new data points.
@@ -13,6 +13,7 @@
 ##              numerical cancellations?! (in the summation)
 ## 10/11/2008   don't ask for the response when creating the model matrix
 ## 13/11/2008   use new internal function for creating model matrix for newdata
+## 05/10/2009   some comments
 #####################################################################################
 
 ## this is not a predict method for BmaSamples!
@@ -24,9 +25,11 @@ bmaPredict <- function (BayesMfpObject, # models over which to average the predi
                         newdata        # new data as data.frame
                         )
 {
+    ## check that the probabilities are parallel to the models
     if (length (postProbs) != length (BayesMfpObject))
         stop ("postProbs has wrong length")
 
+    ## construct the new uncentered data matrix
     tempX <- constructNewdataMatrix(BayesMfpObject=BayesMfpObject,
                                     newdata=newdata)
 
@@ -47,6 +50,5 @@ bmaPredict <- function (BayesMfpObject, # models over which to average the predi
 
     ## average with probabilites as weights
     fitmat <- fitmat * (postProbs / sum (postProbs))
-
     return (colSums (fitmat))
 }

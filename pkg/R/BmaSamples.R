@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BmaSamples.R] by DSB Don 01/10/2009 15:38 (CEST)>
+## Time-stamp: <[BmaSamples.R] by DSB Mon 05/10/2009 09:53 (CEST)>
 ##
 ## Description:
 ## Sample from models in a BayesMfp object using "BmaSamples" for MC model averaging
@@ -25,9 +25,8 @@
 ## 29/11/2008   remove unnecessary "pr" copy of priorSpecs
 ## 01/10/2009   coerce newdata to data.frame, so we don't need NROW here
 ##              (so a list can also be passed without breaking everything)
+## 05/10/2009   some comments
 #####################################################################################
-
-## Time-stamp: <[BmaSamples.R] by DSB Fre 04/07/2008 10:51 (CEST) on daniel@puc.home>
 
 BmaSamples <-
     function (object,         # valid BayesMfp object including the models over which to average
@@ -102,7 +101,6 @@ BmaSamples <-
     ret$sampleSize <- sampleSize
 
     ## reserve space for samples
-    ## to avoid frequent rbinding which would be slow for large sample size
     ret$sigma2 <- numeric (sampleSize)        # regression variance
 
     ret$shrinkage <- numeric(sampleSize) # shrinkage factor t=g/(1+g)
@@ -111,7 +109,9 @@ BmaSamples <-
     ret$fixed <- matrix (nrow = sampleSize, ncol = nFix,
                          dimnames = list (NULL, colNames[inds$fixed])) # fixed coefficients
 
-    ret$bfp <- list ()                  # fractional polynomial function means evaluated at grids
+    ## samples of fractional polynomial function means evaluated at grids
+    ## will be elements of this list:
+    ret$bfp <- list ()                  
     for (i in fpIndsSeq){
         fpName <- termNames$bfp[i]
 
@@ -141,7 +141,9 @@ BmaSamples <-
         }
     }
 
-    ret$uc <- list ()                   # uncertain fixed form covariates coefficients
+    ## uncertain fixed form covariates coefficients samples
+    ## will be elements of this list:
+    ret$uc <- list ()                   
     for (i in seq_along (inds$ucList)){
         ucName <- termNames$uc[i]
         
@@ -157,9 +159,10 @@ BmaSamples <-
         }
     }
 
+    ## here are the model-specific fits from all models in object:
     ret$fitted <- matrix (nrow = length (object), ncol = nObs)
 
-    ## for samples from the posterior predictive
+    ## for samples from the posterior predictive: 
     nNewObs <- nrow(newdata)
     ret$predictions <-
         if(nNewObs)
@@ -167,11 +170,12 @@ BmaSamples <-
                    ncol=sampleSize)
         else
             NULL
-    
+
+    ## echo sampling start
     if (verbose)
         cat ("Starting sampling, current model is number ")
 
-    ## sample from each model as often as indicated by the modelFreqs
+    ## now sample from each model as often as indicated by the modelFreqs
     ## and save fit and predictive samples
     sampleCounter <- 0             # invariant: already sampleCounter samples processed
     for (j in seq_along (object)){ # process every model in object (to obtain fitted values along the way)
@@ -298,9 +302,14 @@ BmaSamples <-
         }
     }
 
+    ## be sure that we have a newline after the
+    ## model numbers printed on the screen:
     if(verbose)
         cat("\n")
-    
+
+    ## attach S3 class
     class (ret) <- "BmaSamples"
+
+    ## finally return the samples
     return (ret)
 }

@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BayesMfp.R] by DSB Mon 21/09/2009 16:46 (CEST)>
+## Time-stamp: <[BayesMfp.R] by DSB Mon 05/10/2009 09:47 (CEST)>
 ##
 ## Description:
 ## Main function of the bfp package: Bayesian Inference for a multivariate
@@ -27,6 +27,7 @@
 ## 21/09/2009   Check that only for k > 1 the model sampling approach can be chosen
 ##              (necessary because of the new SWITCH move type), and that all
 ##              maximum FP degrees are identical (to be inline with the paper)
+## 05/10/2009   remove dead comments
 #####################################################################################
 
 `BayesMfp` <-
@@ -40,10 +41,11 @@
               subset = NULL,           # optional subset expression
               na.action = na.omit,     # default is to skip rows with missing data
               verbose = TRUE,          # should information on computation progress be given?
-              nModels = NULL,   # how many best models should be saved? default: best 1%, 1 would mean MAP
+              nModels = NULL,          # how many best models should be saved?
+                                        # default: best 1%, 1 would mean MAP
               method = c ("ask", "exhaustive", "sampling"), # which method should be used to explore the
                                         # posterior model space? default is to ask after prompting the space cardinality
-              chainlength = 1e+4# only has effect if method = sampling
+              chainlength = 1e+4        # only has effect if method = sampling
               )
 {
     ## save call for return object
@@ -63,7 +65,7 @@
     if (is.function(family))
         family <- family()
     if (family$family != "gaussian" | family$link != "identity")
-        stop (simpleError("currently only gaussian distribution with identity link is implemented"))
+        stop (simpleError("currently only the Gaussian distribution with identity link is implemented"))
     if (is.null(family$family)) {
         print(family)
         stop(simpleError("`family' not recognized"))
@@ -155,13 +157,14 @@
     ## build design matrix
     X <- model.matrix (newTerms, m)
     Xcentered <- scale(X, center=TRUE, scale=FALSE)
-    
-    termNumbers <- attr (X, "assign") # which terms gave rise to which columns?
-                                        # (0 = intercept, 1 = first term)
-    ucIndices <- fpMaxs <- integer (length (termNumbers))
+
+    ## which terms gave rise to which columns?
+    ## (0 = intercept, 1 = first term)
+    termNumbers <- attr (X, "assign") 
 
     ## vector of length col (X) giving uc group indices or 0 (no uc)
     ## for associating uc groups with model matrix columns: ucIndices
+    ucIndices <- fpMaxs <- integer (length (termNumbers))
 
     ## list for mapping group -> columns in model matrix: ucColList
     if(nUcGroups){
@@ -242,9 +245,6 @@
     singleNumbers <- sapply (fpMaxs, getNumberPossibleFps)
     totalNumber <- prod (singleNumbers) * 2^(nUcGroups) # maximum number of possible models
 
-    ## load c++ code: no more necessary because of namespace
-    ## dyn.load ("bayesMfp.so")
-
     ## decide method
     if (identical(method, "ask")){
         cat ("The cardinality of the model space is at most ", totalNumber, ".\n", sep = "")
@@ -324,7 +324,8 @@
         cat ("Aborting.\n")
         return ()
     }
-    ## C++ attaches following attributes:
+
+    ## C++ attaches the following attributes:
 
     ## numVisited
     ## inclusionProbs

@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Fre 02/10/2009 11:38 (CEST)>
+## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Mon 05/10/2009 10:26 (CEST)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on a single model.
@@ -22,15 +22,15 @@
 function (                          # plot fp estimate, optionally with credible intervals and / or bands
           model,                    # for this BayesMfp object, only first model will be recognized
           termName,                 # string denoting an fp term as written by summary
-          plevel = 0.95,            # credibility level for pointwise HPD, NULL means no pwise
+          plevel = 0.95,            # credible level for pointwise HPD, NULL means no pwise
                                         # HPD
-          slevel = plevel,          # credibility level for simultaneous credible band, NULL means no band
+          slevel = plevel,          # credible level for simultaneous credible band, NULL means no band
           plot = TRUE,              # if FALSE, only return values to produce plot
           legendPos = "topleft",    # position where to place the mode values for the coefficients,
                                     # NULL means no leg.
           rug=FALSE,                # add rug to plot?
           grid = NULL,              # vector of unscaled abscissae, default is a
-                                        #length 201 grid over observed range
+                                        # length 201 grid over observed range
           post = getPosteriorParms (model), # may be computed beforehand, the shrinkage factor can
                                         # be given here in the call to getPosteriorParms
           gridSize = 201,           # obvious
