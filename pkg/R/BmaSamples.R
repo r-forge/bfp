@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BmaSamples.R] by DSB Mon 05/10/2009 09:53 (CEST)>
+## Time-stamp: <[BmaSamples.R] by DSB Don 05/11/2009 18:01 (CET)>
 ##
 ## Description:
 ## Sample from models in a BayesMfp object using "BmaSamples" for MC model averaging
@@ -26,6 +26,7 @@
 ## 01/10/2009   coerce newdata to data.frame, so we don't need NROW here
 ##              (so a list can also be passed without breaking everything)
 ## 05/10/2009   some comments
+## 05/11/2009   only construct new design matrix if there are any "newdata"!
 #####################################################################################
 
 BmaSamples <-
@@ -47,6 +48,7 @@ BmaSamples <-
 
     ## coerce newdata to data frame
     newdata <- as.data.frame(newdata)
+    nNewObs <- nrow(newdata)
     
     ## start filling the return list
     ret <- list ()
@@ -71,8 +73,11 @@ BmaSamples <-
     alpha <- ret$priorSpecs$a
 
     ## covariates matrix for newdata:
-    tempX <- constructNewdataMatrix(BayesMfpObject=object,
-                                    newdata=newdata)    
+    if(nNewObs > 0)
+    {
+        tempX <- constructNewdataMatrix(BayesMfpObject=object,
+                                        newdata=newdata)
+    }
     
     ## draw model indices
     objNames <- as.numeric (names (object))
@@ -163,7 +168,6 @@ BmaSamples <-
     ret$fitted <- matrix (nrow = length (object), ncol = nObs)
 
     ## for samples from the posterior predictive: 
-    nNewObs <- nrow(newdata)
     ret$predictions <-
         if(nNewObs)
             matrix(nrow=nNewObs,
