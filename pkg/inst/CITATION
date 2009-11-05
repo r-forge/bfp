@@ -1,20 +1,10 @@
-@TECHREPORT{SabanesBoveHeld2009,
-  author = {Daniel {Saban\'es Bov\'e} and Leonhard Held},
-  title = {Bayesian Fractional Polynomials},
-  institution = {University of Zurich, Institute of Social and Preventive Medicine,
-	Biostatistics Unit},
-  year = {2009},
-  abstract = {This paper sets out to implement the Bayesian paradigm for fractional polynomial
-	models under the assumption of normally distributed error terms. Fractional polynomials
-	widen the class of ordinary polynomials and offer an additive and transportable modelling
-	approach. The methodology is based on a Bayesian linear model with a quasi-default hyper-g
-	prior and combines variable selection with parametric modelling of additive effects. A
-	Markov chain Monte Carlo algorithm for the exploration of the model space is presented. This
-	theoretically well-founded stochastic search constitutes a substantial improvement to ad hoc
-	stepwise procedures for the fitting of fractional polynomial models. The method is applied
-	to a data set on the relationship between ozone levels and meteorological parameters,
-	previously analysed in the literature.},
-  keywords = {Bayesian linear model; fractional polynomials; hyper-g prior; stochastic
-	search algorithm},
-  url = {http://www.biostat.uzh.ch/research/manuscripts/bayesianFps.pdf}
-}
+citHeader("To cite package 'bfp' in publications use:")
+
+citEntry(entry="techreport",
+	 title="Bayesian Fractional Polynomials",
+	 author=personList(as.person("Daniel Sabanes Bove"),
+	 	           as.person("Leonhard Held")), 
+         institution="University of Zurich, Institute of Social and Preventive Medicine, Biostatistics Unit",
+	 year=2009,
+	 note = "Available at http://www.biostat.uzh.ch/research/manuscripts/bayesianFps.pdf")
+
