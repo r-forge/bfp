@@ -6,5 +6,9 @@ citEntry(entry="techreport",
 	 	           as.person("Leonhard Held")), 
          institution="University of Zurich, Institute of Social and Preventive Medicine, Biostatistics Unit",
 	 year=2009,
-	 note = "Available at http://www.biostat.uzh.ch/research/manuscripts/bayesianFps.pdf")
+	 url="http://www.biostat.uzh.ch/research/manuscripts/bayesianFps.pdf",
+	 textVersion=paste("Sabanes Bove, D. and Held, L. (2009):",
+	                   "Bayesian Fractional Polynomials.",
+			   "Technical Report, University of Zurich, Institute of Social and Preventive Medicine, Biostatistics Unit.",
+	 	    	   "URL http://www.biostat.uzh.ch/research/manuscripts/bayesianFps.pdf.")) 
 
