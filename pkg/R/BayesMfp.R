@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BayesMfp.R] by DSB Mon 05/10/2009 09:47 (CEST)>
+## Time-stamp: <[BayesMfp.R] by DSB Fre 04/12/2009 17:04 (CET)>
 ##
 ## Description:
 ## Main function of the bfp package: Bayesian Inference for a multivariate
@@ -28,6 +28,7 @@
 ##              (necessary because of the new SWITCH move type), and that all
 ##              maximum FP degrees are identical (to be inline with the paper)
 ## 05/10/2009   remove dead comments
+## 03/12/2009   add option to specify the models cache size when doing sampling
 #####################################################################################
 
 `BayesMfp` <-
@@ -38,14 +39,17 @@
               priorSpecs =             # prior specifications:
               list (a = 4,             # hyperparameter for hyper-g prior, must be greater than 3
                     modelPrior = "flat"), # prior on model space: "flat" or "sparse"
+              method = c ("ask", "exhaustive", "sampling"), # which method should be used to explore the
+                                        # posterior model space? default is to ask after prompting the space cardinality
               subset = NULL,           # optional subset expression
               na.action = na.omit,     # default is to skip rows with missing data
               verbose = TRUE,          # should information on computation progress be given?
-              nModels = NULL,          # how many best models should be saved?
-                                        # default: best 1%, 1 would mean MAP
-              method = c ("ask", "exhaustive", "sampling"), # which method should be used to explore the
-                                        # posterior model space? default is to ask after prompting the space cardinality
-              chainlength = 1e+4        # only has effect if method = sampling
+              nModels = NULL,          # how many best models should be saved? default: 1% of total
+                                       # number of (cached) models. Must not be larger than nCache
+                                       # if method == "sampling".
+              nCache=1e5L,              # maximum number of best models to be cached at the same
+                                        # time during the model sampling, only has effect if method = sampling
+              chainlength = 1e5L        # only has effect if method = sampling
               )
 {
     ## save call for return object
@@ -244,7 +248,7 @@
     }
     singleNumbers <- sapply (fpMaxs, getNumberPossibleFps)
     totalNumber <- prod (singleNumbers) * 2^(nUcGroups) # maximum number of possible models
-
+        
     ## decide method
     if (identical(method, "ask")){
         cat ("The cardinality of the model space is at most ", totalNumber, ".\n", sep = "")
@@ -266,12 +270,32 @@
     ## start
 
     if (identical(decision, "n")){
+        ## get chainlength?
         if (identical(method, "ask"))
+        {
             chainlength <- as.numeric (readline ("How long do you want the Markov chain to run?\n"))
+        }
+
+        ## compute the default number of models to be saved
+        if(is.null(nModels))
+        {
+            nModels <- max(chainlength / 100, 1)
+        }
+        else
+            stopifnot(nModels >= 1)
+            
+        
+        ## check the chosen cache size
+        nCache <- as.integer(nCache)
+        stopifnot(nCache >= nModels)        
+
+        ## echo progress?
         if (verbose){
             cat("Starting sampler...\n")
             cat ("0%", rep ("_", 100 - 6), "100%\n", sep = "")
         }
+
+        ## then go C++
         Ret <-
             .Call ("samplingGaussian", ## PACKAGE = "bfp",
                    X,            # design matrix
@@ -289,16 +313,29 @@
                    identical(priorSpecs$modelPrior, "sparse"), # use a sparse model prior?
                    as.integer(nModels),          # number of best models returned
                    verbose,          # should progress been displayed?
-                   as.double(chainlength) # how many times should a jump be proposed?
+                   as.double(chainlength), # how many times should a jump be proposed?
+                   as.integer(nCache)      # size of models cache (an STL map)
                    )
 
         attr (Ret, "chainlength") <- chainlength
 
     } else if (identical(decision, "y")){
+
+        ## compute the default number of models to be saved
+        if(is.null(nModels))
+        {
+            nModels <- max(totalNumber / 100, 1)
+        }
+        else
+            stopifnot(nModels >= 1)
+
+        ## echo progress?
         if (verbose){
             cat("Starting with computation of every model...\n")
             cat ("0%", rep ("_", 100 - 6), "100%\n", sep = "")
         }
+
+        ## then go C++
         Ret <-
             .Call ("exhaustiveGaussian", ##  PACKAGE = "bfp",
                    X,            # design matrix
@@ -327,7 +364,7 @@
 
     ## C++ attaches the following attributes:
 
-    ## numVisited
+    ## numVisited 
     ## inclusionProbs
     ## logNormConst
 

@@ -1,6 +1,3 @@
-// todo:
-// correct normalized value of norm constant must be returned!
-
 #include <RnewMat.h>
 #include <combinatorics.h>
 #include <dataStructure.h>
@@ -13,6 +10,8 @@
 #include <iostream>
 #include <cassert>
 #include <climits>
+#include <conversions.h>
+#include <cmath>
 
 // using pretty much:
 using std::map;
@@ -63,7 +62,8 @@ SEXP samplingGaussian(// declaration
                       SEXP R_useSparsePrior, // use sparse model prior?
                       SEXP R_nModels, // number of best models to be returned
                       SEXP R_verbose, // should progress been displayed?
-                      SEXP R_chainlength); // how many times should a jump been made?
+                      SEXP R_chainlength, // how many times should a jump been made?
+                      SEXP R_nCache); // size of models cache (an STL map)
 
 SEXP logMargLik( //declaration
                 SEXP R_R2, // coefficient of determination
@@ -174,24 +174,24 @@ void pushInclusionProbs( // push back index into covGroupWisePosteriors-Array
 
 // definitions ####################################################################################
 
-SEXP exhaustiveGaussian(// definition
-				SEXP R_x, 				// design matrix
-				SEXP R_xcentered,       // centered design matrix
-                SEXP R_y, 				// response vector
-                SEXP R_fpmaxs, 			// vector of maximum fp degrees
-                SEXP R_fppos,			// corresponding vector of fp column indices
-	            SEXP R_fpcards,			// corresponding vector of power set cardinalities
-                SEXP R_nFps, 			// number of fp terms
-                SEXP R_fpnames,			// names of fp terms
-                SEXP R_ucIndices, 		// vector giving _unc_ertainty custer indices (column -> which group)
-                SEXP R_ucTermList,   	// list for (group -> which columns) one-to-many mapping
-                SEXP R_nUcGroups, 		// number of uncertainty groups
-                SEXP R_totalNumber,	 	// cardinality of model space
-                SEXP R_hyperparam,		// hyperparameter a for hyper-g prior
-                SEXP R_useSparsePrior, // use sparse model prior?
-                SEXP R_nModels,			// number of best models to be returned
-                SEXP R_verbose			// should progress been displayed?
-				)
+SEXP
+exhaustiveGaussian(// definition
+                   SEXP R_x, // design matrix
+                   SEXP R_xcentered, // centered design matrix
+                   SEXP R_y, // response vector
+                   SEXP R_fpmaxs, // vector of maximum fp degrees
+                   SEXP R_fppos, // corresponding vector of fp column indices
+                   SEXP R_fpcards, // corresponding vector of power set cardinalities
+                   SEXP R_nFps, // number of fp terms
+                   SEXP R_fpnames, // names of fp terms
+                   SEXP R_ucIndices, // vector giving _unc_ertainty custer indices (column -> which group)
+                   SEXP R_ucTermList, // list for (group -> which columns) one-to-many mapping
+                   SEXP R_nUcGroups, // number of uncertainty groups
+                   SEXP R_totalNumber, // cardinality of model space
+                   SEXP R_hyperparam, // hyperparameter a for hyper-g prior
+                   SEXP R_useSparsePrior, // use sparse model prior?
+                   SEXP R_nModels, // number of best models to be returned
+                   SEXP R_verbose) // should progress been displayed?
 {
 
 	unsigned int nProtect = 0;
@@ -219,8 +219,7 @@ SEXP exhaustiveGaussian(// definition
 	currentFpInfo.fpmaxs = INTEGER(R_fpmaxs);
 	currentFpInfo.fppos = INTEGER(R_fppos);
 	currentFpInfo.fpcards = INTEGER(R_fpcards);
-	Rf_protect(currentFpInfo.fpnames = R_fpnames);
-	nProtect++;
+	currentFpInfo.fpnames = R_fpnames;
 
 	const int* biggestMaxDegree = max_element(currentFpInfo.fpmaxs, currentFpInfo.fpmaxs + Rf_length(R_fpmaxs));
 	double powerset[max(8, 5 + *biggestMaxDegree)];
@@ -309,11 +308,7 @@ SEXP exhaustiveGaussian(// definition
 	bookkeep.covGroupWisePosteriors = cgwp;
 
 	// how many models to return?
-	if (Rf_length(R_nModels) == 0){
-		bookkeep.nModels = max(static_cast<unsigned int>(floor(totalNumber * 1 / 100)), static_cast<unsigned int>(1));
-	} else {
-		bookkeep.nModels = INTEGER(R_nModels)[0];
-	}
+	bookkeep.nModels = INTEGER(R_nModels)[0];
 
 	// start computation
 	permPars(0, currentFpInfo, nUcGroups, startModel, orderedModels, hyp, data, ucTermList, fixedCols, bookkeep);
@@ -326,6 +321,8 @@ SEXP exhaustiveGaussian(// definition
 
 	// normalize posterior probabilities and correct log marg lik and log prior of the models to return
 	const long double normConst = bookkeep.modelPropToPosteriors.sum();
+	const long double logNormConst = log(normConst);
+
 	const double logMargLikConst = 	lgammafn((data.nObs - 1) / 2.0) -
 									(data.nObs - 1) * sqrt(data.sumOfSquaresTotal) -
 									(data.nObs - 1) * M_LN_SQRT_PI -
@@ -344,13 +341,14 @@ SEXP exhaustiveGaussian(// definition
 	nProtect++;
 
 	unsigned int i = 0;
-	for(set<model>::reverse_iterator j = orderedModels.rbegin(); j != orderedModels.rend(); j++){
+	for(set<model>::reverse_iterator j = orderedModels.rbegin(); j != orderedModels.rend(); j++)
+	{
 		model modCopy = *j;
-		SET_VECTOR_ELT(ret, i++, modCopy.convert2list(currentFpInfo, logMargLikConst, logPriorConst, normConst));
+		SET_VECTOR_ELT(ret, i++, modCopy.convert2list(currentFpInfo, logMargLikConst, logPriorConst, logNormConst, bookkeep));
 	}
 	Rf_setAttrib(ret, Rf_install("numVisited"), Rf_ScalarReal(bookkeep.modelCounter));
 	Rf_setAttrib(ret, Rf_install("inclusionProbs"), inc);
-	Rf_setAttrib(ret, Rf_install("logNormConst"), Rf_ScalarReal(logl (normConst)));
+	Rf_setAttrib(ret, Rf_install("logNormConst"), Rf_ScalarReal(logNormConst));
 
 	// return ###
 	Rf_unprotect(nProtect);
@@ -428,7 +426,7 @@ void computeModel(// compute (varying part of) marginal likelihood and prior of 
 	// R2
 	double thisR2 = getR2(thisDesign, data, fixedCols, hyp);
 
-	if (! ISNAN(thisR2)){
+	if (R_IsNaN(thisR2) == FALSE){
 		// log marginal likelihood
 		double thisVarLogMargLik = getVarLogMargLik(thisR2, data.nObs, thisDesign.Ncols(), hyp);
 
@@ -474,30 +472,30 @@ void computeModel(// compute (varying part of) marginal likelihood and prior of 
 
 // ***************************************************************************************************//
 
-SEXP samplingGaussian(// definition
-				SEXP R_x, 				// design matrix (with colnames)
-				SEXP R_xcentered, 		// centered design matrix
-                SEXP R_y, 				// response vector
-                SEXP R_fpmaxs, 			// vector of maximum fp degrees
-                SEXP R_fppos,			// corresponding vector of fp column indices
-	            SEXP R_fpcards,			// corresponding vector of power set cardinalities
-                SEXP R_nFps, 			// number of fp terms
-                SEXP R_fpnames,			// names of fp terms
-                SEXP R_ucIndices, 		// vector giving _unc_ertainty custer indices (column -> which group)
-                SEXP R_ucTermList,   	// list for group -> which columns mapping
-                SEXP R_nUcGroups, 		// number of uncertainty groups
-                SEXP R_hyperparam,		// hyperparameter a for hyper-g prior
-                SEXP R_useSparsePrior, // use sparse model prior?
-                SEXP R_nModels,			// number of best models to be returned
-                SEXP R_verbose,			// should progress been displayed?
-                SEXP R_chainlength		// how many times should a jump been made?
-						)
+SEXP
+samplingGaussian(// definition
+                 SEXP R_x, // design matrix (with colnames)
+                 SEXP R_xcentered, // centered design matrix
+                 SEXP R_y, // response vector
+                 SEXP R_fpmaxs, // vector of maximum fp degrees
+                 SEXP R_fppos, // corresponding vector of fp column indices
+                 SEXP R_fpcards, // corresponding vector of power set cardinalities
+                 SEXP R_nFps, // number of fp terms
+                 SEXP R_fpnames, // names of fp terms
+                 SEXP R_ucIndices, // vector giving _unc_ertainty custer indices (column -> which group)
+                 SEXP R_ucTermList, // list for group -> which columns mapping
+                 SEXP R_nUcGroups, // number of uncertainty groups
+                 SEXP R_hyperparam, // hyperparameter a for hyper-g prior
+                 SEXP R_useSparsePrior, // use sparse model prior?
+                 SEXP R_nModels, // number of best models to be returned
+                 SEXP R_verbose, // should progress been displayed?
+                 SEXP R_chainlength, // how many times should a jump been made?
+                 SEXP R_nCache) // size of models cache (an STL map)
 {
 	// important!!! We now assume that all elements of R_fpmaxs are identical!!!
 	// It would be best to remove the option supporting different maximum FP degrees from the code,
 	// to be inline with the paper.
 
-	unsigned int nProtect = 0;
 	// unpack ###
 	// data
 	const Matrix x = getMatrix(R_x);
@@ -512,8 +510,7 @@ SEXP samplingGaussian(// definition
 	currentFpInfo.fpmaxs = INTEGER(R_fpmaxs);
 	currentFpInfo.fppos = INTEGER(R_fppos);
 	currentFpInfo.fpcards = INTEGER(R_fpcards);
-	Rf_protect(currentFpInfo.fpnames = R_fpnames);
-	nProtect++;
+	currentFpInfo.fpnames = R_fpnames;
 
 	// the FP range
 	const std::set<unsigned int> fpRange = constructSequence(currentFpInfo.nFps);
@@ -525,7 +522,7 @@ SEXP samplingGaussian(// definition
 	const int* biggestMaxDegree = max_element(currentFpInfo.fpmaxs, currentFpInfo.fpmaxs + currentFpInfo.nFps);
 	double powerset[max(8, 5 + *biggestMaxDegree)];
 //	const unsigned int fixedpowerIndices[] ={  0,  1,    2, 3,   4, 5, 6, 7 };
-	const double fixedpowers[] = 			{ -2, -1, -0.5, 0, 0.5, 1, 2, 3 }; // always in powerset
+	const double fixedpowers[] = 	        { -2, -1, -0.5, 0, 0.5, 1, 2, 3 }; // always in powerset
 	copy(fixedpowers, fixedpowers + 8, powerset);
 	for(int more = 3; more < *biggestMaxDegree; more++){ // additional powers
 		*(powerset + 8 + (3 - more)) = more + 1;
@@ -605,8 +602,8 @@ SEXP samplingGaussian(// definition
 	hyperPriorPars hyp(hyperparam,
 	                   useSparsePrior);
 
-	// in case of a linear model the best models can be found during chain run and put in here:
-	set<model> orderedModels;
+	// models which can be found during chain run can be cached in here:
+	ModelCache modelCache(Rf_asInteger(R_nCache));
 
 	// bookkeeping:
 	book bookkeep; // 0) initializes empty sum of prop to posteriors and modelCounter 0
@@ -625,19 +622,7 @@ SEXP samplingGaussian(// definition
 	bookkeep.verbose = LOGICAL(R_verbose)[0];
 
 	// how many models to return?
-	if (Rf_length(R_nModels) == 0){
-		bookkeep.nModels = max(bookkeep.chainlength * 1 / 100, static_cast<unsigned long long int>(1));
-	} else {
-		bookkeep.nModels = INTEGER(R_nModels)[0];
-	}
-
-	// for computation of inclusion probs
-	indexSafeSum cgwp[currentFpInfo.nFps + nUcGroups];
-	bookkeep.covGroupWisePosteriors = cgwp;
-
-
-	// models will be put in here:
-	map<modelPar, modelInfo> modelSpace;
+	bookkeep.nModels = INTEGER(R_nModels)[0];
 
 	// upper limit for num of columns
 	unsigned int maxDim = min(static_cast<unsigned int>(data.nObs), fixedDim + currentFpInfo.maxFpDim + maxUcDim);
@@ -659,7 +644,7 @@ SEXP samplingGaussian(// definition
 	Matrix oldDesign = getDesignMatrix(old.modPar, data, currentFpInfo, ucTermList, nUcGroups, fixedCols);
 	double oldR2 = getR2(oldDesign, data, fixedCols, hyp);
 
-   // log marginal likelihood
+	// log marginal likelihood
 	old.logMargLik = getVarLogMargLik(oldR2, data.nObs, oldDesign.Ncols(), hyp);
 
 	// posterior expected g
@@ -671,18 +656,10 @@ SEXP samplingGaussian(// definition
 	// insert this model into map container
 	double logPrior = getVarLogPrior(old.modPar, currentFpInfo, hyp);
 	modelInfo startInfo(old.logMargLik, logPrior, oldPostExpectedg, oldPostExpectedShrinkage, oldR2, 1);
-	modelSpace[old.modPar] = startInfo;
-	old.mapPos = modelSpace.find(old.modPar);
-	// and into the ordered models set
-	orderedModels.insert(model(old.modPar, startInfo));
 
-	// bookkeeping
-	long double propToPosterior = expl(old.logMargLik + logPrior);
-	bookkeep.modelPropToPosteriors.add(propToPosterior);
+	modelCache.insert(old.modPar, startInfo);
 
-	pushInclusionProbs(old.modPar, currentFpInfo, nUcGroups, bookkeep);
-	bookkeep.modelCounter++;
-
+	// start with this model config
 	now = old;
 
 	// Start MCMC sampler***********************************************************//
@@ -814,128 +791,117 @@ SEXP samplingGaussian(// definition
 			logR = 0;
 		}
 
-		double u2 = unif_rand();
-		now.mapPos = modelSpace.find(now.modPar); // search for proposed model
+		// search for log marg lik of proposed model
+		now.logMargLik = modelCache.getLogMargLik(now.modPar);
 
-		if (now.mapPos == modelSpace.end()){ 						// "now" is a new model
+		if (R_IsNA(now.logMargLik))
+		{ // "now" is a new model
 
-			// construct design matrix and compute R^2
-			Matrix nowDesign = getDesignMatrix(now.modPar, data, currentFpInfo, ucTermList, nUcGroups, fixedCols);
-			double nowR2 = getR2(nowDesign, data, fixedCols, hyp);
+		    // construct design matrix and compute R^2
+		    Matrix nowDesign =
+		            getDesignMatrix(now.modPar, data, currentFpInfo,
+		                            ucTermList, nUcGroups, fixedCols);
+		    double nowR2 = getR2(nowDesign, data, fixedCols, hyp);
 
-			if(ISNAN(nowR2)){ // check if new model is OK, if not then nan
-				modelSpace[now.modPar] = modelInfo(NA_REAL, logPrior, 0, 0, 0);
-				bookkeep.nanCounter++;
-				old.mapPos->second.hits++;
-				now = old;
-			} else { 					// OK: only then can it possibly be accepted
+		    if (R_IsNaN(nowR2))
+		    { // check if new model is OK, if not then nan
+		        now.logMargLik = R_NaN;
 
-				// log marginal likelihood and log Bayes factor
-				now.logMargLik = getVarLogMargLik(nowR2, data.nObs, nowDesign.Ncols(), hyp);
-				double logBayesFactor = now.logMargLik - old.logMargLik;
+		        // we do not save this model in the model cache
+		        bookkeep.nanCounter++;
+		    }
+		    else
+		    { // OK: then compute the rest, and insert into model cache
 
-				double logAcceptanceProb = logBayesFactor + logR;
-				logPrior = getVarLogPrior(now.modPar, currentFpInfo, hyp);
+		        // log marginal likelihood and log Bayes factor
+		        now.logMargLik = getVarLogMargLik(nowR2, data.nObs,
+		                                          nowDesign.Ncols(), hyp);
 
-				// posterior expected g
-				double nowPostExpectedg = posteriorExpectedg_hyperg(nowR2, data.nObs, nowDesign.Ncols(), hyp.a, now.logMargLik);
+		        logPrior = getVarLogPrior(now.modPar, currentFpInfo, hyp);
 
-				// posterior expected shrinkage
-				double nowPostExpectedShrinkage = posteriorExpectedShrinkage_hyperg(nowR2, data.nObs, nowDesign.Ncols(), hyp.a, now.logMargLik);
+		        // posterior expected g
+		        double nowPostExpectedg =
+		                posteriorExpectedg_hyperg(nowR2, data.nObs,
+		                                          nowDesign.Ncols(), hyp.a,
+		                                          now.logMargLik);
 
-				// construct model
-				model thisModel = model(now.modPar, modelInfo(now.logMargLik, logPrior, nowPostExpectedg, nowPostExpectedShrinkage, nowR2));
+		        // posterior expected shrinkage
+		        double nowPostExpectedShrinkage =
+		                posteriorExpectedShrinkage_hyperg(nowR2,
+		                                                  data.nObs,
+		                                                  nowDesign.Ncols(),
+		                                                  hyp.a,
+		                                                  now.logMargLik);
 
-				// save model posteriors
-				propToPosterior = expl(now.logMargLik + logPrior);
-				bookkeep.modelPropToPosteriors.add(propToPosterior);
+		        // insert the model parameter/info into the model cache
 
-				pushInclusionProbs(thisModel.par, currentFpInfo, nUcGroups, bookkeep);
-				bookkeep.modelCounter++;
-
-				// insert it into orderedModels
-				if (orderedModels.size() >= bookkeep.nModels){  // insert into best set?
-					set<model>::iterator it = orderedModels.begin();
-					if (*it < thisModel){ // compare this model to the least probable model in the set
-						orderedModels.erase(it);
-						orderedModels.insert(thisModel); // exchange if it is better than this worst model in the set
-					}
-				} else {
-					orderedModels.insert(thisModel);
-				}
-				// and modelSpace
-				modelSpace[now.modPar] = thisModel.info;
-				if (u2 <= exp(logAcceptanceProb)){ 	// acceptance
-					now.mapPos = modelSpace.find(now.modPar);
-					now.mapPos->second.hits++;
-					old = now;
-				} else {							//  rejection
-					old.mapPos->second.hits++;
-					now = old;
-				}
-			}
-		} else {												// "now" was proposed before
-			now.logMargLik = now.mapPos->second.logMargLik;
-			if(ISNAN(now.logMargLik)){
-				old.mapPos->second.hits++;
-				now = old;
-			} else {
-				double logBayesFactor = now.logMargLik - old.logMargLik;
-				double logAcceptanceProb = logBayesFactor + logR;
-				if (u2 <= exp(logAcceptanceProb)){ 	// acceptance
-					now.mapPos->second.hits++;
-					old = now;
-				} else {							//  rejection
-					old.mapPos->second.hits++;
-					now = old;
-				}
-			}
+		        // problem: this could erase the old model from the model cache,
+		        // and invalidate the iterator old.mapPos!
+		        // ==> so we cannot work with the iterators here.
+		        modelCache.insert(now.modPar,
+		                          modelInfo(now.logMargLik, logPrior,
+		                                    nowPostExpectedg,
+		                                    nowPostExpectedShrinkage,
+		                                    nowR2));
+		    }
 		}
-		if((++t % max(bookkeep.chainlength / 100, static_cast<long long unsigned int>(1)) == 0) && bookkeep.verbose)
+
+		// decide acceptance:
+		// for acceptance, the new model must be valid and the acceptance must be sampled
+                if ((R_IsNaN(now.logMargLik) == FALSE) &&
+                    (unif_rand() <= exp(now.logMargLik - old.logMargLik + logR)))
+                { // acceptance
+                    old = now;
+                }
+                else
+                { // rejection
+                    now = old;
+                }
+
+                // so now definitely old == now, and we can
+                // increment the associated sampling frequency.
+                modelCache.incrementFrequency(now.modPar);
+
+                // echo progress?
+		if((++t % max(bookkeep.chainlength / 100, static_cast<long long unsigned int>(1)) == 0) &&
+		    bookkeep.verbose)
+		{
 			Rprintf("-"); // display computation progress at each percent
+		}
 	}
 	PutRNGstate(); // no RNs required anymore
 
-	if (bookkeep.verbose){
-		Rprintf("\nNumber of models explored:                     %d", bookkeep.modelCounter);
-		Rprintf("\nNumber of non-identifiable models encountered: %d", bookkeep.nanCounter);
-		Rprintf("\nNumber of saved models:                        %d\n", orderedModels.size());
-	}
 
 	// normalize posterior probabilities and correct log marg lik and log prior
-	const long double normConst = bookkeep.modelPropToPosteriors.sum();
-	const double logMargLikConst = 	lgammafn((data.nObs - 1) / 2.0) -
-									(data.nObs - 1) * sqrt(data.sumOfSquaresTotal) -
-									(data.nObs - 1) * M_LN_SQRT_PI -
-									0.5 * log(data.nObs);
+	const long double logNormConst = modelCache.getLogNormConstant();
+	const double logMargLikConst = lgammafn((data.nObs - 1) / 2.0) -
+	        (data.nObs - 1) * sqrt(data.sumOfSquaresTotal) -
+	        (data.nObs - 1) * M_LN_SQRT_PI -
+	        0.5 * log(data.nObs);
 	const double logPriorConst = nUcGroups * M_LN2; // note: M_LN2 = log(2)
 
-	// return best models
+	// get the nModels best models from the cache as an R list
 	SEXP ret;
-	Rf_protect(ret = Rf_allocVector(VECSXP, orderedModels.size()));
-	nProtect++;
+	Rf_protect(ret = modelCache.getListOfBestModels(currentFpInfo,
+	                                                logMargLikConst,
+	                                                logPriorConst,
+	                                                logNormConst,
+	                                                bookkeep));
 
-	// inclusion probs
-	SEXP inc;
-	Rf_protect(inc = Rf_allocVector(REALSXP, currentFpInfo.nFps + nUcGroups));
-	nProtect++;
-	for (int i = 0; i != Rf_length(inc); i++)
-		REAL(inc)[i] = bookkeep.covGroupWisePosteriors[i].sum(bookkeep.modelPropToPosteriors) / normConst;
+	// set the attributes
+	Rf_setAttrib(ret, Rf_install("numVisited"), Rf_ScalarReal(modelCache.size()));
+	Rf_setAttrib(ret, Rf_install("inclusionProbs"), putDoubleVector(modelCache.getInclusionProbs(logNormConst, currentFpInfo.nFps, nUcGroups)));
+	Rf_setAttrib(ret, Rf_install("logNormConst"), Rf_ScalarReal(logNormConst));
 
-	// build return list
-	unsigned long long int i = 0;
-	for(set<model>::reverse_iterator j = orderedModels.rbegin(); j != orderedModels.rend(); j++){
-		model modCopy = *j;
-		map<modelPar, modelInfo>::const_iterator modPosInMap = modelSpace.find(modCopy.par); // plug in correct hit value
-		modCopy.info.hits = modPosInMap->second.hits;
-		SET_VECTOR_ELT(ret, i++, modCopy.convert2listMcmc(currentFpInfo, logMargLikConst, logPriorConst, normConst, bookkeep)); // and insert into return list
+	if (bookkeep.verbose){
+	    Rprintf("\nNumber of non-identifiable model proposals:     %d", bookkeep.nanCounter);
+	    Rprintf("\nNumber of total cached models:                  %d", modelCache.size());
+	    Rprintf("\nNumber of returned models:                      %d\n", Rf_length(ret));
 	}
-	Rf_setAttrib(ret, Rf_install("numVisited"), Rf_ScalarReal(bookkeep.modelCounter));
-	Rf_setAttrib(ret, Rf_install("inclusionProbs"), inc);
-	Rf_setAttrib(ret, Rf_install("logNormConst"), Rf_ScalarReal(logl (normConst)));
+
 
 	// return ###
-	Rf_unprotect(nProtect);
+	Rf_unprotect(1);
 	return ret;
 }
 
@@ -1115,7 +1081,7 @@ double getR2(	// compute coefficient of determination for the model
 {
 
 	int dim = design.Ncols();
-	if (dim - 1 >= data.nObs - 3 - hyp.a) return NA_REAL; // not a valid model
+	if (dim - 1 >= data.nObs - 3 - hyp.a) return R_NaN; // not a valid model
 //
 //	MATRIXSTORE(B, BStore)
 //
@@ -1155,7 +1121,7 @@ double getR2(	// compute coefficient of determination for the model
 
 			return R2;
 		}
-		catch(NPDException) {return NA_REAL;} // if XtX is not p.d. then return NA
+		catch(NPDException) {return R_NaN;} // if XtX is not p.d. then return NAN
 	}
 }
 
@@ -1164,6 +1130,11 @@ double getR2(	// compute coefficient of determination for the model
 // compute varying part of log marginal likelihood for specific model
 double getVarLogMargLik(const double &R2, const int &n, const int &dim, const hyperPriorPars &hyp)
 {
+    // check if any interrupt signals have been entered
+    // (check here because this function is used both by the exhaustive and the sampling function)
+    R_CheckUserInterrupt();
+
+    // then start computing
 	if(dim == 1){
 		return 0;
 	} else {

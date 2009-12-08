@@ -55,6 +55,11 @@ T modified_deflation(const vector<T>& v)
     else if (*i > 0.0)
       vp.push_back(*i);
 
+  // immediately return 0 if there are no negative or positive elements
+  if(vn.empty() && vp.empty())
+      return static_cast<T>(0.0);
+
+
   T a, b, sum, error, sp, sn;
   bool well_conditioned = false;
   while (!well_conditioned) {

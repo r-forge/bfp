@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[inclusionProbs.R] by DSB Fre 04/07/2008 11:35 (CEST) on daniel@puc.home>
+## Time-stamp: <[inclusionProbs.R] by DSB Die 01/12/2009 10:58 (CET)>
 ##
 ## Description:
 ## Compute (model averaged) posterior inclusion probabilites for the uncertain

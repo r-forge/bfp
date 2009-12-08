@@ -1,3 +1,9 @@
+2009-12-04  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Add option to restrict the size of the model cache during model
+	sampling, to avoid running out of allocatable memory in long model
+	sampling chains.
+
 2009-09-30  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Add some documentation to R functions.

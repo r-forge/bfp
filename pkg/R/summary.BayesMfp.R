@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[summary.BayesMfp.R] by DSB Fre 02/10/2009 17:09 (CEST)>
+## Time-stamp: <[summary.BayesMfp.R] by DSB Fre 04/12/2009 17:06 (CET)>
 ##
 ## Description:
 ## Calculate and print the summary of a BayesMfp object.
@@ -128,7 +128,7 @@ print.summary.BayesMfp <- function (x, ...)
         cat ("Original call:\n")
         print (x$call)
         cat ("\n")
-        cat (x$nModels, " multivariable fractional polynomial model(s) of total ",
+        cat (x$nModels, " multivariable fractional polynomial model(s) of total (visited/cached)",
             x$numVisited,
              ifelse (!is.null (chl <- x$chainlength), paste("\n(during", chl, "sampling jumps)"), ""),
              " for following covariates:\n\n",

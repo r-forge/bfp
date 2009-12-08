@@ -3,7 +3,8 @@ SOURCES_CPP =  \
 	       	dataStructure.cpp \
 		hyperg.cpp \
 		combinatorics.cpp \
-		RnewMat.cpp
+		RnewMat.cpp \
+		conversions.cpp
 
 SOURCES_C = \
 		const.c \

@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Course:
 ##         from the Department of Statistics, University of Munich
-## Time-stamp: <[test.R] by DSB Die 22/09/2009 14:49 (CEST)>
+## Time-stamp: <[test.R] by DSB Fre 04/12/2009 17:38 (CET)>
 ##
 ## Description:
 ##
@@ -86,11 +86,17 @@ summary(simulation)
 
 p1 <- posteriors(exhaustive)
 p2 <- posteriors(simulation, 2)
+
 plot(log(p1), log(p2))
 abline(0, 1)
 
 d1 <- as.data.frame(exhaustive)
 d2 <- as.data.frame(simulation)
+
+head(d1[, -c(7,8)])
+head(d2[, -c(2, 8, 9)])
+
 shouldbeZero <- d1[, -c(7,8)] - d2[, -c(2, 8, 9)]
-stopifnot(all(unlist(shouldbeZero) == 0))
+shouldbeZero <- max(abs(unlist(shouldbeZero)))
+stopifnot(all.equal(shouldbeZero, 0))
 

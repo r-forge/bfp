@@ -2,14 +2,16 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[posteriors.R] by DSB Fre 02/10/2009 11:49 (CEST)>
+## Time-stamp: <[posteriors.R] by DSB Fre 04/12/2009 17:08 (CET)>
 ##
 ## Description:
 ## Extract posterior model probability estimates from BayesMfp object.
 ##
 ## History:
 ## 04/07/2008   copy from thesis function collection.
-## 02/10/2009   checks, in particular if there are two estimates for the models when ind=2 
+## 02/10/2009   checks, in particular if there are two estimates for the models when ind=2
+## 04/12/2009   update to the new data mode that there is always a frequency estimate,
+##              but this may be NA when exhaustive search was used.
 #####################################################################################
 
 `posteriors` <-
@@ -20,8 +22,7 @@ function (BayesMfpObject,
     stopifnot(ind %in% c(1, 2))
     if(ind == 2){
         ## does the first model have two probability estimates?
-        stopifnot(identical(length(BayesMfpObject[[1]]$posterior),
-                            2L))
+        stopifnot(! is.na(BayesMfpObject[[1]]$posterior[ind]))
     }
 
     ## now extract the required one from all models

@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BayesMfpMethods.R] by DSB Don 01/10/2009 15:59 (CEST)>
+## Time-stamp: <[BayesMfpMethods.R] by DSB Fre 04/12/2009 17:06 (CET)>
 ##
 ## Description:
 ## Additional convenience methods for BayesMfp class objects.
@@ -34,7 +34,7 @@
 print.BayesMfp <- function (x, ...)
 {
     cat ("------------------------------ BayesMfp-Output ------------------------------\n")
-    cat (length (x), "multivariable fractional polynomial model(s) of total",
+    cat (length (x), "multivariable fractional polynomial model(s) of total (visited/cached)",
          attr (x, "numVisited"), "for following covariates:\n\n")
     cat ("fixed:                ", paste(attr (x, "termNames")$fixed, collapse = ", "), "\n")
     cat ("uncertain fixed form: ", paste(attr (x, "termNames")$uc, collapse = ", "), "\n")

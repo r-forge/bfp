@@ -11,12 +11,15 @@
 }
 \usage{
 BayesMfp(formula = formula(data), data = parent.frame(), family =
-gaussian, priorSpecs = list(a = 4, modelPrior = "flat"), subset = NULL,
-na.action = na.omit, verbose = TRUE, nModels = NULL, method = c("ask",
-"exhaustive", "sampling"), chainlength = 10000) 
+gaussian, priorSpecs = list(a = 4, modelPrior = "flat"), method =
+c("ask", "exhaustive", "sampling"), subset = NULL, na.action = na.omit,
+verbose = TRUE, nModels = NULL, nCache=1e5L, chainlength = 1e5L)
+
 bfp(x, max = 2, scale = TRUE, rangeVals=NULL)
+
 uc(x)
 }
+
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{formula}{model formula}
@@ -24,15 +27,18 @@ uc(x)
     parent frame)}
   \item{family}{distribution and link: only gaussian("identity") supported at the moment}
   \item{priorSpecs}{prior specifications, see details}
+  \item{method}{which method should be used to explore the  posterior
+    model space? (default: ask the user)}
   \item{subset}{optional subset expression}
   \item{na.action}{default is to skip rows with missing data, and no other
     option supported at the moment}
   \item{verbose}{should information on computation progress be given? (default)}
   \item{nModels}{how many best models should be saved? (default: 1\% of
-    the explored models, 1 would mean only the maximum a posteriori [MAP]
-    model)}
-  \item{method}{which method should be used to explore the  posterior
-    model space? (default: ask the user)}
+    the explored models or the chainlength, 1 would mean only the
+    maximum a posteriori [MAP] model)}
+  \item{nCache}{maximum number of best models to be cached at the same
+    time during the model sampling (only has an effect if sampling has
+    been chosen as method)}  
   \item{chainlength}{length of the model sampling chain (only has an
     effect if sampling has been chosen as method)}
   \item{x}{variable}
@@ -93,7 +99,8 @@ uc(x)
   with \code{\link{[.BayesMfp}} returns again a \code{BayesMfp} object
   with the same attributes, which are
 
-  \item{numVisited}{the number of models that have been visited}
+  \item{numVisited}{the number of models that have been visited
+  (exhaustive search) or cached (model sampling)}
   \item{inclusionProbs}{BMA inclusion probabilities for all uncertain
     covariates}
   \item{logNormConst}{the (estimated) log normalizing constant \eqn{f
@@ -122,7 +129,9 @@ uc(x)
 }
 
 \note{\code{logNormConst} may be unusable due to necessary conversion
-  from long double to double! Various methods for posterior summaries are available.
+  from long double to double!
+
+  Various methods for posterior summaries are available.
 }
 
 \seealso{
