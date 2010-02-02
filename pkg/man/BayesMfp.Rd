@@ -13,7 +13,7 @@
 BayesMfp(formula = formula(data), data = parent.frame(), family =
 gaussian, priorSpecs = list(a = 4, modelPrior = "flat"), method =
 c("ask", "exhaustive", "sampling"), subset = NULL, na.action = na.omit,
-verbose = TRUE, nModels = NULL, nCache=1e5L, chainlength = 1e5L)
+verbose = TRUE, nModels = NULL, nCache=1e9L, chainlength = 1e5L)
 
 bfp(x, max = 2, scale = TRUE, rangeVals=NULL)
 

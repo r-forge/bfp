@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BayesMfp.R] by DSB Fre 04/12/2009 17:04 (CET)>
+## Time-stamp: <[BayesMfp.R] by DSB Mon 14/12/2009 10:24 (CET)>
 ##
 ## Description:
 ## Main function of the bfp package: Bayesian Inference for a multivariate
@@ -29,6 +29,10 @@
 ##              maximum FP degrees are identical (to be inline with the paper)
 ## 05/10/2009   remove dead comments
 ## 03/12/2009   add option to specify the models cache size when doing sampling
+## 14/12/2009   increase default value for "nCache" to 1e9 (previously 1e5) for
+##              (almost) backward-compatibility - if not more than 1e9 models are visited
+##              during the sampling, the results are completely identical to those from
+##              the old HypergBayesMfp package.
 #####################################################################################
 
 `BayesMfp` <-
@@ -47,7 +51,7 @@
               nModels = NULL,          # how many best models should be saved? default: 1% of total
                                        # number of (cached) models. Must not be larger than nCache
                                        # if method == "sampling".
-              nCache=1e5L,              # maximum number of best models to be cached at the same
+              nCache=1e9L,              # maximum number of best models to be cached at the same
                                         # time during the model sampling, only has effect if method = sampling
               chainlength = 1e5L        # only has effect if method = sampling
               )
