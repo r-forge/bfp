@@ -515,7 +515,9 @@ ModelCache::getListOfBestModels(const fpInfo& currFp,
 {
     // allocate the return R-list
     SEXP ret;
-    Rf_protect(ret = Rf_allocVector(VECSXP, min(bookkeep.nModels, modelIterSet.size())));
+
+    // cast is necessary for gcc-4.2 on Mac on R-forge.
+    Rf_protect(ret = Rf_allocVector(VECSXP, min(bookkeep.nModels, static_cast<PosInt>(modelIterSet.size()))));
 
     // process the ordered list of best models from the end (because the set is ordered increasingly)
     PosInt i = 0;
