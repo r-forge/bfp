@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mon 05/10/2009 10:26 (CEST)>
+## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mit 03/03/2010 10:19 (CET)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on (MC) Bayesian model average.
@@ -15,6 +15,7 @@
 ## 16/09/2009   add rug argument, and plot curves last to obtain clearer graphics
 ## 02/10/2009   adapt return list to the analogue function for BayesMfp objects
 ##              ("original" instead of "originalGrid")
+## 03/03/2010   also accept a "main" plotting argument
 #####################################################################################
 
 plotCurveEstimate.BmaSamples <-
@@ -27,7 +28,8 @@ plotCurveEstimate.BmaSamples <-
               legendPos = "topleft",    # where to place sample size information? if NULL it is not
                                         # printed
               rug=FALSE,                # add rug to plot?
-              ...                       # arguments for plotting with matplot
+              ...,                       # arguments for plotting with matplot
+              main=NULL
               )
 {
     ret <- list ()
@@ -116,7 +118,8 @@ plotCurveEstimate.BmaSamples <-
              ylab=matplotList$ylab,
              ylim=matplotList$ylim,
              cex = 0.5,
-             col = "gray")
+             col = "gray",
+             main=main)
 
         ## possibly the rug
         rug <- as.logical(rug)

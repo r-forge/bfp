@@ -75,7 +75,9 @@ verbose = TRUE)
   and the columns are appropriately named to correspond to the single
   design variables.}
 \item{fitted}{fitted values of all models in \code{object}, in a matrix
-  with layout models x observations.} 
+  with layout models x observations.}
+\item{predictions}{samples from the predictive distribution at the
+  covariates given in \code{newdata}}
 }
 
 \seealso{\link{BmaSamples Methods}, \code{\link{BayesMfp}}}

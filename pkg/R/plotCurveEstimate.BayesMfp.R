@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Mon 05/10/2009 10:26 (CEST)>
+## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Mit 03/03/2010 10:18 (CET)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on a single model.
@@ -16,6 +16,7 @@
 ## 04/09/2008   use the center argument of getFpTransforms
 ## 02/10/2009   also return the transform parameters, safer indexing of them
 ##              inside the function
+## 03/03/2010   also accept a "main" plotting argument
 #####################################################################################
 
 `plotCurveEstimate.BayesMfp` <-
@@ -35,7 +36,8 @@ function (                          # plot fp estimate, optionally with credible
                                         # be given here in the call to getPosteriorParms
           gridSize = 201,           # obvious
           numSim = 500,             # number of simulations for simultaneous credible band
-          ...                       # arguments for plotting with matplot
+          ...,                      # arguments for plotting with matplot
+          main=NULL
           )
 {
     model <- model[1]
@@ -148,7 +150,8 @@ function (                          # plot fp estimate, optionally with credible
              ylab=matplotList$ylab,
              ylim=matplotList$ylim,
              cex = 0.5,
-             col = "gray")
+             col = "gray",
+             main=main)
 
         ## possibly the rug
         rug <- as.logical(rug)

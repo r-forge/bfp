@@ -11,7 +11,7 @@
 }
 \usage{
 plotCurveEstimate(model, termName, plevel = 0.95, slevel = plevel, plot
-= TRUE, legendPos = "topleft", rug = FALSE, ...)
+= TRUE, legendPos = "topleft", rug = FALSE, ..., main = NULL)
 }
 
 \arguments{
@@ -30,7 +30,8 @@ plotCurveEstimate(model, termName, plevel = 0.95, slevel = plevel, plot
   \item{rug}{add a rug to the plot? (default: \code{FALSE})}
   \item{\dots}{further arguments in case of a \code{\link{BayesMfp}}
     object (see details) and arguments for plotting with
-  \code{\link{matplot}}} 
+    \code{\link{matplot}}}
+  \item{main}{optional main argument for the plot}
 }
 \details{
   Further arguments for application on a \code{\link{BayesMfp}} object:

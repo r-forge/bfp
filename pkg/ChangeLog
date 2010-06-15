@@ -1,3 +1,7 @@
+2010-03-03  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Also accept a "main" argument in the plotCurveEstimate functions 
+
 2009-12-04  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Add option to restrict the size of the model cache during model

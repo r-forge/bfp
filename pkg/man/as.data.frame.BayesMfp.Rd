@@ -17,7 +17,7 @@
   the \code{\link{BayesMfp}} list)}
   \item{freq}{should empirical frequencies of the models in the sampling
     path be given? (default)}
-  \item{\ldots}{unused}
+  \item{\dots}{unused}
 }
 
 \author{Daniel Saban\'es Bov\'e}
