@@ -842,7 +842,8 @@ samplingGaussian(// definition
 		                          modelInfo(now.logMargLik, logPrior,
 		                                    nowPostExpectedg,
 		                                    nowPostExpectedShrinkage,
-		                                    nowR2));
+		                                    nowR2,
+		                                    0));
 		    }
 		}
 

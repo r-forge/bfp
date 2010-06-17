@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[posteriors.R] by DSB Fre 04/12/2009 17:08 (CET)>
+## Time-stamp: <[posteriors.R] by DSB Mit 16/06/2010 11:32 (CEST)>
 ##
 ## Description:
 ## Extract posterior model probability estimates from BayesMfp object.
@@ -16,10 +16,10 @@
 
 `posteriors` <-
 function (BayesMfpObject,
-                        ind = 1         # ind = 1 means normalized posteriors, ind = 2 sampling freqs
-                        )
+          ind = 1)         # ind = 1 means normalized posteriors, ind = 2 sampling freqs          
 {
     stopifnot(ind %in% c(1, 2))
+    
     if(ind == 2){
         ## does the first model have two probability estimates?
         stopifnot(! is.na(BayesMfpObject[[1]]$posterior[ind]))

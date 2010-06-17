@@ -1,6 +1,11 @@
+2010-06-16  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Add a "predictMeans" element to the return value of
+	"BmaSamples".
+
 2010-03-03  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
-	* Also accept a "main" argument in the plotCurveEstimate functions 
+	* Also accept a "main" argument in the plotCurveEstimate functions
 
 2009-12-04  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 

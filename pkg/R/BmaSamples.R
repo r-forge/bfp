@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BmaSamples.R] by DSB Don 10/12/2009 09:52 (CET)>
+## Time-stamp: <[BmaSamples.R] by DSB Mit 16/06/2010 11:13 (CEST)>
 ##
 ## Description:
 ## Sample from models in a BayesMfp object using "BmaSamples" for MC model averaging
@@ -27,6 +27,10 @@
 ##              (so a list can also be passed without breaking everything)
 ## 05/10/2009   some comments
 ## 05/11/2009   only construct new design matrix if there are any "newdata"!
+## 16/06/2010   add predictMeans to return list, which is necessary for the log score
+##              estimation (besides the already existing variance samples). The
+##              actual predictive samples for "newdata" are now generated at the
+##              end of the function. 
 #####################################################################################
 
 BmaSamples <-
@@ -73,7 +77,7 @@ BmaSamples <-
     alpha <- ret$priorSpecs$a
 
     ## covariates matrix for newdata:
-    if(nNewObs > 0)
+    if(nNewObs > 0L)
     {
         tempX <- constructNewdataMatrix(BayesMfpObject=object,
                                         newdata=newdata)
@@ -167,13 +171,13 @@ BmaSamples <-
     ## here are the model-specific fits from all models in object:
     ret$fitted <- matrix (nrow = length (object), ncol = nObs)
 
-    ## for samples from the posterior predictive: 
-    ret$predictions <-
-        if(nNewObs)
+    ## for samples from the posterior predictive means:
+    if(nNewObs > 0L)
+    {
+        ret$predictMeans <-
             matrix(nrow=nNewObs,
                    ncol=sampleSize)
-        else
-            NULL
+    }
 
     ## echo sampling start
     if (verbose)
@@ -222,15 +226,10 @@ BmaSamples <-
             ## begin prediction with these intercepts and the noise:
             if(nNewObs)
             {
-                ## in each sample, all new obs have the same intercept and the same sd
-                ret$predictions[, sampleCounter + oneInds] <-
-                    matrix(data=
-                           rnorm(n=m * nNewObs,
-                                 mean=theseIntercepts,
-                                 sd=sqrt(theseVariances)),
-                           nrow=nNewObs,
-                           ncol=m,
-                           byrow=TRUE)
+                ## in each sample, all new obs have the same intercept
+                ret$predictMeans[, sampleCounter + oneInds] <-
+                    rep(theseIntercepts,
+                        each=nNewObs)
             }
             
             ## if this is not the null model:
@@ -264,9 +263,9 @@ BmaSamples <-
                     newDesignNonFixed <- getDesignMatrix (tempMod,
                                                           fixedColumns=FALSE)
                     
-                    ## and add this to the Normal(intercepts, sds) samples
-                    ret$predictions[, sampleCounter + oneInds] <-
-                        ret$predictions[, sampleCounter + oneInds] +
+                    ## and add this to the predictive means
+                    ret$predictMeans[, sampleCounter + oneInds] <-
+                        ret$predictMeans[, sampleCounter + oneInds] +
                             newDesignNonFixed %*% simCoefs 
                 }
 
@@ -306,6 +305,20 @@ BmaSamples <-
         }
     }
 
+    ## add predictive samples (mainly for backwards compatibility)
+    if(nNewObs > 0L)
+    {
+        ## in each sample, all new obs have the same sd, so we
+        ## must replicate the corresponding sd's appropriately.
+        ret$predictions <- matrix(rnorm(n=nNewObs * sampleSize,
+                                        mean=ret$predictMeans,
+                                        sd=
+                                        rep(sqrt(ret$sigma2),
+                                            each=nNewObs)),
+                                  nrow=nNewObs,
+                                  ncol=sampleSize)
+    }
+    
     ## be sure that we have a newline after the
     ## model numbers printed on the screen:
     if(verbose)

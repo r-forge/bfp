@@ -78,6 +78,8 @@ verbose = TRUE)
   with layout models x observations.}
 \item{predictions}{samples from the predictive distribution at the
   covariates given in \code{newdata}}
+\item{predictMeans}{means of the predictive distribution at the
+  covariates given in \code{newdata}}
 }
 
 \seealso{\link{BmaSamples Methods}, \code{\link{BayesMfp}}}
