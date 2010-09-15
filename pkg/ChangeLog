@@ -1,3 +1,15 @@
+2010-06-18  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/transformMfp.R (transformMfp): Fix a bug in this
+	transformation function, which lead to incorrect design matrix
+	construction when the order of covariates in the mfp object was
+	different from the order in the BayesMfp object.
+
+2010-06-17  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Correct prediction methods to use the same shifts of the design
+	matrix columns as for the original data.
+
 2010-06-16  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Add a "predictMeans" element to the return value of

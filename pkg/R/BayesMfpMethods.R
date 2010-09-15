@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BayesMfpMethods.R] by DSB Fre 04/12/2009 17:06 (CET)>
+## Time-stamp: <[BayesMfpMethods.R] by DSB Don 17/06/2010 15:47 (CEST)>
 ##
 ## Description:
 ## Additional convenience methods for BayesMfp class objects.
@@ -18,6 +18,7 @@
 ## 13/11/2008   use new internal function for creating model matrix for newdata
 ##              and scale the x matrix in tempMod
 ## 29/11/2008   update for new model prior option
+## 17/06/2010   correct predict.BayesMfp to use the shifts of the original data
 #####################################################################################
 
 '[.BayesMfp' <- function (x, ...)       
@@ -86,13 +87,19 @@ predict.BayesMfp <- function (object, # valid BayesMfp object, only first elemen
     tempMod <- mod <- object[1]
     
     tempX <- constructNewdataMatrix(BayesMfpObject=object,
-                                    newdata=newdata)
-    
+                                    newdata=newdata)   
     attr (tempMod, "x") <- tempX
-    attr(tempMod, "xCentered") <- scale(tempX, center=TRUE, scale=FALSE)
+
+    ## get design matrix for the old data
+    origDesign <- getDesignMatrix(mod, center=TRUE)
+
+    ## use its shifts to compute the correct design matrix for the new data
+    design <- getDesignMatrix(tempMod, center=FALSE)
+    design <- sweep(design,
+                    MARGIN=2L,
+                    attr(origDesign, "shifts"))
     
-    ## and compute fit with original posterior coefficient mode
-    design <- getDesignMatrix (tempMod)
+    ## and compute fit with original posterior coefficient mode   
     post <- getPosteriorParms (mod)
     fit <- as.vector (design %*% post$mStar)
 

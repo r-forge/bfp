@@ -1,14 +1,16 @@
 #####################################################################################
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs with Hyper-g-prior
-## Time-stamp: <[transformMfp.R] by DSB Die 29/09/2009 16:47 (CEST)>
+## Time-stamp: <[transformMfp.R] by DSB Fre 18/06/2010 14:04 (CEST)>
 ##
 ## Description:
 ## Transform a fitted mfp model into a BayesMfp model with the correct powers etc.
 ## to compare with other (true) BayesMfp models on the same (!) data.
 ##
 ## History:
-## 26/02/2009   file creation: modify existing code from bfp/OzoneValidation.R 
+## 26/02/2009   file creation: modify existing code from bfp/OzoneValidation.R
+## 18/06/2010   sort fpNumeric accordingly to the order in BayesMfpObject, otherwise
+##              the design matrix will not be correct!!
 #####################################################################################
 
 transformMfp <- function(mfpObject,
@@ -45,6 +47,9 @@ transformMfp <- function(mfpObject,
     ## check equality of power names
     stopifnot(setequal(names(ret[[1]]$powers),
                        names(fpNumeric)))
+
+    ## and then sort fpNumeric accordingly
+    fpNumeric <- fpNumeric[names(ret[[1]]$powers)]
     
     ## impute into BayesMfp shell
     ret[[1]]$powers <- fpNumeric

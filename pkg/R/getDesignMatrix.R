@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[getDesignMatrix.R] by DSB Son 09/11/2008 19:12 (CET) on daniel@puc.home>
+## Time-stamp: <[getDesignMatrix.R] by DSB Don 17/06/2010 14:57 (CEST)>
 ##
 ## Description:
 ## Extract the design matrix of the first element (== model) of a BayesMfp object.
@@ -14,22 +14,30 @@
 ## 05/09/2008   use xCentered attribute from BayesMfp object
 ## 09/11/2008   add parameter to control if fixed columns (intercept) should be in the
 ##              return matrix
+## 17/06/2010   do the centering optionally and only at the end and give the
+##              column means back as an attribute of the design matrix. This is
+##              important for the prediction of new data points, where exactly
+##              the same shifts must be used in the construction of the new
+##              design matrix! So we cannot just center the new design matrix
+##              with its own column means but we must use the column means of
+##              the old design matrix.
 #####################################################################################
 
 getDesignMatrix <- function (x, # a valid BayesMfp-Object of length 1 (otherwise only first element
                                 # recognized)
-                             fixedColumns=TRUE # return the fixed columns inside the matrix or not?
+                             fixedColumns=TRUE, # return the fixed columns
+                                        # inside the matrix or not?
+                             center=TRUE # do the centering?
                              )
 {
     full <- attr (x, "x")
-    fullCentered <- attr(x, "xCentered")
     
     inds <- attr (x, "indices")
     powers <- x[1][[1]]$powers
     ucSet <- x[1][[1]]$ucTerms
 
     nFix <- length (inds$fixed)         
-    stopifnot(identical(nFix, as.integer(1)))
+    stopifnot(identical(nFix, 1L))
 
     ucColInds <- inds$uc %in% ucSet
     nUc <- sum (ucColInds)
@@ -46,7 +54,7 @@ getDesignMatrix <- function (x, # a valid BayesMfp-Object of length 1 (otherwise
     ret <- matrix (nrow = nrow (full),
                    ncol = nColumns)
     retColnames <- character (ncol (ret))
-    col <- 0                            # invariant: already col columns written
+    col <- 0L                           # invariant: already col columns written
 
     if(fixedColumns)
     {
@@ -64,7 +72,7 @@ getDesignMatrix <- function (x, # a valid BayesMfp-Object of length 1 (otherwise
     for (i in seq_along (inds$bfp)){
         pi <- powers[[i]]
         if (len <- length (pi)) {       # if there is at least one power
-            new <- getFpTransforms (full[, inds$bfp[i], drop = FALSE], pi, center=TRUE)
+            new <- getFpTransforms (full[, inds$bfp[i], drop = FALSE], pi, center=FALSE)
             newInds <- col + seq_along (pi)
 
             ret[, newInds] <- new
@@ -76,7 +84,7 @@ getDesignMatrix <- function (x, # a valid BayesMfp-Object of length 1 (otherwise
 
     ## uc part
     if (length (ucSet)){
-        new <- fullCentered[, ucColInds, drop = FALSE]
+        new <- full[, ucColInds, drop = FALSE]
         newInds <- col + seq_len (nUc)
 
         ret[, newInds] <- new
@@ -88,7 +96,25 @@ getDesignMatrix <- function (x, # a valid BayesMfp-Object of length 1 (otherwise
     rownames (ret) <- rownames (full)
     colnames (ret) <- retColnames
 
-    return (ret)
+    ## only once center if that was wished
+    shifts <-
+        if(center)
+        {
+            colMeans(ret)
+        }
+        else
+        {
+            ## no shifting at all
+            rep.int(0, times=nColumns)
+        }
+
+    ## intercept column is not shifted in any case
+    if(fixedColumns)
+        shifts[1L] <- 0
+
+    ## return the (optionally centered) design matrix and the used shifts
+    return(structure(sweep(ret, 2, shifts),
+                     shifts=shifts))
 }
 
 

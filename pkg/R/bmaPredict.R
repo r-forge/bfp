@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[bmaPredict.R] by DSB Mon 05/10/2009 10:12 (CEST)>
+## Time-stamp: <[bmaPredict.R] by DSB Don 17/06/2010 15:50 (CEST)>
 ##
 ## Description:
 ## BMA prediction for new data points.
@@ -14,6 +14,7 @@
 ## 10/11/2008   don't ask for the response when creating the model matrix
 ## 13/11/2008   use new internal function for creating model matrix for newdata
 ## 05/10/2009   some comments
+## 17/06/2010   correct to use the shifts of the original data
 #####################################################################################
 
 ## this is not a predict method for BmaSamples!
@@ -38,13 +39,23 @@ bmaPredict <- function (BayesMfpObject, # models over which to average the predi
     for (i in seq_along (BayesMfpObject)){
         tempMod <- BayesMfpObject[i]
 
-        post <- getPosteriorParms (BayesMfpObject[i])
-        
-        attr (tempMod, "x") <- tempX
-        attr(tempMod, "xCentered") <- scale(tempX, center=TRUE, scale=FALSE)
-        
-        tempDesign <- getDesignMatrix (tempMod)
+        ## get design matrix for the old data
+        origDesign <- getDesignMatrix(tempMod, center=TRUE)
 
+        ## and posterior parameter means
+        post <- getPosteriorParms (BayesMfpObject[i])
+
+        ## then change to the new uncentered covariates data matrix
+        attr (tempMod, "x") <- tempX
+
+        ## and use the old shifts to compute the
+        ## correct design matrix for the new data
+        tempDesign <- getDesignMatrix(tempMod, center=FALSE)
+        tempDesign <- sweep(tempDesign,
+                            MARGIN=2L,
+                            attr(origDesign, "shifts"))
+
+        ## to compute the fit
         fitmat[i,] <- tempDesign %*% post$mStar
     }
 

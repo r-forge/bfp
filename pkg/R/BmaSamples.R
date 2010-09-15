@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BmaSamples.R] by DSB Mit 16/06/2010 11:13 (CEST)>
+## Time-stamp: <[BmaSamples.R] by DSB Don 17/06/2010 16:03 (CEST)>
 ##
 ## Description:
 ## Sample from models in a BayesMfp object using "BmaSamples" for MC model averaging
@@ -30,21 +30,21 @@
 ## 16/06/2010   add predictMeans to return list, which is necessary for the log score
 ##              estimation (besides the already existing variance samples). The
 ##              actual predictive samples for "newdata" are now generated at the
-##              end of the function. 
+##              end of the function.
+## 17/06/2010   correct shifting of the new design matrix columns
 #####################################################################################
 
 BmaSamples <-
-    function (object,         # valid BayesMfp object including the models over which to average
-              sampleSize = length (object) * 10, # sample size
-              postProbs = posteriors (object),# vector of posterior probabilites that will be normalized within
-              gridList = list (), # optional list of appropriately named grid vectors for fp evaluation
+    function(object,         # valid BayesMfp object including the models over which to average
+             sampleSize = length (object) * 10, # sample size
+             postProbs = posteriors (object),# vector of posterior probabilites that will be normalized within
+             gridList = list (), # optional list of appropriately named grid vectors for fp evaluation
                                         # default is a length 201 grid per covariate additional to the observed values
                                         # (two are at the endpoints)
-              gridSize = 203, # obvious. if there are many observed values, gridSize may be much
-                              # lower!
-              newdata = NULL, # new covariate data with exactly the names (and preferably ranges) as before
-              verbose = TRUE  # should information on progress been printed?
-              )
+             gridSize = 203, # obvious. if there are many observed values, gridSize may be much
+                                        # lower!
+             newdata = NULL, # new covariate data with exactly the names (and preferably ranges) as before
+             verbose = TRUE)  # should information on progress been printed?             
 {
     ## check the length of the object
     if(! (length(object) >= 1))
@@ -192,7 +192,8 @@ BmaSamples <-
 
         mod <- object[j]                # get model and
 
-        design <- getDesignMatrix (mod) # its (centered) design matrix and
+        design <- getDesignMatrix (mod) # its (centered) design matrix
+                                        # (including intercept) and
         dim <- ncol(design)
 
         post <- getPosteriorParms (mod, design = design) # posterior parameters with posterior
@@ -257,11 +258,17 @@ BmaSamples <-
                     
                     ## correct model matrix in tempMod to new data matrix
                     attr(tempMod, "x") <- tempX
-                    attr(tempMod, "xCentered") <- scale(tempX, center=TRUE, scale=FALSE)
 
-                    ## compute sampled (mean - intercept) vectors for the normal distributions
-                    newDesignNonFixed <- getDesignMatrix (tempMod,
-                                                          fixedColumns=FALSE)
+                    ## this is not necessary, because xCentered is not used by getDesignMatrix!
+                    ## attr(tempMod, "xCentered") <- scale(tempX, center=TRUE, scale=FALSE)
+
+                    ## get the correct design matrix (without the intercept column),
+                    ## using the shifts of the original data!
+                    newDesignNonFixed <- getDesignMatrix(tempMod,
+                                                         center=FALSE)
+                    newDesignNonFixed <- sweep(newDesignNonFixed,
+                                               MARGIN=2L,
+                                               attr(design, "shifts"))[, -1L] # intercept is discarded here 
                     
                     ## and add this to the predictive means
                     ret$predictMeans[, sampleCounter + oneInds] <-

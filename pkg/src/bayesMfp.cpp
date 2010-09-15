@@ -263,6 +263,8 @@ exhaustiveGaussian(// definition
 	}
 	currentFpInfo.tcols = transformedCols;
 
+	// todo: check that really all elements are transformed (was a bug in glmBfp)
+
 	// uc info
 	const int* ucIndicesArray = INTEGER(R_ucIndices);
 	const vector<int> ucIndices(ucIndicesArray, ucIndicesArray + Rf_length(R_ucIndices));
