@@ -1,18 +1,3 @@
-#####################################################################################
-## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
-## Course:
-##         from the Department of Statistics, University of Munich
-## Time-stamp: <[test.R] by DSB Fre 04/12/2009 17:38 (CET)>
-##
-## Description:
-##
-##
-## History:
-## 29/11/2008   update for new model prior option
-## 22/09/2009   update for new SWITCH move type: use 2 FP terms in order to be able
-##              to do the simulation
-#####################################################################################
-
 library(bfp)
 
 ## setting

@@ -1,18 +1,3 @@
-#####################################################################################
-## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
-## Course:
-##         from the Department of Statistics, University of Munich
-## Time-stamp: <[testSimulation.R] by DSB Sam 29/11/2008 19:12 (CET) on daniel@puc.home>
-##
-## Description:
-##
-##
-## History:
-## 14/10/2008   file creation to detect the error leading to an incompatible
-##              dimensions exception
-## 29/11/2008   update for new model prior option
-#####################################################################################
-
 library(bfp)
 
 set.seed (234)

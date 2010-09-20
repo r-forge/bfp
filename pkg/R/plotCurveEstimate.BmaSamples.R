@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mit 03/03/2010 10:19 (CET)>
+## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mon 20/09/2010 17:11 (CEST)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on (MC) Bayesian model average.
@@ -16,6 +16,8 @@
 ## 02/10/2009   adapt return list to the analogue function for BayesMfp objects
 ##              ("original" instead of "originalGrid")
 ## 03/03/2010   also accept a "main" plotting argument
+## 20/09/2010   create matplotList$y in such a way that no R CMD check note is
+##              triggered.
 #####################################################################################
 
 plotCurveEstimate.BmaSamples <-
@@ -32,7 +34,7 @@ plotCurveEstimate.BmaSamples <-
               main=NULL
               )
 {
-    ret <- list ()
+    ret <- list()
 
     if (is.null (mat <- model$bfp[[termName]]))
         stop ("There were no samples which include ", termName, " in this model average sample!\n")
@@ -103,7 +105,11 @@ plotCurveEstimate.BmaSamples <-
         if (is.null (matplotList$type))
             matplotList$type <- "l"
         matplotList$x <- ret$original
-        matplotList$y <- subset (as.data.frame (ret), select = - c (original, grid))
+
+        matplotList$y <- as.data.frame(ret)
+        notCols <- which(names(matplotList$y) %in% c("original", "grid"))
+        matplotList$y <- matplotList$y[, - notCols]
+        
         if (is.null (matplotList$ylim))
             matplotList$ylim <- range (c (partialResids, matplotList$y))
 

@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Mit 03/03/2010 10:18 (CET)>
+## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Mon 20/09/2010 17:11 (CEST)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on a single model.
@@ -17,6 +17,8 @@
 ## 02/10/2009   also return the transform parameters, safer indexing of them
 ##              inside the function
 ## 03/03/2010   also accept a "main" plotting argument
+## 20/09/2010   create matplotList$y in such a way that no R CMD check note is
+##              triggered.
 #####################################################################################
 
 `plotCurveEstimate.BayesMfp` <-
@@ -43,7 +45,7 @@ function (                          # plot fp estimate, optionally with credible
     model <- model[1]
     powers <- model[[1]]$powers
 
-    ret <- list ()
+    ret <- list()
 
     ## determine position
     fpInd <- which (attr (model, "termNames")$bfp == termName)
@@ -134,7 +136,11 @@ function (                          # plot fp estimate, optionally with credible
         if (is.null (matplotList$type))
             matplotList$type <- "l"
         matplotList$x <- ret$original
-        matplotList$y <- subset (as.data.frame (ret), select = - c (original, grid))
+
+        matplotList$y <- as.data.frame(ret)
+        notCols <- which(names(matplotList$y) %in% c("original", "grid"))
+        matplotList$y <- matplotList$y[, - notCols]
+        
         if (is.null (matplotList$ylim))
             matplotList$ylim <- range (c (partialResids, matplotList$y))
 

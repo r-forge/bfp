@@ -1,3 +1,19 @@
+2010-09-20  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* data/ozone.RData: Remove UTF8 degree symbol from Fahrenheit unit
+	name to avoid a note by R CMD check.
+
+	* inst/CITATION: Input the Statistics and Computing paper instead
+	of the technical report here.
+
+	* examples/simulation.R: Add more comments and more sensible
+	names.
+
+	* demo/ozone.R: Add more comments and delete save/load-pairs.
+
+	* DESCRIPTION: Add "Hmisc" and "mfp" to suggested packages because
+	they are loaded in the ozone demo.
+
 2010-06-18  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* R/transformMfp.R (transformMfp): Fix a bug in this

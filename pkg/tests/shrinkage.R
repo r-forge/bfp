@@ -1,15 +1,4 @@
-#####################################################################################
-## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
-## Course:
-##         from the Department of Statistics, University of Munich
-## Time-stamp: <[shrinkage.R] by DSB Mit 05/11/2008 13:42 (CET) on daniel@puc.home>
-##
-## Description:
-## test the shrinkage sampling
-##
-## History:
-## 05/11/2008   file creation
-#####################################################################################
+## test the shrinkage sampling.
 
 library(bfp)
 
