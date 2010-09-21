@@ -1,10 +1,10 @@
-# Time-stamp: <[Makevars] by DSB Mit 30/09/2009 13:32 (CEST)>
+# Time-stamp: <[Makevars] by DSB Die 21/09/2010 14:36 (CEST)>
 
 # use makefile variables from the R installation
 MkInclude = $(R_HOME)/etc${R_ARCH}/Makeconf
 
 # flags are needed:
-PKG_CPPFLAGS = -D R_NO_REMAP 
+PKG_CPPFLAGS = -D R_NO_REMAP
 PKG_CXXFLAGS = -I. -Inewmat
 PKG_LIBS = -Lnewmat -lnewmat
 

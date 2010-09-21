@@ -87,31 +87,31 @@ SEXP postExpectedShrinkage( //declaration
 } // extern "C"
 
 // other functions ##########################################################################
-void permPars(unsigned int pos, // current position in parameter vector, starting from 0
+void permPars(PosInt pos, // current position in parameter vector, starting from 0
               const fpInfo &currFp,
               const int &nUcGroups,
               modelPar mod,
               set<model> &space,
               const hyperPriorPars &hyp,
               const dataValues &data,
-              set<int>* const &ucTermList,
+              const vector<IntSet>& ucTermList,
               const set<int> &fixedCols,
               book&);
 
 set<int> getFreeUcs( // compute set of free uc group indices
                    const modelPar& mod,
-                   const vector<unsigned int>& ucSizes,
-                   const unsigned int& currDim,
-                   const unsigned int& maxDim);
+                   const vector<PosInt>& ucSizes,
+                   const PosInt& currDim,
+                   const PosInt& maxDim);
 
-set<unsigned int> getFreeCovs( // compute set of free cov indices
+set<PosInt> getFreeCovs( // compute set of free cov indices
                              const modelPar& mod,
                              const fpInfo& currFp,
                              const set<int>& freeUcs,
-                             const unsigned int& currDim,
-                             const unsigned int& maxDim);
-set<unsigned int> getPresentCovs( // determine set of present cov indices
-const modelPar& mod);
+                             const PosInt& currDim,
+                             const PosInt& maxDim);
+set<PosInt> getPresentCovs( // determine set of present cov indices
+        const modelPar& mod);
 
 template <class T> T discreteUniform( // return random element of myset; should be enclosed in getRNGstate() etc.
 const set<T>& myset);
@@ -127,7 +127,7 @@ void computeModel(const modelPar &mod,
                   const hyperPriorPars &hyp,
                   const dataValues &data,
                   const fpInfo &currFp,
-                  set<int>* const &ucTermList,
+                  const vector<IntSet>& ucTermList,
                   const int &nUcGroups,
                   const set<int> &fixedCols,
                   set<model> &space,
@@ -137,7 +137,7 @@ ReturnMatrix getDesignMatrix( // construct design matrix for the model
                              const modelPar &mod,
                              const dataValues &data,
                              const fpInfo &currFp,
-                             set<int>* const &ucTermList,
+                             const vector<IntSet>& ucTermList,
                              const int &nUcGroups,
                              const set<int> &fixedCols);
 
@@ -194,8 +194,9 @@ exhaustiveGaussian(// definition
                    SEXP R_verbose) // should progress been displayed?
 {
 
-	unsigned int nProtect = 0;
-	// unpack ###
+    PosInt nProtect = 0;
+
+    // unpack ###
 	// data
 	const Matrix x = getMatrix(R_x);
 	const Matrix xcentered = getMatrix(R_xcentered);
@@ -221,35 +222,40 @@ exhaustiveGaussian(// definition
 	currentFpInfo.fpcards = INTEGER(R_fpcards);
 	currentFpInfo.fpnames = R_fpnames;
 
-	const int* biggestMaxDegree = max_element(currentFpInfo.fpmaxs, currentFpInfo.fpmaxs + Rf_length(R_fpmaxs));
-	double powerset[max(8, 5 + *biggestMaxDegree)];
+	const int* biggestMaxDegree = max_element(currentFpInfo.fpmaxs,
+	                                          currentFpInfo.fpmaxs + Rf_length(R_fpmaxs));
+
+	DoubleVector powerset(max(8, 5 + *biggestMaxDegree));
+
 	// corresponding indices        0   1     2  3    4  5  6  7
 	const double fixedpowers[] = { -2, -1, -0.5, 0, 0.5, 1, 2, 3 }; // always in powerset
-	copy(fixedpowers, fixedpowers + 8, powerset);
+	copy(fixedpowers, fixedpowers + 8,
+	     inserter(powerset, powerset.begin()));
+
 	for(int more = 3; more < *biggestMaxDegree; more++){ // additional powers
-		*(powerset + 8 + (3 - more)) = more + 1;
+	        powerset.at(8 + (3 - more)) = more + 1;
 	}
 	currentFpInfo.powerset = powerset; // save maximum powerset
 
-	vector<ColumnVector> transformedCols[currentFpInfo.nFps]; // build array of vectors of ColumnVectors holding the required
+	ColumnVectorArray transformedCols(currentFpInfo.nFps); // build array of vectors of ColumnVectors holding the required
 									// transformed values for the design matrices
-	for (unsigned int i = 0; i != currentFpInfo.nFps; i++){ // for every fp term
+	for (PosInt i = 0; i != currentFpInfo.nFps; i++){ // for every fp term
 		const int nCols = currentFpInfo.fpcards[i];
 		const ColumnVector thisCol = x.Column(currentFpInfo.fppos[i]);
 		vector<ColumnVector> thisFp;
 		for (int j = 0; j != nCols; j++){ // for every possible power
 			ColumnVector thisTransform = thisCol;
-			double thisPower = currentFpInfo.powerset[j];
+			double thisPower = currentFpInfo.powerset.at(j);
 			if(thisPower){ // not 0
 				for (int k = 0; k != thisTransform.Nrows(); k++){ // transform each element
 					assert(thisTransform.element(k) > 0);
-					thisTransform.element(k) = pow (thisTransform.element(k), thisPower);
+					thisTransform.element(k) = pow(thisTransform.element(k), thisPower);
 					assert(! ISNAN(thisTransform.element(k)));
 				}
 			} else { // 0
 				for (int k = 0; k != thisTransform.Nrows(); k++){
 					assert(thisTransform.element(k) > 0);
-					thisTransform.element(k) = log (thisTransform.element(k));
+					thisTransform.element(k) = log(thisTransform.element(k));
 					assert(! ISNAN(thisTransform.element(k)));
 				}
 			}
@@ -259,7 +265,7 @@ exhaustiveGaussian(// definition
 			// and put it into vector of columns
 			thisFp.push_back(thisTransform);
 		}
-		transformedCols[i] = thisFp;
+		transformedCols.at(i) = thisFp;
 	}
 	currentFpInfo.tcols = transformedCols;
 
@@ -267,11 +273,13 @@ exhaustiveGaussian(// definition
 	const int* ucIndicesArray = INTEGER(R_ucIndices);
 	const vector<int> ucIndices(ucIndicesArray, ucIndicesArray + Rf_length(R_ucIndices));
 	const int nUcGroups = INTEGER(R_nUcGroups)[0];
-	set<int> ucTermList[nUcGroups]; // Array with length nUcGroups of int-vectors
+
+	vector<IntSet> ucTermList(nUcGroups); // Array with length nUcGroups of int-vectors
 	if(nUcGroups){ // catch case with no uc groups
-		for(R_len_t i = 0; i != Rf_length(R_ucTermList); i++){
+		for(R_len_t i = 0; i != Rf_length(R_ucTermList); i++) {
 			SEXP temp = VECTOR_ELT(R_ucTermList, i);
-			copy(INTEGER(temp), INTEGER(temp) + Rf_length(temp), inserter(ucTermList[i], ucTermList[i].begin()));
+			copy(INTEGER(temp), INTEGER(temp) + Rf_length(temp),
+			     inserter(ucTermList.at(i), ucTermList.at(i).begin()));
 		}
 	}
 
@@ -304,7 +312,7 @@ exhaustiveGaussian(// definition
 	bookkeep.verbose = LOGICAL(R_verbose)[0];
 
 	// for computation of inclusion probs
-	indexSafeSum cgwp[currentFpInfo.nFps + nUcGroups];
+	vector<indexSafeSum> cgwp(currentFpInfo.nFps + nUcGroups);
 	bookkeep.covGroupWisePosteriors = cgwp;
 
 	// how many models to return?
@@ -334,7 +342,7 @@ exhaustiveGaussian(// definition
 	Rf_protect(inc = Rf_allocVector(REALSXP, currentFpInfo.nFps + nUcGroups));
 	nProtect++;
 	for (int i = 0; i != Rf_length(inc); i++)
-		REAL(inc)[i] = bookkeep.covGroupWisePosteriors[i].sum(bookkeep.modelPropToPosteriors) / normConst;
+		REAL(inc)[i] = bookkeep.covGroupWisePosteriors.at(i).sum(bookkeep.modelPropToPosteriors) / normConst;
 
 	SEXP ret;
 	Rf_protect(ret = Rf_allocVector(VECSXP, orderedModels.size()));
@@ -358,30 +366,28 @@ exhaustiveGaussian(// definition
 // ***************************************************************************************************//
 
 // recursion via:
-void permPars(
-			unsigned int pos, // current position in parameter vector, starting from 0 - copied.
-			const fpInfo& currFp,
-			const int &nUcGroups,
-			modelPar mod,	// is copied every time! everything else is call by reference.
-			set<model> &space,
-			const hyperPriorPars &hyp,
-			const dataValues &data,
-			set<int>* const &ucTermList,
-			const set<int> &fixedCols,
-			book &bookkeep
-			)
+void permPars(PosInt pos, // current position in parameter vector, starting from 0 - copied.
+              const fpInfo& currFp,
+              const int &nUcGroups,
+              modelPar mod,	// is copied every time! everything else is call by reference.
+              set<model> &space,
+              const hyperPriorPars &hyp,
+              const dataValues &data,
+              const vector<IntSet>& ucTermList,
+              const set<int> &fixedCols,
+              book &bookkeep)
 {
 	if (pos != currFp.nFps){ // some fps are still left
 		const int card = currFp.fpcards[pos]; // cardinality of this power set
 		permPars(pos + 1, currFp, nUcGroups, mod, space, hyp, data, ucTermList, fixedCols, bookkeep); // degree 0
 		for (int deg = 1; deg <= currFp.fpmaxs[pos]; deg++){ // different degrees for fp at pos
 			mod.fpSize++; // increment sums of fp degrees
-			int part[card]; // partition of deg into card parts
+			IntVector part(card); // partition of deg into card parts
 			bool more1 = false;
 			int h(0), t(0); // internal variables for comp_next
 			do {
 				comp_next(deg, card, part, &more1, h, t);	// next partition of deg into card parts
-				mod.fpPars[pos] = freqvec2multiset(part, card); // convert into multiset
+				mod.fpPars[pos] = freqvec2multiset(part); // convert into multiset
 				// and go on
 				permPars(pos + 1, currFp, nUcGroups, mod, space, hyp, data, ucTermList, fixedCols, bookkeep);
 			} while (more1);
@@ -390,12 +396,12 @@ void permPars(
 		computeModel(mod, hyp, data, currFp, ucTermList, nUcGroups, fixedCols, space, bookkeep);
 		for (int deg = 1; deg <= nUcGroups; deg++){ // different number of uc groups
 			mod.ucSize++; // increment number of uc groups present
-			int subset[deg]; // partition of deg into card parts
+			IntVector subset(deg); // partition of deg into card parts
 			bool more2 = false;
 			int m(0), m2(0); // internal variables for ksub_next
 			do {
 				ksub_next(nUcGroups, deg, subset, &more2, m, m2);	// next subset (positive integers)
-				mod.ucPars = set<int>(subset, subset + deg); // convert into set
+				mod.ucPars = set<int>(subset.begin(), subset.end()); // convert into set
 				computeModel(mod, hyp, data, currFp, ucTermList, nUcGroups, fixedCols, space, bookkeep);
 			} while (more2);
 		}
@@ -411,7 +417,7 @@ void computeModel(// compute (varying part of) marginal likelihood and prior of 
 					const hyperPriorPars &hyp,
 					const dataValues &data,
 					const fpInfo &currFp,
-					set<int>* const &ucTermList,
+					const vector<IntSet>& ucTermList,
 					const int &nUcGroups,
 					const set<int> &fixedCols,
 					set<model> &space,
@@ -520,18 +526,22 @@ samplingGaussian(// definition
 
 	// determine maximum powerset
 	const int* biggestMaxDegree = max_element(currentFpInfo.fpmaxs, currentFpInfo.fpmaxs + currentFpInfo.nFps);
-	double powerset[max(8, 5 + *biggestMaxDegree)];
-//	const unsigned int fixedpowerIndices[] ={  0,  1,    2, 3,   4, 5, 6, 7 };
-	const double fixedpowers[] = 	        { -2, -1, -0.5, 0, 0.5, 1, 2, 3 }; // always in powerset
-	copy(fixedpowers, fixedpowers + 8, powerset);
-	for(int more = 3; more < *biggestMaxDegree; more++){ // additional powers
-		*(powerset + 8 + (3 - more)) = more + 1;
-	}
+
+        DoubleVector powerset(max(8, 5 + *biggestMaxDegree));
+
+        // corresponding indices        0   1     2  3    4  5  6  7
+        const double fixedpowers[] = { -2, -1, -0.5, 0, 0.5, 1, 2, 3 }; // always in powerset
+        copy(fixedpowers, fixedpowers + 8,
+             inserter(powerset, powerset.begin()));
+
+        for(int more = 3; more < *biggestMaxDegree; more++){ // additional powers
+                powerset.at(8 + (3 - more)) = more + 1;
+        }
 	currentFpInfo.powerset = powerset; // save maximum powerset
 
-	vector<ColumnVector> transformedCols[currentFpInfo.nFps]; // build array of vectors of ColumnVectors holding the required
-									// transformed values for the design matrices
-	for (unsigned int i = 0; i != currentFpInfo.nFps; i++){ // for every fp term
+	ColumnVectorArray transformedCols(currentFpInfo.nFps); // build array of vectors of ColumnVectors holding the required
+	        						// transformed values for the design matrices
+	for (PosInt i = 0; i != currentFpInfo.nFps; i++){ // for every fp term
 		const int nCols = currentFpInfo.fpcards[i];
 		const ColumnVector thisCol = x.Column(currentFpInfo.fppos[i]);
 		vector<ColumnVector> thisFp;
@@ -573,11 +583,12 @@ samplingGaussian(// definition
 	int maxUcDim = accumulate(ucSizes.begin(), ucSizes.end(), 0);
 
 
-	set<int> ucTermList[nUcGroups]; // Array with length nUcGroups of int-vectors
+	vector<IntSet> ucTermList(nUcGroups); // Array with length nUcGroups of int-vectors
 	if(nUcGroups){ // catch case with no uc groups
 		for(R_len_t i = 0; i != Rf_length(R_ucTermList); i++){
 			SEXP temp = VECTOR_ELT(R_ucTermList, i);
-			copy(INTEGER(temp), INTEGER(temp) + Rf_length(temp), inserter(ucTermList[i], ucTermList[i].begin()));
+			copy(INTEGER(temp), INTEGER(temp) + Rf_length(temp),
+			     inserter(ucTermList[i], ucTermList[i].begin()));
 		}
 	}
 
@@ -610,11 +621,11 @@ samplingGaussian(// definition
 
 	// a) length of chain
 	double chainlength = REAL(R_chainlength)[0];
-	if (ULLONG_MAX < chainlength){
-		Rf_warning("\nchainlength too high - reducing to %d \n", ULLONG_MAX);
-		bookkeep.chainlength = ULLONG_MAX;
+	if (ULONG_MAX < chainlength){
+		Rf_warning("\nchainlength too high - reducing to %d \n", ULONG_MAX);
+		bookkeep.chainlength = ULONG_MAX;
 	} else {
-		bookkeep.chainlength = static_cast<unsigned long long int>(chainlength);
+		bookkeep.chainlength = static_cast<PosLargeInt>(chainlength);
 	}
 
 
@@ -664,7 +675,7 @@ samplingGaussian(// definition
 
 	// Start MCMC sampler***********************************************************//
 	GetRNGstate(); // use R's random number generator
-	for(unsigned long long int t = 0; t != bookkeep.chainlength; /* ++t explicitly at the end */){
+	for(PosLargeInt t = 0; t != bookkeep.chainlength; /* ++t explicitly at the end */){
 		double logR; // log(prior times proposal ratio)
 		// randomly select move type
 		double u1 = unif_rand();
@@ -864,7 +875,7 @@ samplingGaussian(// definition
                 modelCache.incrementFrequency(now.modPar);
 
                 // echo progress?
-		if((++t % max(bookkeep.chainlength / 100, static_cast<long long unsigned int>(1)) == 0) &&
+		if((++t % max(bookkeep.chainlength / 100, static_cast<PosLargeInt>(1)) == 0) &&
 		    bookkeep.verbose)
 		{
 			Rprintf("-"); // display computation progress at each percent
@@ -940,7 +951,7 @@ set<unsigned int> getFreeCovs(					// compute set of free cov indices
 		return ret;
 
 	for (unsigned int i = 0; i != mod.nFps; i++){
-		if (mod.fpPars.at(i).size() < static_cast<unsigned int>(currFp.fpmaxs[i]))
+		if (mod.fpPars.at(i).size() < static_cast<PosInt>(currFp.fpmaxs[i]))
 			ret.insert(i + 1);
 	}
 
@@ -1033,7 +1044,7 @@ ReturnMatrix getDesignMatrix ( // construct centered design matrix including int
 					const modelPar &mod,
 					const dataValues &data,
 					const fpInfo &currFp,
-					set<int>* const &ucTermList,
+					const vector<IntSet>& ucTermList,
 					const int &nUcGroups,
 					const set<int> &fixedCols
 					)
@@ -1048,9 +1059,9 @@ ReturnMatrix getDesignMatrix ( // construct centered design matrix including int
 
 	// centered fp matrices
 	for (unsigned int i = 0; i != currFp.nFps; i++){
-		multiset<int> powersi = mod.fpPars[i];
+		multiset<int> powersi = mod.fpPars.at(i);
 		if (! powersi.empty()){
-			Matrix Fp = getFpMatrix(currFp.tcols[i], powersi, data); // this is centered
+			Matrix Fp = getFpMatrix(currFp.tcols.at(i), powersi, data); // this is centered
 			B = B | Fp;
 		}
 	}
@@ -1059,7 +1070,7 @@ ReturnMatrix getDesignMatrix ( // construct centered design matrix including int
 	for (int i = 0; i != nUcGroups; i++){
 		set<int>::const_iterator ipos = find(mod.ucPars.begin(), mod.ucPars.end(), i + 1);
 		if (ipos != mod.ucPars.end()){ // if mod.ucPars contains i
-			Matrix Uc = getMultipleCols(data.centeredDesign, ucTermList[i]);	// this is centered
+			Matrix Uc = getMultipleCols(data.centeredDesign, ucTermList.at(i));	// this is centered
 			B = B | Uc;
 		}
 	}
@@ -1159,7 +1170,7 @@ double getVarLogPrior( // compute varying part of logarithm of model prior
         safeSum thisVarLogPrior;
         for (unsigned int i = 0; i != currFp.nFps; i++)
         { // for each fp covariate
-            unsigned int degree = mod.fpPars[i].size();
+            unsigned int degree = mod.fpPars.at(i).size();
             double thisVal = -lchoose(currFp.fpcards[i] - 1 + degree, degree)
                     -log1p(currFp.fpmaxs[i]);
             thisVarLogPrior.add(thisVal);
@@ -1194,10 +1205,10 @@ ReturnMatrix getFpMatrix( // build Fp basis matrix from vector, power indices an
 
 	for (multiset<int>::const_iterator now = powerinds.begin(); now != powerinds.end(); now++){
 		if (*now == lastInd){ 	// repeated powers case
-			lastCol = SP(lastCol, tcols[logInd]);
+			lastCol = SP(lastCol, tcols.at(logInd));
 		} else {				// normal case
 			lastInd = *now;
-			lastCol = tcols[lastInd];
+			lastCol = tcols.at(lastInd);
 		}
 		// center the column
 		ret.Column(cols++) = lastCol - (lastCol.sum() / data.nObs) * data.onesVector;
@@ -1216,13 +1227,13 @@ void pushInclusionProbs(	// push back index into covGroupWisePosteriors-Array
 {
 	for (unsigned int i = 0; i != currFp.nFps; i++){
 		if (! mod.fpPars.at(i).empty())
-			bookkeep.covGroupWisePosteriors[i].add(bookkeep.modelCounter);
+			bookkeep.covGroupWisePosteriors.at(i).add(bookkeep.modelCounter);
 	}
 
 	for (int i = 1; i <= nUcGroups; i++){
 		set<int>::const_iterator ipos = find(mod.ucPars.begin(), mod.ucPars.end(), i);
 		if (ipos != mod.ucPars.end()){ // if mod.ucPars contains i
-			bookkeep.covGroupWisePosteriors[i - 1 + currFp.nFps].add(bookkeep.modelCounter);
+			bookkeep.covGroupWisePosteriors.at(i - 1 + currFp.nFps).add(bookkeep.modelCounter);
 		}
 	}
 }

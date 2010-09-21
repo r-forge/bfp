@@ -45,26 +45,30 @@ struct indexSafeSum{
 
 struct book{
 
-    unsigned long long int modelCounter;
+    PosLargeInt modelCounter;
     safeSum modelPropToPosteriors;
-        indexSafeSum *covGroupWisePosteriors; // for computation of covariate inclusion probs: array (bfp, uc)
+    std::vector<indexSafeSum> covGroupWisePosteriors; // for computation of covariate inclusion probs: array (bfp, uc)
         bool verbose;
-        unsigned long long int chainlength;
-        unsigned long long int nanCounter;
+        PosLargeInt chainlength;
+        PosLargeInt nanCounter;
         PosInt nModels;
         book() : modelCounter(0), nanCounter(0) {};
 };
 
+
 struct fpInfo{ // collects all information on fractional polynomials needed to be passed down
-        unsigned int nFps;
-        double* powerset;
-        int* fpcards;
-        int* fppos;
-        int* fpmaxs;
-        SEXP fpnames;
-        vector<ColumnVector>* tcols;
-        void inds2powers(const multiset<int> &m, double* p) const;
-        unsigned int maxFpDim;
+    PosInt nFps;
+    DoubleVector powerset;
+    int* fpcards;
+    int* fppos;
+    int* fpmaxs;
+    SEXP fpnames;
+
+    ColumnVectorArray tcols;
+
+    void inds2powers(const multiset<int> &m, double* p) const;
+
+    PosInt maxFpDim;
 };
 
 

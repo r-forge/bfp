@@ -204,12 +204,21 @@ SEXP putMatrix(const Matrix& M) // Newmat-Matrix to R-Matrix
 }
 
 
-multiset<int> freqvec2multiset(int* const &vec, const int &vecLength) // convert frequency vector into multiset
+multiset<int> freqvec2multiset(const IntVector& vec) // convert frequency vector into multiset
 {
         multiset<int> ret;
-        for (int power = 0; power != vecLength; power++){
-                for (int times = 0; times != vec[power]; times++)
-                        ret.insert(power);
+
+        int power = 0;
+        for (IntVector::const_iterator
+                i = vec.begin();
+                i != vec.end();
+                ++i, ++power)
+        {
+            for (int times = 0; times != *i; times++)
+            {
+                ret.insert(power);
+            }
         }
+
         return ret;
 }

@@ -91,7 +91,7 @@ putMatrix(const Matrix&);
 
 // convert frequency vector into multiset
 multiset<int>
-freqvec2multiset(int* const &, const int&);
+freqvec2multiset(const IntVector&);
 
 
 #endif /* CONVERSIONS_H_ */

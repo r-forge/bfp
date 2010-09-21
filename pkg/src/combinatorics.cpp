@@ -1,10 +1,11 @@
 #include "combinatorics.h"
 #include <iostream>
 #include <cstdlib>
+#include <types.h>
 
 using std::cout;
 
-void ksub_next ( int n, int k, int a[], bool *more, int &m, int &m2)
+void ksub_next ( int n, int k, IntVector& a, bool *more, int &m, int &m2)
 
 //****************************************************************************80
 //
@@ -81,7 +82,7 @@ void ksub_next ( int n, int k, int a[], bool *more, int &m, int &m2)
 
 // ****************************************************************************************//
 
-void comp_next ( int n, int k, int a[], bool *more, int &h, int &t)
+void comp_next ( int n, int k, IntVector& a, bool *more, int &h, int &t)
 
 //****************************************************************************80
 //

@@ -31,9 +31,7 @@ typedef int Int;
 typedef unsigned int PosInt;
 
 // general large unsigned integer
-typedef unsigned long long int PosLargeInt;
-
-
+typedef unsigned long int PosLargeInt;
 
 // here is an integer vector
 typedef std::vector<Int> IntVector;
