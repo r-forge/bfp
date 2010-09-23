@@ -8,6 +8,9 @@
 
 using std::lexicographical_compare;
 using std::pair;
+using std::map;
+using std::set;
+using std::min;
 
 // model info functions
 modelInfo& modelInfo::operator=(const modelInfo& m)
