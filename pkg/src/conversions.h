@@ -90,7 +90,7 @@ SEXP
 putMatrix(const Matrix&);
 
 // convert frequency vector into multiset
-multiset<int>
+Powers
 freqvec2multiset(const IntVector&);
 
 

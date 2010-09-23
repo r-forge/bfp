@@ -49,7 +49,7 @@ double logPsi(double b, double c, int n, int p, double R2){
     		- M_LN2
     		+ tauMode
     		- logspace_sub(
-    				log(n - 1) + log1p(-R2) - 2 * log1p((1 - R2) * gMode),
+    				log(static_cast<double>(n - 1)) + log1p(-R2) - 2 * log1p((1 - R2) * gMode),
     				log(n - 1 - pmodel - c) - 2 * log1p(gMode) 
     			);
 //   		- log(

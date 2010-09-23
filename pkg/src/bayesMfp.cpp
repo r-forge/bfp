@@ -22,6 +22,8 @@ using std::find;
 using std::set_difference;
 using std::count;
 using std::max_element;
+using std::max;
+using std::min;
 
 typedef std::vector<long double>::size_type indexType;
 
@@ -160,7 +162,7 @@ double getVarLogPrior( // compute logarithm of model prior
 
 ReturnMatrix getFpMatrix( // build Fp basis matrix from transformed cols and power indices
                          const vector<ColumnVector> &tcols,
-                         const multiset<int> &powerinds,
+                         const Powers &powerinds,
                          const dataValues &data);
 
 void pushInclusionProbs( // push back index into covGroupWisePosteriors-Array
@@ -304,7 +306,7 @@ exhaustiveGaussian(// definition
 
 	// start model
 	modelPar startModel(currentFpInfo.nFps, 0, 0);
-	powervecType startFps(currentFpInfo.nFps); // allocate correct length of vector
+	PowersVector startFps(currentFpInfo.nFps); // allocate correct length of vector
 	startModel.fpPars = startFps;
 
 	// bookkeeping
@@ -334,7 +336,7 @@ exhaustiveGaussian(// definition
 	const double logMargLikConst = 	lgammafn((data.nObs - 1) / 2.0) -
 									(data.nObs - 1) * sqrt(data.sumOfSquaresTotal) -
 									(data.nObs - 1) * M_LN_SQRT_PI -
-									0.5 * log(data.nObs);
+									0.5 * log(static_cast<double>(data.nObs));
 	const double logPriorConst = nUcGroups * M_LN2; // note: M_LN2 = log(2)
 
 	// inclusion probs
@@ -643,7 +645,7 @@ samplingGaussian(// definition
 
 	// start model
 	modelPar startModel(currentFpInfo.nFps, 0, 0);
-	powervecType startFps(currentFpInfo.nFps); // initialize empty vector of correct length
+	PowersVector startFps(currentFpInfo.nFps); // initialize empty vector of correct length
 	startModel.fpPars = startFps;
 	old.modPar = startModel;
 	old.dim = fixedDim;
@@ -689,15 +691,20 @@ samplingGaussian(// definition
 				unsigned int newPowersEqualPowerIndex = count(now.modPar.fpPars.at(newCovInd-1).begin(), now.modPar.fpPars.at(newCovInd-1).end(), powerIndex);
 				unsigned int m = old.modPar.fpPars.at(newCovInd-1).size();
 				logR = hyp.useSparsePrior ?
-				        log(newPowersEqualPowerIndex) + log(currentFpInfo.fpcards[newCovInd-1]) - log(currentFpInfo.fpcards[newCovInd-1] + m)
-				        : log(newPowersEqualPowerIndex) + log(currentFpInfo.fpcards[newCovInd-1]) - log1p(m);
+				        log(static_cast<double>(newPowersEqualPowerIndex)) +
+				            log(static_cast<double>(currentFpInfo.fpcards[newCovInd-1])) -
+				            log(static_cast<double>(currentFpInfo.fpcards[newCovInd-1] + m))
+				        : log(static_cast<double>(newPowersEqualPowerIndex)) +
+				              log(static_cast<double>(currentFpInfo.fpcards[newCovInd-1])) -
+				              log1p(static_cast<double>(m));
 			} else { 													// uc index
 				int index = discreteUniform<int>(old.freeUcs);
 				now.modPar.ucPars.insert(index);
 				now.modPar.ucSize++;
 				now.dim += ucSizes.at(index - 1);
 				now.freeUcs = getFreeUcs(now.modPar, ucSizes, now.dim, maxDim);
-				logR = log(old.freeUcs.size()) - log(now.modPar.ucSize);
+				logR = log(static_cast<double>(old.freeUcs.size())) -
+				        log(static_cast<double>(now.modPar.ucSize));
 			}
 			now.presentCovs.insert(newCovInd);
 			now.freeCovs = getFreeCovs(now.modPar, currentFpInfo, now.freeUcs, now.dim, maxDim);
@@ -706,25 +713,32 @@ samplingGaussian(// definition
 			} else {
 				now.birthprob = now.deathprob =	now.moveprob = (now.modPar.fpSize > 0) ? 0.25 : 1.0 / 3;
 			}
-			logR += log(now.deathprob) - log(old.birthprob) + log(old.freeCovs.size()) - log(now.presentCovs.size());
+			logR += log(now.deathprob) - log(old.birthprob) +
+			            log(static_cast<double>(old.freeCovs.size())) -
+			                log(static_cast<double>(now.presentCovs.size()));
 		} else if (u1 < old.birthprob + old.deathprob){					// DEATH
 			unsigned int oldCovInd = discreteUniform<unsigned int>(old.presentCovs);
 			if (oldCovInd <= currentFpInfo.nFps){ 					// some fp index
-				multiset<int>::iterator powerIterator = dU<multiset<int> >(now.modPar.fpPars.at(oldCovInd-1));
+				Powers::iterator powerIterator = dU<Powers >(now.modPar.fpPars.at(oldCovInd-1));
 				unsigned int oldPowersEqualPowerIndex = count(old.modPar.fpPars.at(oldCovInd-1).begin(), old.modPar.fpPars.at(oldCovInd-1).end(), *powerIterator);
 				now.modPar.fpPars.at(oldCovInd-1).erase(powerIterator);
 				now.modPar.fpSize--; // correct invariants
 				now.dim--;
 				logR = hyp.useSparsePrior ?
-				        - log(oldPowersEqualPowerIndex) + log(currentFpInfo.fpcards[oldCovInd-1] + now.modPar.fpPars.at(oldCovInd-1).size()) - log(currentFpInfo.fpcards[oldCovInd-1])
-				        : - log(oldPowersEqualPowerIndex) - log(currentFpInfo.fpcards[oldCovInd-1]) + log(old.modPar.fpPars.at(oldCovInd-1).size());
+				        - log(static_cast<double>(oldPowersEqualPowerIndex)) +
+				            log(static_cast<double>(currentFpInfo.fpcards[oldCovInd-1] + now.modPar.fpPars.at(oldCovInd-1).size())) -
+				                log(static_cast<double>(currentFpInfo.fpcards[oldCovInd-1]))
+				        : - log(static_cast<double>(oldPowersEqualPowerIndex)) -
+				              log(static_cast<double>(currentFpInfo.fpcards[oldCovInd-1])) +
+				                  log(static_cast<double>(old.modPar.fpPars.at(oldCovInd-1).size()));
 			} else { 													// uc index
 				set<int>::iterator IndIterator = dU<set<int> >(now.modPar.ucPars);
 				now.modPar.ucSize--;
 				now.dim -= ucSizes.at(*IndIterator - 1);
 				now.modPar.ucPars.erase(IndIterator);
 				now.freeUcs = getFreeUcs(now.modPar, ucSizes, now.dim, maxDim);
-				logR = log(old.modPar.ucSize) - log(now.freeUcs.size());
+				logR = log(static_cast<double>(old.modPar.ucSize)) -
+				        log(static_cast<double>(now.freeUcs.size()));
 			}
 			now.presentCovs = getPresentCovs(now.modPar);
 			now.freeCovs = getFreeCovs(now.modPar, currentFpInfo, now.freeUcs, now.dim, maxDim);
@@ -733,19 +747,22 @@ samplingGaussian(// definition
 			} else {
 				now.birthprob = now.deathprob =	now.moveprob = (now.modPar.fpSize > 0) ? 0.25 : 1.0 / 3;
 			}
-			logR += log(now.birthprob) - log(old.deathprob) + log(old.presentCovs.size()) - log(now.freeCovs.size());
+			logR += log(now.birthprob) - log(old.deathprob) +
+			            log(static_cast<double>(old.presentCovs.size())) -
+			                log(static_cast<double>(now.freeCovs.size()));
 
 		} else if (u1 < old.birthprob + old.deathprob + old.moveprob){	 // MOVE
 			unsigned int CovInd = discreteUniform<unsigned int>(old.presentCovs);
 			if (CovInd <= currentFpInfo.nFps){ 						// some fp index
-				multiset<int>::iterator powerIterator = dU<multiset<int> >(now.modPar.fpPars.at(CovInd-1));
+				Powers::iterator powerIterator = dU<Powers >(now.modPar.fpPars.at(CovInd-1));
 				unsigned int oldPowersEqualPowerIndex = count(old.modPar.fpPars.at(CovInd-1).begin(), old.modPar.fpPars.at(CovInd-1).end(), *powerIterator);
 				now.modPar.fpPars.at(CovInd-1).erase(powerIterator);
 				int powerIndex = discreteUniform(0, currentFpInfo.fpcards[CovInd-1]);
 				now.modPar.fpPars.at(CovInd-1).insert(powerIndex);
 				unsigned int newPowersEqualPowerIndex = count(now.modPar.fpPars.at(CovInd-1).begin(), now.modPar.fpPars.at(CovInd-1).end(), powerIndex);
 				// free, present Covs and move type probs are unchanged
-				logR = log(newPowersEqualPowerIndex) - log(oldPowersEqualPowerIndex);
+				logR = log(static_cast<double>(newPowersEqualPowerIndex)) -
+				        log(static_cast<double>(oldPowersEqualPowerIndex));
 
 			} else { 													// uc index
 				set<int>::iterator IndIterator = dU<set<int> >(now.modPar.ucPars);
@@ -773,15 +790,15 @@ samplingGaussian(// definition
 
 			// so we have the first power vector:
 			unsigned int firstFpInd = discreteUniform<unsigned int>(presentFps);
-			powers first = now.modPar.fpPars.at(firstFpInd - 1);
+			Powers first = now.modPar.fpPars.at(firstFpInd - 1);
 
 			// the second power vector from all other FPs
 			std::set<unsigned int> otherFps = removeElement(fpRange, firstFpInd);
 			unsigned int secondFpInd = discreteUniform<unsigned int>(otherFps);
-			powers second = now.modPar.fpPars.at(secondFpInd - 1);
+			Powers second = now.modPar.fpPars.at(secondFpInd - 1);
 
 			// save the first
-			powers saveFirst = first;
+			Powers saveFirst = first;
 
 			// copy second to first
 			now.modPar.fpPars.at(firstFpInd - 1) = second;
@@ -889,7 +906,7 @@ samplingGaussian(// definition
 	const double logMargLikConst = lgammafn((data.nObs - 1) / 2.0) -
 	        (data.nObs - 1) * sqrt(data.sumOfSquaresTotal) -
 	        (data.nObs - 1) * M_LN_SQRT_PI -
-	        0.5 * log(data.nObs);
+	        0.5 * log(static_cast<double>(data.nObs));
 	const double logPriorConst = nUcGroups * M_LN2; // note: M_LN2 = log(2)
 
 	// get the nModels best models from the cache as an R list
@@ -1059,7 +1076,7 @@ ReturnMatrix getDesignMatrix ( // construct centered design matrix including int
 
 	// centered fp matrices
 	for (unsigned int i = 0; i != currFp.nFps; i++){
-		multiset<int> powersi = mod.fpPars.at(i);
+		Powers powersi = mod.fpPars.at(i);
 		if (! powersi.empty()){
 			Matrix Fp = getFpMatrix(currFp.tcols.at(i), powersi, data); // this is centered
 			B = B | Fp;
@@ -1187,7 +1204,7 @@ double getVarLogPrior( // compute varying part of logarithm of model prior
 
 ReturnMatrix getFpMatrix( // build Fp basis matrix from vector, power indices and power set for one covariate
 			const vector<ColumnVector> &tcols,
-			const multiset<int> &powerinds,
+			const Powers &powerinds,
 			const dataValues &data
 			)
 {
@@ -1201,9 +1218,9 @@ ReturnMatrix getFpMatrix( // build Fp basis matrix from vector, power indices an
 	ColumnVector lastCol(nrow); lastCol = 1;
 
 	// there is at least one power present
-	multiset<int>::size_type cols = 1; // invariant: about to process column number cols
+	Powers::size_type cols = 1; // invariant: about to process column number cols
 
-	for (multiset<int>::const_iterator now = powerinds.begin(); now != powerinds.end(); now++){
+	for (Powers::const_iterator now = powerinds.begin(); now != powerinds.end(); now++){
 		if (*now == lastInd){ 	// repeated powers case
 			lastCol = SP(lastCol, tcols.at(logInd));
 		} else {				// normal case
@@ -1266,7 +1283,7 @@ SEXP logMargLik( //definition
 	double logMargLikConst = lgammafn((n - 1) / 2.0) -
 							(n - 1) * sqrt(sst) -
 							(n - 1) * M_LN_SQRT_PI -
-							0.5 * log(n);
+							0.5 * log(static_cast<double>(n));
 
 	SEXP ret;
 	Rf_protect(ret = Rf_ScalarReal(varLogMargLik + logMargLikConst));

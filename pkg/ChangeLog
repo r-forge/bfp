@@ -1,3 +1,10 @@
+2010-09-23  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* src/various: some clarifications for the Solaris C++ compiler
+	which threw errors on CRAN (e.g. cast integer to double before
+	taking the logarithm of a number to avoid overloading ambiguity
+	between float and double casting)
+
 2010-09-20  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* data/ozone.RData: Remove UTF8 degree symbol from Fahrenheit unit

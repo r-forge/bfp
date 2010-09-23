@@ -8,9 +8,6 @@
 #include <iterator>
 #include <types.h>
 
-typedef std::multiset<int> powers;
-
-typedef std::vector < powers >  powervecType;
 
 struct safeSum
 {
@@ -66,7 +63,7 @@ struct fpInfo{ // collects all information on fractional polynomials needed to b
 
     ColumnVectorArray tcols;
 
-    void inds2powers(const multiset<int> &m, double* p) const;
+    void inds2powers(const Powers &m, double* p) const;
 
     PosInt maxFpDim;
 };
@@ -100,7 +97,7 @@ struct modelInfo{ // contents: must be assignable
 };
 	
 struct modelPar{ // key: must have a strict weak ordering
-	powervecType fpPars; // vector of multisets	
+	PowersVector fpPars; // vector of multisets
 	unsigned int nFps; // length of vector
 	unsigned int fpSize; // number of fp powers
 	std::set<int> ucPars; // set of group indices, starting from 1 (!)
@@ -144,10 +141,13 @@ struct dataValues{
 	
 	ColumnVector onesVector;
 	
-	typedef map<modelPar, modelInfo>::size_type NumberType;
+	typedef std::map<modelPar, modelInfo>::size_type NumberType;
 	NumberType totalNumber; // cardinality of model space
 	
-	dataValues(const Matrix &x, const Matrix &xcentered, const ColumnVector &y, const double &totalNum);
+	dataValues(const Matrix &x,
+               const Matrix &xcentered,
+               const ColumnVector &y,
+               const double &totalNum);
 };
 
 

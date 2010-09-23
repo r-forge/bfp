@@ -6,9 +6,11 @@
  */
 
 #include <conversions.h>
+#include <types.h>
 
 #include <vector>
 #include <algorithm>
+
 
 
 // convert a REALSXP to a std::vector of doubles
@@ -204,9 +206,9 @@ SEXP putMatrix(const Matrix& M) // Newmat-Matrix to R-Matrix
 }
 
 
-multiset<int> freqvec2multiset(const IntVector& vec) // convert frequency vector into multiset
+Powers freqvec2multiset(const IntVector& vec) // convert frequency vector into multiset
 {
-        multiset<int> ret;
+        Powers ret;
 
         int power = 0;
         for (IntVector::const_iterator

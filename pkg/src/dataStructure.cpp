@@ -245,10 +245,10 @@ dataValues::dataValues(const Matrix &x, const Matrix &xcentered, const ColumnVec
 
 // fpInfo //
 
-void fpInfo::inds2powers(const multiset<int> &m, double* p) const // convert inds m into power array p
+void fpInfo::inds2powers(const Powers &m, double* p) const // convert inds m into power array p
 {
 	unsigned int i = 0;
-	for (multiset<int>::const_iterator j = m.begin(); j != m.end(); i++, j++){
+	for (Powers::const_iterator j = m.begin(); j != m.end(); i++, j++){
 		p[i] = powerset[*j];
 	}
 }
@@ -454,7 +454,7 @@ ModelCache::getInclusionProbs(long double logNormConstant, PosInt nFps, PosInt n
         // first process the FPs
         {
         SafeSumVector::iterator s = fps.begin();
-        for (powervecType::const_iterator
+        for (PowersVector::const_iterator
                 p = thisPar.fpPars.begin();
                 p != thisPar.fpPars.end();
                 ++p, ++s)
