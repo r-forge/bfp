@@ -85,3 +85,23 @@ shouldbeZero <- d1[, -c(7,8)] - d2[, -c(2, 8, 9)]
 shouldbeZero <- max(abs(unlist(shouldbeZero)))
 stopifnot(all.equal(shouldbeZero, 0))
 
+
+## also test the dependent model prior
+dependent <- BayesMfp (y ~ bfp (x1, max=1) + bfp(x2, max=1),
+                        data = covariateData,
+                        priorSpecs =
+                        list (a = 3.5,
+                              modelPrior="dependent"),
+                        method = "exhaustive",
+                        nModels = 10000)           
+attr(dependent, "logNormConst")
+
+depSum <- as.data.frame(dependent)
+depSum
+
+sum(exp(depSum$logPrior))
+
+index <- 1L
+
+stopifnot(all.equal(getLogPrior(dependent[index]),
+                    dependent[[index]]$logP))

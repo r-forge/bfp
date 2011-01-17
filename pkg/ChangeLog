@@ -1,3 +1,14 @@
+2011-01-14  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Increment version because I will implement a dependent model
+	prior for the fractional polynomials.
+
+2010-10-29  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/BayesMfp.R:  add additional attribute "linearInclusionProbs",
+	which gives for FP terms the posterior probability of exactly
+	linear inclusion.
+
 2010-09-23  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* src/various: some clarifications for the Solaris C++ compiler

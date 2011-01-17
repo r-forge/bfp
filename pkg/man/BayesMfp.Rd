@@ -63,8 +63,9 @@ uc(x)
     \item{a}{hyperparameter for hyper-g prior which must be greater than
       3 and is recommended to be not greater than 4 (default is 4)}
     \item{modelPrior}{choose if a flat model prior (default,
-      \code{"flat"}) should be used or a model prior favoring 
-      sparse models explicitly (\code{"sparse"})}
+      \code{"flat"}), a model prior favoring 
+      sparse models explicitly (\code{"sparse"}), or a dependent model
+    prior (\code{"dependent"}) should be used.}
   }
 
   If \code{method = "ask"}, the user is prompted with the maximum
@@ -103,6 +104,8 @@ uc(x)
   (exhaustive search) or cached (model sampling)}
   \item{inclusionProbs}{BMA inclusion probabilities for all uncertain
     covariates}
+  \item{linearInclusionProbs}{BMA probabilities for exactly linear
+  inclusion of FP covariates} 
   \item{logNormConst}{the (estimated) log normalizing constant \eqn{f
       (D)}}
   \item{chainlength}{length of the Markov chain, only present if \code{method = "sampling"}}
@@ -153,6 +156,12 @@ y <- rt(n=15, df=2)
 test <- BayesMfp(y ~ bfp (x2, max = 4) + uc (x1 + x3), nModels = 100,
                  method="exhaustive")
 test
+
+## now the same with a *dependent* model prior:
+test2 <- BayesMfp(y ~ bfp (x2, max = 4) + uc (x1 + x3), nModels = 100,
+		 priorSpecs = list(a = 4, modelPrior = "dependent"),
+                 method="exhaustive")
+test2
 }
 
 \keyword{regression}

@@ -12,6 +12,7 @@
 #include <climits>
 #include <conversions.h>
 #include <cmath>
+#include <types.h>
 
 // using pretty much:
 using std::map;
@@ -44,7 +45,7 @@ SEXP exhaustiveGaussian(// declaration
                         SEXP R_nUcGroups, // number of uncertainty groups
                         SEXP R_totalNumber, // cardinality of model space,
                         SEXP R_hyperparam, // hyperparameter a for hyper-g prior
-                        SEXP R_useSparsePrior, // use sparse model prior?
+                        SEXP R_priorType, // type of model prior?
                         SEXP R_nModels, // number of best models to be returned
                         SEXP R_verbose); // should progress been displayed?
 
@@ -61,7 +62,7 @@ SEXP samplingGaussian(// declaration
                       SEXP R_ucTermList, // list for group -> which columns mapping
                       SEXP R_nUcGroups, // number of uncertainty groups
                       SEXP R_hyperparam, // hyperparameter a for hyper-g prior
-                      SEXP R_useSparsePrior, // use sparse model prior?
+                      SEXP R_priorType, // type of model prior?
                       SEXP R_nModels, // number of best models to be returned
                       SEXP R_verbose, // should progress been displayed?
                       SEXP R_chainlength, // how many times should a jump been made?
@@ -158,6 +159,7 @@ double getVarLogMargLik( // compute varying part of log marginal likelihood for 
 double getVarLogPrior( // compute logarithm of model prior
                       const modelPar &mod,
                       const fpInfo &currFp,
+                      const PosInt nUcGroups,
                       const hyperPriorPars &hyp);
 
 ReturnMatrix getFpMatrix( // build Fp basis matrix from transformed cols and power indices
@@ -191,7 +193,7 @@ exhaustiveGaussian(// definition
                    SEXP R_nUcGroups, // number of uncertainty groups
                    SEXP R_totalNumber, // cardinality of model space
                    SEXP R_hyperparam, // hyperparameter a for hyper-g prior
-                   SEXP R_useSparsePrior, // use sparse model prior?
+                   SEXP R_priorType, // type of model prior?
                    SEXP R_nModels, // number of best models to be returned
                    SEXP R_verbose) // should progress been displayed?
 {
@@ -206,10 +208,10 @@ exhaustiveGaussian(// definition
 
 	// prior specifications
 	const double hyperparam = Rf_asReal(R_hyperparam);
-	const bool useSparsePrior = Rf_asLogical(R_useSparsePrior);
+	const std::string priorType = getStringVector(R_priorType).at(0);
 
 	hyperPriorPars hyp(hyperparam,
-	                   useSparsePrior);
+	                   priorType);
 
 	const double totalNumber = REAL(R_totalNumber)[0]; // cardinality of model space
 
@@ -217,59 +219,12 @@ exhaustiveGaussian(// definition
 	const dataValues data(x, xcentered, y, totalNumber);
 
 	// fp info
-	fpInfo currentFpInfo;
-	currentFpInfo.nFps = INTEGER(R_nFps)[0];
-	currentFpInfo.fpmaxs = INTEGER(R_fpmaxs);
-	currentFpInfo.fppos = INTEGER(R_fppos);
-	currentFpInfo.fpcards = INTEGER(R_fpcards);
-	currentFpInfo.fpnames = R_fpnames;
-
-	const int* biggestMaxDegree = max_element(currentFpInfo.fpmaxs,
-	                                          currentFpInfo.fpmaxs + Rf_length(R_fpmaxs));
-
-	DoubleVector powerset(max(8, 5 + *biggestMaxDegree));
-
-	// corresponding indices        0   1     2  3    4  5  6  7
-	const double fixedpowers[] = { -2, -1, -0.5, 0, 0.5, 1, 2, 3 }; // always in powerset
-	copy(fixedpowers, fixedpowers + 8,
-	     inserter(powerset, powerset.begin()));
-
-	for(int more = 3; more < *biggestMaxDegree; more++){ // additional powers
-	        powerset.at(8 + (3 - more)) = more + 1;
-	}
-	currentFpInfo.powerset = powerset; // save maximum powerset
-
-	ColumnVectorArray transformedCols(currentFpInfo.nFps); // build array of vectors of ColumnVectors holding the required
-									// transformed values for the design matrices
-	for (PosInt i = 0; i != currentFpInfo.nFps; i++){ // for every fp term
-		const int nCols = currentFpInfo.fpcards[i];
-		const ColumnVector thisCol = x.Column(currentFpInfo.fppos[i]);
-		vector<ColumnVector> thisFp;
-		for (int j = 0; j != nCols; j++){ // for every possible power
-			ColumnVector thisTransform = thisCol;
-			double thisPower = currentFpInfo.powerset.at(j);
-			if(thisPower){ // not 0
-				for (int k = 0; k != thisTransform.Nrows(); k++){ // transform each element
-					assert(thisTransform.element(k) > 0);
-					thisTransform.element(k) = pow(thisTransform.element(k), thisPower);
-					assert(! ISNAN(thisTransform.element(k)));
-				}
-			} else { // 0
-				for (int k = 0; k != thisTransform.Nrows(); k++){
-					assert(thisTransform.element(k) > 0);
-					thisTransform.element(k) = log(thisTransform.element(k));
-					assert(! ISNAN(thisTransform.element(k)));
-				}
-			}
-			// do not! center the column. This is done inside getFpMatrix, because
-			// the repeated powers case cannot be treated here!!
-
-			// and put it into vector of columns
-			thisFp.push_back(thisTransform);
-		}
-		transformedCols.at(i) = thisFp;
-	}
-	currentFpInfo.tcols = transformedCols;
+	fpInfo currentFpInfo(R_nFps,
+	                     R_fpcards,
+	                     R_fppos,
+	                     R_fpmaxs,
+	                     R_fpnames,
+	                     x);
 
 	// uc info
 	const int* ucIndicesArray = INTEGER(R_ucIndices);
@@ -317,6 +272,9 @@ exhaustiveGaussian(// definition
 	vector<indexSafeSum> cgwp(currentFpInfo.nFps + nUcGroups);
 	bookkeep.covGroupWisePosteriors = cgwp;
 
+	// vector<indexSafeSum> lfp(currentFpInfo.nFps);
+	bookkeep.linearFpPosteriors = vector<indexSafeSum>(currentFpInfo.nFps);
+
 	// how many models to return?
 	bookkeep.nModels = INTEGER(R_nModels)[0];
 
@@ -337,7 +295,6 @@ exhaustiveGaussian(// definition
 									(data.nObs - 1) * sqrt(data.sumOfSquaresTotal) -
 									(data.nObs - 1) * M_LN_SQRT_PI -
 									0.5 * log(static_cast<double>(data.nObs));
-	const double logPriorConst = nUcGroups * M_LN2; // note: M_LN2 = log(2)
 
 	// inclusion probs
 	SEXP inc;
@@ -345,6 +302,12 @@ exhaustiveGaussian(// definition
 	nProtect++;
 	for (int i = 0; i != Rf_length(inc); i++)
 		REAL(inc)[i] = bookkeep.covGroupWisePosteriors.at(i).sum(bookkeep.modelPropToPosteriors) / normConst;
+
+	SEXP linearInc;
+	Rf_protect(linearInc = Rf_allocVector(REALSXP, currentFpInfo.nFps));
+	nProtect++;
+	for (int i = 0; i != Rf_length(linearInc); i++)
+	    REAL(linearInc)[i] = bookkeep.linearFpPosteriors.at(i).sum(bookkeep.modelPropToPosteriors) / normConst;
 
 	SEXP ret;
 	Rf_protect(ret = Rf_allocVector(VECSXP, orderedModels.size()));
@@ -354,10 +317,11 @@ exhaustiveGaussian(// definition
 	for(set<model>::reverse_iterator j = orderedModels.rbegin(); j != orderedModels.rend(); j++)
 	{
 		model modCopy = *j;
-		SET_VECTOR_ELT(ret, i++, modCopy.convert2list(currentFpInfo, logMargLikConst, logPriorConst, logNormConst, bookkeep));
+		SET_VECTOR_ELT(ret, i++, modCopy.convert2list(currentFpInfo, logMargLikConst, logNormConst, bookkeep));
 	}
 	Rf_setAttrib(ret, Rf_install("numVisited"), Rf_ScalarReal(bookkeep.modelCounter));
 	Rf_setAttrib(ret, Rf_install("inclusionProbs"), inc);
+	Rf_setAttrib(ret, Rf_install("linearInclusionProbs"), linearInc);
 	Rf_setAttrib(ret, Rf_install("logNormConst"), Rf_ScalarReal(logNormConst));
 
 	// return ###
@@ -439,7 +403,7 @@ void computeModel(// compute (varying part of) marginal likelihood and prior of 
 		double thisVarLogMargLik = getVarLogMargLik(thisR2, data.nObs, thisDesign.Ncols(), hyp);
 
 		// log prior
-		const double thisLogPrior = getVarLogPrior(mod, currFp, hyp);
+		const double thisLogPrior = getVarLogPrior(mod, currFp, nUcGroups, hyp);
 
 		// posterior expected g
 		double thisPostExpectedg = posteriorExpectedg_hyperg(thisR2, data.nObs, thisDesign.Ncols(), hyp.a, thisVarLogMargLik);
@@ -494,7 +458,7 @@ samplingGaussian(// definition
                  SEXP R_ucTermList, // list for group -> which columns mapping
                  SEXP R_nUcGroups, // number of uncertainty groups
                  SEXP R_hyperparam, // hyperparameter a for hyper-g prior
-                 SEXP R_useSparsePrior, // use sparse model prior?
+                 SEXP R_priorType, // use sparse model prior?
                  SEXP R_nModels, // number of best models to be returned
                  SEXP R_verbose, // should progress been displayed?
                  SEXP R_chainlength, // how many times should a jump been made?
@@ -513,65 +477,16 @@ samplingGaussian(// definition
 	dataValues data(x, xcentered, y, 0); // totalNumber is not needed
 
 	// fp info
-	fpInfo currentFpInfo;
-	currentFpInfo.nFps = INTEGER(R_nFps)[0];
-	currentFpInfo.fpmaxs = INTEGER(R_fpmaxs);
-	currentFpInfo.fppos = INTEGER(R_fppos);
-	currentFpInfo.fpcards = INTEGER(R_fpcards);
-	currentFpInfo.fpnames = R_fpnames;
+	fpInfo currentFpInfo(R_nFps,
+	                     R_fpcards,
+	                     R_fppos,
+	                     R_fpmaxs,
+	                     R_fpnames,
+	                     x);
 
 	// the FP range
 	const std::set<unsigned int> fpRange = constructSequence(currentFpInfo.nFps);
 
-	// maximum fp dimension
-	currentFpInfo.maxFpDim = accumulate(currentFpInfo.fpmaxs, currentFpInfo.fpmaxs + currentFpInfo.nFps, 0);
-
-	// determine maximum powerset
-	const int* biggestMaxDegree = max_element(currentFpInfo.fpmaxs, currentFpInfo.fpmaxs + currentFpInfo.nFps);
-
-        DoubleVector powerset(max(8, 5 + *biggestMaxDegree));
-
-        // corresponding indices        0   1     2  3    4  5  6  7
-        const double fixedpowers[] = { -2, -1, -0.5, 0, 0.5, 1, 2, 3 }; // always in powerset
-        copy(fixedpowers, fixedpowers + 8,
-             inserter(powerset, powerset.begin()));
-
-        for(int more = 3; more < *biggestMaxDegree; more++){ // additional powers
-                powerset.at(8 + (3 - more)) = more + 1;
-        }
-	currentFpInfo.powerset = powerset; // save maximum powerset
-
-	ColumnVectorArray transformedCols(currentFpInfo.nFps); // build array of vectors of ColumnVectors holding the required
-	        						// transformed values for the design matrices
-	for (PosInt i = 0; i != currentFpInfo.nFps; i++){ // for every fp term
-		const int nCols = currentFpInfo.fpcards[i];
-		const ColumnVector thisCol = x.Column(currentFpInfo.fppos[i]);
-		vector<ColumnVector> thisFp;
-		for (int j = 0; j != nCols; j++){ // for every possible power
-			ColumnVector thisTransform = thisCol;
-			double thisPower = currentFpInfo.powerset[j];
-			if(thisPower){ // not 0
-				for (int k = 0; k != thisTransform.Nrows(); k++){ // transform each element
-					assert(thisTransform.element(k) > 0);
-					thisTransform.element(k) = pow (thisTransform.element(k), thisPower);
-					assert(! ISNAN(thisTransform.element(k)));
-				}
-			} else { // 0
-				for (int k = 0; k != thisTransform.Nrows(); k++){
-					assert(thisTransform.element(k) > 0);
-					thisTransform.element(k) = log (thisTransform.element(k));
-					assert(! ISNAN(thisTransform.element(k)));
-				}
-			}
-			// do not! center the column. This is done inside getFpMatrix, because
-			// the repeated powers case cannot be treated here!!
-
-			// and put it into vector of columns
-			thisFp.push_back(thisTransform);
-		}
-		transformedCols[i] = thisFp;
-	}
-	currentFpInfo.tcols = transformedCols;
 
 	// uc info
 	const int* ucIndicesArray = INTEGER(R_ucIndices);
@@ -610,10 +525,10 @@ samplingGaussian(// definition
 
 	// prior specifications
 	const double hyperparam = Rf_asReal(R_hyperparam);
-	const bool useSparsePrior = Rf_asLogical(R_useSparsePrior);
+        const std::string priorType = getStringVector(R_priorType).at(0);
 
-	hyperPriorPars hyp(hyperparam,
-	                   useSparsePrior);
+        hyperPriorPars hyp(hyperparam,
+                           priorType);
 
 	// models which can be found during chain run can be cached in here:
 	ModelCache modelCache(Rf_asInteger(R_nCache));
@@ -660,6 +575,9 @@ samplingGaussian(// definition
 	// log marginal likelihood
 	old.logMargLik = getVarLogMargLik(oldR2, data.nObs, oldDesign.Ncols(), hyp);
 
+	// log prior
+        old.logPrior = getVarLogPrior(old.modPar, currentFpInfo, nUcGroups, hyp);
+
 	// posterior expected g
 	double oldPostExpectedg = posteriorExpectedg_hyperg(oldR2, data.nObs, oldDesign.Ncols(), hyp.a, old.logMargLik);
 
@@ -667,9 +585,7 @@ samplingGaussian(// definition
 	double oldPostExpectedShrinkage = posteriorExpectedShrinkage_hyperg(oldR2, data.nObs, oldDesign.Ncols(), hyp.a, old.logMargLik);
 
 	// insert this model into map container
-	double logPrior = getVarLogPrior(old.modPar, currentFpInfo, hyp);
-	modelInfo startInfo(old.logMargLik, logPrior, oldPostExpectedg, oldPostExpectedShrinkage, oldR2, 1);
-
+	modelInfo startInfo(old.logMargLik, old.logPrior, oldPostExpectedg, oldPostExpectedShrinkage, oldR2, 1);
 	modelCache.insert(old.modPar, startInfo);
 
 	// start with this model config
@@ -678,7 +594,7 @@ samplingGaussian(// definition
 	// Start MCMC sampler***********************************************************//
 	GetRNGstate(); // use R's random number generator
 	for(PosLargeInt t = 0; t != bookkeep.chainlength; /* ++t explicitly at the end */){
-		double logR; // log(prior times proposal ratio)
+		double logPropRatio; // log proposal ratio
 		// randomly select move type
 		double u1 = unif_rand();
 		if (u1 < old.birthprob){											// BIRTH
@@ -690,11 +606,7 @@ samplingGaussian(// definition
 				now.dim++;
 				unsigned int newPowersEqualPowerIndex = count(now.modPar.fpPars.at(newCovInd-1).begin(), now.modPar.fpPars.at(newCovInd-1).end(), powerIndex);
 				unsigned int m = old.modPar.fpPars.at(newCovInd-1).size();
-				logR = hyp.useSparsePrior ?
-				        log(static_cast<double>(newPowersEqualPowerIndex)) +
-				            log(static_cast<double>(currentFpInfo.fpcards[newCovInd-1])) -
-				            log(static_cast<double>(currentFpInfo.fpcards[newCovInd-1] + m))
-				        : log(static_cast<double>(newPowersEqualPowerIndex)) +
+				logPropRatio = log(static_cast<double>(newPowersEqualPowerIndex)) +
 				              log(static_cast<double>(currentFpInfo.fpcards[newCovInd-1])) -
 				              log1p(static_cast<double>(m));
 			} else { 													// uc index
@@ -703,7 +615,7 @@ samplingGaussian(// definition
 				now.modPar.ucSize++;
 				now.dim += ucSizes.at(index - 1);
 				now.freeUcs = getFreeUcs(now.modPar, ucSizes, now.dim, maxDim);
-				logR = log(static_cast<double>(old.freeUcs.size())) -
+				logPropRatio = log(static_cast<double>(old.freeUcs.size())) -
 				        log(static_cast<double>(now.modPar.ucSize));
 			}
 			now.presentCovs.insert(newCovInd);
@@ -713,7 +625,7 @@ samplingGaussian(// definition
 			} else {
 				now.birthprob = now.deathprob =	now.moveprob = (now.modPar.fpSize > 0) ? 0.25 : 1.0 / 3;
 			}
-			logR += log(now.deathprob) - log(old.birthprob) +
+			logPropRatio += log(now.deathprob) - log(old.birthprob) +
 			            log(static_cast<double>(old.freeCovs.size())) -
 			                log(static_cast<double>(now.presentCovs.size()));
 		} else if (u1 < old.birthprob + old.deathprob){					// DEATH
@@ -724,11 +636,7 @@ samplingGaussian(// definition
 				now.modPar.fpPars.at(oldCovInd-1).erase(powerIterator);
 				now.modPar.fpSize--; // correct invariants
 				now.dim--;
-				logR = hyp.useSparsePrior ?
-				        - log(static_cast<double>(oldPowersEqualPowerIndex)) +
-				            log(static_cast<double>(currentFpInfo.fpcards[oldCovInd-1] + now.modPar.fpPars.at(oldCovInd-1).size())) -
-				                log(static_cast<double>(currentFpInfo.fpcards[oldCovInd-1]))
-				        : - log(static_cast<double>(oldPowersEqualPowerIndex)) -
+				logPropRatio = - log(static_cast<double>(oldPowersEqualPowerIndex)) -
 				              log(static_cast<double>(currentFpInfo.fpcards[oldCovInd-1])) +
 				                  log(static_cast<double>(old.modPar.fpPars.at(oldCovInd-1).size()));
 			} else { 													// uc index
@@ -737,7 +645,7 @@ samplingGaussian(// definition
 				now.dim -= ucSizes.at(*IndIterator - 1);
 				now.modPar.ucPars.erase(IndIterator);
 				now.freeUcs = getFreeUcs(now.modPar, ucSizes, now.dim, maxDim);
-				logR = log(static_cast<double>(old.modPar.ucSize)) -
+				logPropRatio = log(static_cast<double>(old.modPar.ucSize)) -
 				        log(static_cast<double>(now.freeUcs.size()));
 			}
 			now.presentCovs = getPresentCovs(now.modPar);
@@ -747,7 +655,7 @@ samplingGaussian(// definition
 			} else {
 				now.birthprob = now.deathprob =	now.moveprob = (now.modPar.fpSize > 0) ? 0.25 : 1.0 / 3;
 			}
-			logR += log(now.birthprob) - log(old.deathprob) +
+			logPropRatio += log(now.birthprob) - log(old.deathprob) +
 			            log(static_cast<double>(old.presentCovs.size())) -
 			                log(static_cast<double>(now.freeCovs.size()));
 
@@ -761,7 +669,7 @@ samplingGaussian(// definition
 				now.modPar.fpPars.at(CovInd-1).insert(powerIndex);
 				unsigned int newPowersEqualPowerIndex = count(now.modPar.fpPars.at(CovInd-1).begin(), now.modPar.fpPars.at(CovInd-1).end(), powerIndex);
 				// free, present Covs and move type probs are unchanged
-				logR = log(static_cast<double>(newPowersEqualPowerIndex)) -
+				logPropRatio = log(static_cast<double>(newPowersEqualPowerIndex)) -
 				        log(static_cast<double>(oldPowersEqualPowerIndex));
 
 			} else { 													// uc index
@@ -782,7 +690,7 @@ samplingGaussian(// definition
 				} else {
 					now.birthprob = now.deathprob =	now.moveprob = (now.modPar.fpSize > 0) ? 0.25 : 1.0 / 3;
 				}
-				logR = 0;
+				logPropRatio = 0.0;
 			}
 		} else {													// SWITCH (of FP vectors)
 			// select only the FP present covs
@@ -815,14 +723,14 @@ samplingGaussian(// definition
 			now.freeCovs = getFreeCovs(now.modPar, currentFpInfo, now.freeUcs, now.dim, maxDim);
 			now.presentCovs = getPresentCovs(now.modPar);
 
-			// and the prior, proposal ratios are 1, thus:
-			logR = 0;
+			// and the proposal ratio is 1, thus the log proposal ratio is 0:
+			logPropRatio = 0;
 		}
 
 		// search for log marg lik of proposed model
-		now.logMargLik = modelCache.getLogMargLik(now.modPar);
+		modelInfo nowInfo = modelCache.getModelInfo(now.modPar);
 
-		if (R_IsNA(now.logMargLik))
+		if (R_IsNA(nowInfo.logMargLik))
 		{ // "now" is a new model
 
 		    // construct design matrix and compute R^2
@@ -845,7 +753,7 @@ samplingGaussian(// definition
 		        now.logMargLik = getVarLogMargLik(nowR2, data.nObs,
 		                                          nowDesign.Ncols(), hyp);
 
-		        logPrior = getVarLogPrior(now.modPar, currentFpInfo, hyp);
+		        now.logPrior = getVarLogPrior(now.modPar, currentFpInfo, nUcGroups, hyp);
 
 		        // posterior expected g
 		        double nowPostExpectedg =
@@ -867,18 +775,25 @@ samplingGaussian(// definition
 		        // and invalidate the iterator old.mapPos!
 		        // ==> so we cannot work with the iterators here.
 		        modelCache.insert(now.modPar,
-		                          modelInfo(now.logMargLik, logPrior,
+		                          modelInfo(now.logMargLik, now.logPrior,
 		                                    nowPostExpectedg,
 		                                    nowPostExpectedShrinkage,
 		                                    nowR2,
 		                                    0));
 		    }
 		}
+		else // "now" is an old model
+		{
+		    // extract log marg lik and prior from the modelInfo object
+		    now.logMargLik = nowInfo.logMargLik;
+		    now.logPrior = nowInfo.logPrior;
+		}
+
 
 		// decide acceptance:
 		// for acceptance, the new model must be valid and the acceptance must be sampled
                 if ((R_IsNaN(now.logMargLik) == FALSE) &&
-                    (unif_rand() <= exp(now.logMargLik - old.logMargLik + logR)))
+                    (unif_rand() <= exp(now.logMargLik - old.logMargLik + now.logPrior - old.logPrior + logPropRatio)))
                 { // acceptance
                     old = now;
                 }
@@ -901,25 +816,24 @@ samplingGaussian(// definition
 	PutRNGstate(); // no RNs required anymore
 
 
-	// normalize posterior probabilities and correct log marg lik and log prior
+	// normalize posterior probabilities and correct log marg lik
 	const long double logNormConst = modelCache.getLogNormConstant();
 	const double logMargLikConst = lgammafn((data.nObs - 1) / 2.0) -
 	        (data.nObs - 1) * sqrt(data.sumOfSquaresTotal) -
 	        (data.nObs - 1) * M_LN_SQRT_PI -
 	        0.5 * log(static_cast<double>(data.nObs));
-	const double logPriorConst = nUcGroups * M_LN2; // note: M_LN2 = log(2)
 
 	// get the nModels best models from the cache as an R list
 	SEXP ret;
 	Rf_protect(ret = modelCache.getListOfBestModels(currentFpInfo,
 	                                                logMargLikConst,
-	                                                logPriorConst,
 	                                                logNormConst,
 	                                                bookkeep));
 
 	// set the attributes
 	Rf_setAttrib(ret, Rf_install("numVisited"), Rf_ScalarReal(modelCache.size()));
 	Rf_setAttrib(ret, Rf_install("inclusionProbs"), putDoubleVector(modelCache.getInclusionProbs(logNormConst, currentFpInfo.nFps, nUcGroups)));
+	Rf_setAttrib(ret, Rf_install("linearInclusionProbs"), putDoubleVector(modelCache.getLinearInclusionProbs(logNormConst, currentFpInfo.nFps)));
 	Rf_setAttrib(ret, Rf_install("logNormConst"), Rf_ScalarReal(logNormConst));
 
 	if (bookkeep.verbose){
@@ -1180,23 +1094,72 @@ double getVarLogMargLik(const double &R2, const int &n, const int &dim, const hy
 double getVarLogPrior( // compute varying part of logarithm of model prior
                       const modelPar &mod,
                       const fpInfo &currFp,
+                      const PosInt nUcGroups,
                       const hyperPriorPars &hyp)
 {
-    if (hyp.useSparsePrior)
+    if (hyp.priorType == "sparse")
     {
         safeSum thisVarLogPrior;
         for (unsigned int i = 0; i != currFp.nFps; i++)
         { // for each fp covariate
             unsigned int degree = mod.fpPars.at(i).size();
             double thisVal = -lchoose(currFp.fpcards[i] - 1 + degree, degree)
-                    -log1p(currFp.fpmaxs[i]);
+                    - log1p(currFp.fpmaxs[i]);
             thisVarLogPrior.add(thisVal);
         }
-        return thisVarLogPrior.sum();
+        return thisVarLogPrior.sum() - (nUcGroups * M_LN2);
     }
-    else
+    else if (hyp.priorType == "dependent")
     {
-        return 0;
+        // determine number of all covariates (covariate groups):
+        int nCovs = nUcGroups + currFp.nFps;
+
+        // determine number of included FPs and which are nonlinear:
+        int nInclContinuous = 0;
+        PosIntVector nonlinearFps;
+
+        for(PosInt i = 0; i != currFp.nFps; i++)
+        {
+            Powers powersi = mod.fpPars.at(i);
+            if (! powersi.empty())
+            {
+                ++nInclContinuous;
+
+                if(mod.fpPars.at(i) != currFp.linearPowers)
+                {
+                    nonlinearFps.push_back(i);
+                }
+            }
+        }
+
+        // determine number of included discrete covariates:
+        int nInclDiscrete = mod.ucSize;
+
+        // so altogether there are
+        int nIncluded = nInclContinuous + nInclDiscrete;
+        // included covariates
+
+        // and the number of possible nonlinear transformations
+        // for each variable is also included in the computations:
+        double sumLogNonlinearPossibilities = 0.0;
+        for(PosIntVector::const_iterator
+                i = nonlinearFps.begin();
+                i != nonlinearFps.end();
+                ++i)
+        {
+            sumLogNonlinearPossibilities += log(currFp.numberPossibleFps.at(*i) - 2);
+            //                              Note: degree 0 and linear degree 1 FP are subtracted
+        }
+
+        double result = - log1p(nCovs) - lchoose(nCovs, nIncluded) -
+                log1p(nInclContinuous) - lchoose(nInclContinuous, nonlinearFps.size()) -
+                sumLogNonlinearPossibilities;
+
+        return result;
+    }
+    else // if (hyp.priorType == "flat")
+    {
+        return - (nUcGroups * M_LN2);
     }
 }
 
@@ -1209,7 +1172,7 @@ ReturnMatrix getFpMatrix( // build Fp basis matrix from vector, power indices an
 			)
 {
 	const int logInd = 3; // this index corresponds to power = 0, i.e. log.
-	const int nrow = tcols.at(1).Nrows();
+	const int nrow = tcols.at(0).Nrows();
 
 	Matrix ret(nrow, powerinds.size());
 
@@ -1236,23 +1199,34 @@ ReturnMatrix getFpMatrix( // build Fp basis matrix from vector, power indices an
 
 // ***************************************************************************************************//
 
+
+
 void pushInclusionProbs(	// push back index into covGroupWisePosteriors-Array
 						const modelPar &mod,
 						const fpInfo &currFp,
 						const int &nUcGroups,
 						book &bookkeep)
 {
-	for (unsigned int i = 0; i != currFp.nFps; i++){
-		if (! mod.fpPars.at(i).empty())
-			bookkeep.covGroupWisePosteriors.at(i).add(bookkeep.modelCounter);
-	}
+    for (PosInt i = 0; i != currFp.nFps; i++){
+        if (! mod.fpPars.at(i).empty())
+        {
+            bookkeep.covGroupWisePosteriors.at(i).add(bookkeep.modelCounter);
 
-	for (int i = 1; i <= nUcGroups; i++){
-		set<int>::const_iterator ipos = find(mod.ucPars.begin(), mod.ucPars.end(), i);
-		if (ipos != mod.ucPars.end()){ // if mod.ucPars contains i
-			bookkeep.covGroupWisePosteriors.at(i - 1 + currFp.nFps).add(bookkeep.modelCounter);
-		}
-	}
+            // also record if this FP is just a linear effect
+            if(mod.fpPars.at(i) == currFp.linearPowers)
+            {
+                bookkeep.linearFpPosteriors.at(i).add(bookkeep.modelCounter);
+            }
+        }
+    }
+
+    for (int i = 1; i <= nUcGroups; i++){
+        set<int>::const_iterator ipos = find(mod.ucPars.begin(), mod.ucPars.end(), i);
+        if (ipos != mod.ucPars.end()) // if mod.ucPars contains i
+        {
+            bookkeep.covGroupWisePosteriors.at(i - 1 + currFp.nFps).add(bookkeep.modelCounter);
+        }
+    }
 }
 
 
@@ -1278,7 +1252,7 @@ SEXP logMargLik( //definition
 	const double sst = REAL(R_sst)[0];
 
 	// compute
-	hyperPriorPars hyp(alpha, 0); // value of useSparsePrior does not matter here
+	hyperPriorPars hyp(alpha, std::string("flat")); // prior type does not matter here
 	double varLogMargLik = getVarLogMargLik(R2, n, dim, hyp);
 	double logMargLikConst = lgammafn((n - 1) / 2.0) -
 							(n - 1) * sqrt(sst) -
@@ -1311,7 +1285,7 @@ SEXP postExpectedg( // definition
     const double alpha = REAL(R_alpha)[0];
 
     // compute
-    hyperPriorPars hyp(alpha, 0); // value of useSparsePrior does not matter here
+    hyperPriorPars hyp(alpha, std::string("flat")); // value of priorType does not matter here
     const double varLogMargLik = getVarLogMargLik(R2, n, dim, hyp);
     const double postExpectedg = posteriorExpectedg_hyperg(R2, n, dim, hyp.a, varLogMargLik);
 
@@ -1341,7 +1315,7 @@ SEXP postExpectedShrinkage( //definition
     const double alpha = REAL(R_alpha)[0];
 
     // compute
-    hyperPriorPars hyp(alpha, 0); // value of useSparsePrior does not matter here
+    hyperPriorPars hyp(alpha, std::string("flat")); // value of priorType does not matter here
     const double varLogMargLik = getVarLogMargLik(R2, n, dim, hyp);
     const double postExpectedShrinkage = posteriorExpectedShrinkage_hyperg(R2, n, dim, hyp.a, varLogMargLik);
 

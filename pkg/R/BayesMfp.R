@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BayesMfp.R] by DSB Mon 14/12/2009 10:24 (CET)>
+## Time-stamp: <[BayesMfp.R] by DSB Fre 14/01/2011 16:27 (CET)>
 ##
 ## Description:
 ## Main function of the bfp package: Bayesian Inference for a multivariate
@@ -33,7 +33,22 @@
 ##              (almost) backward-compatibility - if not more than 1e9 models are visited
 ##              during the sampling, the results are completely identical to those from
 ##              the old HypergBayesMfp package.
+## 29/10/2010   add additional attribute "linearInclusionProbs", which gives for
+##              FP terms the posterior probability of exactly linear inclusion.
+## 14/01/2011   - add the new modelPrior option "dependent"
+##              - let getNumberPossibleFps be a separate function so that it can
+##              be used in the function getLogPrior as well (for the dependent
+##              model prior)
 #####################################################################################
+
+getNumberPossibleFps <- function (  # computes number of possible univariate fps (including omission)
+                                  maxDegree # maximum fp degree
+                                  ){
+    s <- ifelse (maxDegree <= 3, 8, 5 + maxDegree) # card. of power set
+    singleDegreeNumbers <- sapply (0:maxDegree, function (m)
+                                       choose (s - 1 + m, m))
+    return (sum (singleDegreeNumbers))
+}
 
 `BayesMfp` <-
     function (
@@ -42,7 +57,8 @@
               family = gaussian,       # distribution and link: only gaussian supported at the moment
               priorSpecs =             # prior specifications:
               list (a = 4,             # hyperparameter for hyper-g prior, must be greater than 3
-                    modelPrior = "flat"), # prior on model space: "flat" or "sparse"
+                    modelPrior = "flat"), # prior on model space: "flat",
+                                        # "sparse" or "dependent"
               method = c ("ask", "exhaustive", "sampling"), # which method should be used to explore the
                                         # posterior model space? default is to ask after prompting the space cardinality
               subset = NULL,           # optional subset expression
@@ -238,18 +254,10 @@
 
     ## get model prior choice
     priorSpecs$modelPrior <- match.arg(priorSpecs$modelPrior,
-                                       choices=c("flat", "sparse"))
+                                       choices=c("flat", "sparse", "dependent"))
 
     ## compute and print cardinality of the model space to guide decision
     fpSetCards <- ifelse (fpMaxs[fpMaxs != 0] <= 3, 8, 5 + fpMaxs[fpMaxs != 0])
-    getNumberPossibleFps <- function (  # computes number of possible univariate fps (including omission)
-                                      maxDegree # maximum fp degree
-                                      ){
-        s <- ifelse (maxDegree <= 3, 8, 5 + maxDegree) # card. of power set
-        singleDegreeNumbers <- sapply (0:maxDegree, function (m)
-                                       choose (s - 1 + m, m))
-        return (sum (singleDegreeNumbers))
-    }
     singleNumbers <- sapply (fpMaxs, getNumberPossibleFps)
     totalNumber <- prod (singleNumbers) * 2^(nUcGroups) # maximum number of possible models
         
@@ -314,7 +322,7 @@
                    ucColList,   # list for group -> which columns mapping
                    as.integer(nUcGroups), # number of uncertainty groups
                    as.double (priorSpecs$a), # only the hyperparameter a
-                   identical(priorSpecs$modelPrior, "sparse"), # use a sparse model prior?
+                   priorSpecs$modelPrior, # model prior?
                    as.integer(nModels),          # number of best models returned
                    verbose,          # should progress been displayed?
                    as.double(chainlength), # how many times should a jump be proposed?
@@ -355,7 +363,7 @@
                    as.integer(nUcGroups), # number of uncertainty groups
                    as.double(totalNumber), # cardinality of model space
                    as.double (priorSpecs$a), # only the hyperparameter a
-                   identical(priorSpecs$modelPrior, "sparse"), # use a sparse model prior?
+                   priorSpecs$modelPrior, #  model prior?
                    as.integer(nModels),          # number of best models returned
                    verbose          # should progress been displayed?
                    )
@@ -370,9 +378,11 @@
 
     ## numVisited 
     ## inclusionProbs
+    ## linearInclusionProbs (only for FPs)
     ## logNormConst
 
     names (attr (Ret, "inclusionProbs")) <- c(unlist (bfpInner), ucInner)
+    names (attr (Ret, "linearInclusionProbs")) <- c(unlist (bfpInner))
 
     ## attach additional information:
     names (Ret) <- 1:length (Ret)

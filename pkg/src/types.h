@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <map>
+#include <string>
 
 #include <R.h>
 #include <newmat.h>
@@ -39,6 +40,8 @@ typedef std::vector<Int> IntVector;
 // and an unsigned int vector
 typedef std::vector<PosInt> PosIntVector;
 
+// vector of strings
+typedef std::vector<std::string> StringVector;
 
 
 // a set of ints

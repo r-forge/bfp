@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BayesMfpMethods.R] by DSB Don 17/06/2010 15:47 (CEST)>
+## Time-stamp: <[BayesMfpMethods.R] by DSB Fre 14/01/2011 16:28 (CET)>
 ##
 ## Description:
 ## Additional convenience methods for BayesMfp class objects.
@@ -19,6 +19,7 @@
 ##              and scale the x matrix in tempMod
 ## 29/11/2008   update for new model prior option
 ## 17/06/2010   correct predict.BayesMfp to use the shifts of the original data
+## 14/01/2011   remove spaces around pr$modelPrior
 #####################################################################################
 
 '[.BayesMfp' <- function (x, ...)       
@@ -42,7 +43,7 @@ print.BayesMfp <- function (x, ...)
     cat ("fractional polynomial:", paste(attr (x, "termNames")$bfp, collapse = ", "), "\n")
     pr <- attr (x, "priorSpecs")
     cat ("\nPrior parameter was a =", pr$a, "for the hyper-g prior,",
-         "\nand a ", pr$modelPrior, " prior on the model space was used.",
+         "\nand a", pr$modelPrior, "prior on the model space was used.",
          "\n")
 }
 

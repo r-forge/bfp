@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BmaSamplesMethods.R] by DSB Don 01/10/2009 16:16 (CEST)>
+## Time-stamp: <[BmaSamplesMethods.R] by DSB Fre 14/01/2011 16:28 (CET)>
 ##
 ## Description:
 ## Additional convenience methods for BmaSamples class objects.
@@ -14,6 +14,7 @@
 ##              BmaSamples object
 ## 10/11/2008   and a corresponding print method
 ## 29/11/2008   update for new model prior option
+## 14/01/2011   remove spaces around pr$modelPrior
 #####################################################################################
 
 
@@ -31,7 +32,7 @@ print.BmaSamples <- function (x,
     cat ("fractional polynomial:", paste (tn$bfp, collapse = ", "), "\n")
     pr <- x$priorSpecs
     cat ("\nPrior parameter was a =", pr$a, "for the hyper-g prior,",
-         "\nand a ", pr$modelPrior, " prior on the model space was used.",
+         "\nand a", pr$modelPrior, "prior on the model space was used.",
          "\n")
 }
 

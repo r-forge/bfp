@@ -4,13 +4,16 @@
 #include <set>
 #include <types.h>
 
+#include <cassert>
 #include <algorithm>
+#include <numeric>
 
 using std::lexicographical_compare;
 using std::pair;
 using std::map;
 using std::set;
 using std::min;
+using std::accumulate;
 
 // model info functions
 modelInfo& modelInfo::operator=(const modelInfo& m)
@@ -28,7 +31,6 @@ modelInfo& modelInfo::operator=(const modelInfo& m)
 	
 SEXP
 modelInfo::convert2list(double addLogMargLikConst,
-                        double subLogPriorConst,
                         long double logNormConst,
                         const book& bookkeep) const
 {
@@ -46,7 +48,7 @@ modelInfo::convert2list(double addLogMargLikConst,
     SET_VECTOR_ELT(ret, 0, Rf_ScalarReal(logMargLik + addLogMargLikConst));
     SET_STRING_ELT(names, 0, Rf_mkChar("logM"));
 
-    SET_VECTOR_ELT(ret, 1, Rf_ScalarReal(logPrior - subLogPriorConst));
+    SET_VECTOR_ELT(ret, 1, Rf_ScalarReal(logPrior));
     SET_STRING_ELT(names, 1, Rf_mkChar("logP"));
 
     SEXP posterior;
@@ -217,13 +219,11 @@ bool model::operator<(const model& m) const  // less
 
 SEXP model::convert2list(const fpInfo& currFp,
                          double addLogMargLikConst,
-                         double subLogPriorConst,
                          long double logNormConst,
                          const book& bookkeep) const // convert model into list for export to R
 {
     return combineLists(par.convert2list(currFp),
                         info.convert2list(addLogMargLikConst,
-                                          subLogPriorConst,
                                           logNormConst,
                                           bookkeep));
 }
@@ -247,6 +247,81 @@ dataValues::dataValues(const Matrix &x, const Matrix &xcentered, const ColumnVec
 
 
 // fpInfo //
+
+fpInfo::fpInfo(SEXP R_nFps,
+               SEXP R_fpcards,
+               SEXP R_fppos,
+               SEXP R_fpmaxs,
+               SEXP R_fpnames,
+               const Matrix& x) :
+               nFps(INTEGER(R_nFps)[0]),
+               fpcards(INTEGER(R_fpcards)),
+               fppos(INTEGER(R_fppos)),
+               fpmaxs(INTEGER(R_fpmaxs)),
+               biggestMaxDegree(*max_element(fpmaxs,
+                                             fpmaxs + Rf_length(R_fpmaxs))),
+               maxFpDim(accumulate(fpmaxs, fpmaxs + nFps, 0)),
+               powerset(max(8, 5 + biggestMaxDegree)),
+               fpnames(R_fpnames),
+               numberPossibleFps(),
+               linearPowers(),
+               tcols(nFps)
+{
+    // corresponding indices        0   1     2  3    4  5  6  7
+    const double fixedpowers[] = { -2, -1, -0.5, 0, 0.5, 1, 2, 3 }; // always in powerset
+
+    copy(fixedpowers, fixedpowers + 8,
+         inserter(powerset, powerset.begin()));
+    for(int more = 3; more < biggestMaxDegree; more++){ // additional powers
+        powerset.at(8 + (3 - more)) = more + 1;
+    }
+
+    // numbers of possible univariate fps?
+    for(PosInt i=0; i != nFps; ++i)
+    {
+        int thisNumber = 0;
+        for(int deg = 0; deg <= fpmaxs[i]; ++deg)
+        {
+            thisNumber += Rf_choose(fpcards[i] - 1 + deg, deg);
+        }
+        numberPossibleFps.push_back(thisNumber);
+    }
+
+    // insert the index 5 for linear power 1
+    linearPowers.insert(5);
+
+    // build array of vectors of ColumnVectors holding the required
+    // transformed values for the design matrices
+    for (PosInt i = 0; i != nFps; i++){ // for every fp term
+        const int nCols = fpcards[i];
+        const ColumnVector thisCol = x.Column(fppos[i]);
+        vector<ColumnVector> thisFp;
+        for (int j = 0; j != nCols; j++){ // for every possible power
+            ColumnVector thisTransform = thisCol;
+            double thisPower = powerset.at(j);
+            if(thisPower){ // not 0
+                for (int k = 0; k != thisTransform.Nrows(); k++){ // transform each element
+                    assert(thisTransform.element(k) > 0);
+                    thisTransform.element(k) = pow(thisTransform.element(k), thisPower);
+                    assert(! ISNAN(thisTransform.element(k)));
+                }
+            } else { // 0
+                for (int k = 0; k != thisTransform.Nrows(); k++){
+                    assert(thisTransform.element(k) > 0);
+                    thisTransform.element(k) = log(thisTransform.element(k));
+                    assert(! ISNAN(thisTransform.element(k)));
+                }
+            }
+            // do not! center the column. This is done inside getFpMatrix, because
+            // the repeated powers case cannot be treated here!!
+
+            // and put it into vector of columns
+            thisFp.push_back(thisTransform);
+        }
+        tcols.at(i) = thisFp;
+    }
+}
+
 
 void fpInfo::inds2powers(const Powers &m, double* p) const // convert inds m into power array p
 {
@@ -382,19 +457,19 @@ ModelCache::insert(const modelPar& par, const modelInfo& info)
     }
 }
 
-// search for the log marginal likelihood of a model config in the map,
-// and return NA if not found
-double
-ModelCache::getLogMargLik(const modelPar& par) const
+// search for the model info of a model config in the map,
+// and return an information with NA for log marg lik if not found
+modelInfo
+ModelCache::getModelInfo(const modelPar& par) const
 {
     // search for the config in the map
     MapType::const_iterator ret = modelMap.find(par);
 
     // if found, return the log marg lik
     if(ret != modelMap.end())
-        return ret->second.logMargLik;
+        return ret->second;
     else
-        return R_NaReal;
+        return modelInfo(R_NaReal, R_NaReal, 0.0, 0.0, 0.0);
 }
 
 // increment the sampling frequency for a model configuration
@@ -508,11 +583,66 @@ ModelCache::getInclusionProbs(long double logNormConstant, PosInt nFps, PosInt n
     return ret;
 }
 
+// compute the linear inclusion probabilities from all cached models,
+// taking the log normalising constant and the number of FPs
+DoubleVector
+ModelCache::getLinearInclusionProbs(long double logNormConstant, PosInt nFps) const
+{
+    // abbreviation
+    typedef std::vector<safeSum> SafeSumVector;
+    // allocate vector of safeSum objects for all FPs
+    SafeSumVector fps(nFps);
+
+    // what is a "linear inclusion"?
+    Powers linear;
+    linear.insert(5);
+
+    // now process each model in the cache
+    for(MapType::const_iterator
+            m = modelMap.begin();
+            m != modelMap.end();
+            ++m)
+    {
+        // abbrevs
+        const modelPar& thisPar = m->first;
+        const modelInfo& thisInfo = m->second;
+
+        // first process the FPs
+        {
+        SafeSumVector::iterator s = fps.begin();
+        for (PowersVector::const_iterator
+                p = thisPar.fpPars.begin();
+                p != thisPar.fpPars.end();
+                ++p, ++s)
+        {
+            // is this FP linear?
+            if (*p == linear)
+            {
+                // then add the normalized model probability onto his stack
+                s->add(exp(thisInfo.logPost - logNormConstant));
+            }
+        }
+        }
+    } // end processing all models in the cache
+
+    // so now we can sum up safesum-wise to the return double vector
+    DoubleVector ret;
+
+    for(SafeSumVector::iterator
+            s = fps.begin();
+            s != fps.end();
+            ++s)
+    {
+        ret.push_back(s->sum());
+    }
+
+    return ret;
+}
+
 // convert the best nModels from the cache into an R list
 SEXP
 ModelCache::getListOfBestModels(const fpInfo& currFp,
                                 double addLogMargLikConst,
-                                double subLogPriorConst,
                                 long double logNormConst,
                                 const book& bookkeep) const
 {
@@ -533,7 +663,6 @@ ModelCache::getListOfBestModels(const fpInfo& currFp,
         // put that in the i-th slot of the return list.
         SET_VECTOR_ELT(ret, i, combineLists((**s).first.convert2list(currFp),
                                             (**s).second.convert2list(addLogMargLikConst,
-                                                                      subLogPriorConst,
                                                                       logNormConst,
                                                                       bookkeep)));
     }

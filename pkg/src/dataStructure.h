@@ -45,27 +45,52 @@ struct book{
     PosLargeInt modelCounter;
     safeSum modelPropToPosteriors;
     std::vector<indexSafeSum> covGroupWisePosteriors; // for computation of covariate inclusion probs: array (bfp, uc)
-        bool verbose;
-        PosLargeInt chainlength;
-        PosLargeInt nanCounter;
-        PosInt nModels;
-        book() : modelCounter(0), nanCounter(0) {};
+    std::vector<indexSafeSum> linearFpPosteriors;
+    bool verbose;
+    PosLargeInt chainlength;
+    PosLargeInt nanCounter;
+    PosInt nModels;
+    book() : modelCounter(0), nanCounter(0) {};
 };
 
 
 struct fpInfo{ // collects all information on fractional polynomials needed to be passed down
-    PosInt nFps;
-    DoubleVector powerset;
-    int* fpcards;
-    int* fppos;
-    int* fpmaxs;
-    SEXP fpnames;
 
+    // number of FP terms, cardinality of their power sets, which position they have in the
+    // design matrix and which are their maximum degrees
+    const PosInt nFps;
+    const int* fpcards;
+    const int* fppos;
+    const int* fpmaxs;
+
+    // derived quantities: maximum of fpmaxs, largest overall number of FP powers (sum of fpmaxs)
+    // and the DoubleVector of all possibly needed powers.
+    const int biggestMaxDegree;
+    const PosInt maxFpDim;
+    DoubleVector powerset;
+
+    // R names of the FPs
+    const SEXP fpnames;
+
+    // number of possible univariate fps for each FP?
+    IntVector numberPossibleFps;
+
+    // what is the multiset expressing a linear inclusion of a covariate?
+    Powers linearPowers;
+
+    // array of vectors of ColumnVectors holding the required transformed values for the design matrices
     ColumnVectorArray tcols;
 
-    void inds2powers(const Powers &m, double* p) const;
+    // ctr
+    fpInfo(SEXP R_nFps,
+           SEXP R_fpcards,
+           SEXP R_fppos,
+           SEXP R_fpmaxs,
+           SEXP R_fpnames,
+           const Matrix& x);
 
-    PosInt maxFpDim;
+    // convert inds m into power array p
+    void inds2powers(const Powers &m, double* p) const;
 };
 
 
@@ -91,7 +116,6 @@ struct modelInfo{ // contents: must be assignable
 
 	SEXP
 	convert2list(double addLogMargLikConst,
-                     double subLogPriorConst,
                      long double logNormConst,
                      const book& bookkeep) const;
 };
@@ -121,13 +145,13 @@ struct modelPar{ // key: must have a strict weak ordering
  
 struct hyperPriorPars{ 
 	double a; // hyperparameter for hyper-g prior on g
-	bool useSparsePrior; // use a sparse model prior?
+	std::string priorType; // type of model prior?
 	
-	hyperPriorPars(const double &a, const bool &useSparsePrior) :
+	hyperPriorPars(const double &a, const std::string &pt) :
         a(a),
-        useSparsePrior(useSparsePrior)
-    {
-    }
+        priorType(pt)
+	{
+	}
 };
 
 struct dataValues{
@@ -168,7 +192,6 @@ struct model{
 	
 	SEXP convert2list(const fpInfo& currFp,
 	                  double addLogMargLikConst,
-	                  double subLogPriorConst,
 	                  long double normConst,
 	                  const book& bookkeep) const; // model to list
 };
@@ -211,10 +234,10 @@ public:
     bool
     insert(const modelPar& par, const modelInfo& info);
 
-    // search for the log marginal likelihood of a model config in the map,
-    // and return NA if not found
-    double
-    getLogMargLik(const modelPar& par) const;
+    // search for the model info of a model config in the map,
+    // and return an information with NA for log marg lik if not found
+    modelInfo
+    getModelInfo(const modelPar& par) const;
 
     // increment the sampling frequency for a model configuration
     // (of course, if this config is not cached nothing is done!)
@@ -230,11 +253,15 @@ public:
     DoubleVector
     getInclusionProbs(long double logNormConstant, PosInt nFps, PosInt nUcs) const;
 
+    // compute the linear inclusion probabilities from all cached models,
+    // taking the log normalising constant and the number of FPs
+    DoubleVector
+    getLinearInclusionProbs(long double logNormConstant, PosInt nFps) const;
+
     // convert the best nModels from the cache into an R list
     SEXP
     getListOfBestModels(const fpInfo& currFp,
                         double addLogMargLikConst,
-                        double subLogPriorConst,
                         long double logNormConst,
                         const book& bookkeep) const;
 
@@ -271,6 +298,7 @@ struct modelmcmc{ // all information needed in mcmc function
         unsigned int dim; // number of columns in this model's design matrix
         double birthprob, deathprob, moveprob; // move type probabilites, switchprob is 1-bprob-dprob-mprob.
         double logMargLik;
+        double logPrior;
 };
 
 // delete a number from a set

@@ -53,7 +53,7 @@ putDoubleVector(DoubleVector output)
 
 // convert a std::vector of strings to a STRSXP
 SEXP
-putStringVector(const std::vector<std::string>& stringVec)
+putStringVector(const StringVector& stringVec)
 {
         // count protected SEXP's
         unsigned int nProtect(0);
@@ -77,7 +77,7 @@ putStringVector(const std::vector<std::string>& stringVec)
 }
 
 // convert a STRSXP to a std::vector of strings
-std::vector<std::string>
+StringVector
 getStringVector(SEXP R_input)
 {
         // allocate return vector
