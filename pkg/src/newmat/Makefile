@@ -1,4 +1,4 @@
-# Time-stamp: <[Makefile] by DSB Mit 30/09/2009 13:32 (CEST)>
+# Time-stamp: <[Makefile] by DSB Mit 19/01/2011 15:57 (CET)>
 
 # Makefile for the newmat library shipped with the bfp package
 # modified from default gcc makefile nm_gnu.mak for newmat11.

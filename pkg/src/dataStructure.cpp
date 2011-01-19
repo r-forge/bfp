@@ -14,6 +14,8 @@ using std::map;
 using std::set;
 using std::min;
 using std::accumulate;
+using std::max;
+using std::max_element;
 
 // model info functions
 modelInfo& modelInfo::operator=(const modelInfo& m)

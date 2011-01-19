@@ -291,10 +291,7 @@ exhaustiveGaussian(// definition
 	const long double normConst = bookkeep.modelPropToPosteriors.sum();
 	const long double logNormConst = log(normConst);
 
-	const double logMargLikConst = 	lgammafn((data.nObs - 1) / 2.0) -
-									(data.nObs - 1) * sqrt(data.sumOfSquaresTotal) -
-									(data.nObs - 1) * M_LN_SQRT_PI -
-									0.5 * log(static_cast<double>(data.nObs));
+	const double logMargLikConst = 	- (data.nObs - 1) / 2.0 * log(data.sumOfSquaresTotal) - log(hyp.a - 2.0);
 
 	// inclusion probs
 	SEXP inc;
@@ -818,10 +815,7 @@ samplingGaussian(// definition
 
 	// normalize posterior probabilities and correct log marg lik
 	const long double logNormConst = modelCache.getLogNormConstant();
-	const double logMargLikConst = lgammafn((data.nObs - 1) / 2.0) -
-	        (data.nObs - 1) * sqrt(data.sumOfSquaresTotal) -
-	        (data.nObs - 1) * M_LN_SQRT_PI -
-	        0.5 * log(static_cast<double>(data.nObs));
+	const double logMargLikConst = - (data.nObs - 1) / 2.0 * log(data.sumOfSquaresTotal)  - log(hyp.a - 2.0);
 
 	// get the nModels best models from the cache as an R list
 	SEXP ret;
@@ -1147,7 +1141,7 @@ double getVarLogPrior( // compute varying part of logarithm of model prior
                 i != nonlinearFps.end();
                 ++i)
         {
-            sumLogNonlinearPossibilities += log(currFp.numberPossibleFps.at(*i) - 2);
+            sumLogNonlinearPossibilities += log(currFp.numberPossibleFps.at(*i) - 2.0);
             //                              Note: degree 0 and linear degree 1 FP are subtracted
         }
 
@@ -1254,10 +1248,7 @@ SEXP logMargLik( //definition
 	// compute
 	hyperPriorPars hyp(alpha, std::string("flat")); // prior type does not matter here
 	double varLogMargLik = getVarLogMargLik(R2, n, dim, hyp);
-	double logMargLikConst = lgammafn((n - 1) / 2.0) -
-							(n - 1) * sqrt(sst) -
-							(n - 1) * M_LN_SQRT_PI -
-							0.5 * log(static_cast<double>(n));
+	double logMargLikConst = - (n - 1) / 2.0 * log(sst)  - log(hyp.a - 2.0);
 
 	SEXP ret;
 	Rf_protect(ret = Rf_ScalarReal(varLogMargLik + logMargLikConst));

@@ -1,3 +1,9 @@
+2011-01-18  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* src/bayesMfp.cpp: Changed the logMargLikConst. This is rather
+	arbitrary if only BFP models are compared, but now it matches the
+	definition in the hypergsplines package. 
+
 2011-01-14  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Increment version because I will implement a dependent model
