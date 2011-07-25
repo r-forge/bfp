@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Mon 20/09/2010 17:11 (CEST)>
+## Time-stamp: <[plotCurveEstimate.BayesMfp.R] by DSB Mit 26/01/2011 14:32 (CET)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on a single model.
@@ -19,6 +19,7 @@
 ## 03/03/2010   also accept a "main" plotting argument
 ## 20/09/2010   create matplotList$y in such a way that no R CMD check note is
 ##              triggered.
+## 26/01/2011   add options "partialResids" and "hpd" 
 #####################################################################################
 
 `plotCurveEstimate.BayesMfp` <-
@@ -32,6 +33,8 @@ function (                          # plot fp estimate, optionally with credible
           legendPos = "topleft",    # position where to place the mode values for the coefficients,
                                     # NULL means no leg.
           rug=FALSE,                # add rug to plot?
+          partialResids=TRUE,
+          hpd=TRUE,
           grid = NULL,              # vector of unscaled abscissae, default is a
                                         # length 201 grid over observed range
           post = getPosteriorParms (model), # may be computed beforehand, the shrinkage factor can
@@ -90,7 +93,15 @@ function (                          # plot fp estimate, optionally with credible
         simVals <- rmvt (n = numSim, mu = mStarPart, sigma = post$bStar / post$aStar * VStarPart,
                          df = 2 * post$aStar) # coefs in rows
         simVals <- tcrossprod (simVals, xMat) # respective simulated means in cols
-        bandData <- scrHpd (simVals, level = slevel, mode = ret$mode)
+        bandData <-
+            if(hpd)
+                scrHpd(simVals,
+                       level = slevel,
+                       mode = ret$mode)
+            else
+                scrBesag(simVals,
+                         level=slevel)
+        
         ret$slower <- bandData[1, ]
         ret$supper <- bandData[2, ]
     }
@@ -98,7 +109,7 @@ function (                          # plot fp estimate, optionally with credible
     ## partial residuals
     design <- getDesignMatrix (model)
     resids <- residuals (model, design = design, post = post)
-    partialResids <- as.vector (design[, indPart, drop = FALSE] %*% mStarPart) + resids
+    parResids <- as.vector (design[, indPart, drop = FALSE] %*% mStarPart) + resids
 
     if (plot){
         ## determine plotting arguments
@@ -142,16 +153,15 @@ function (                          # plot fp estimate, optionally with credible
         matplotList$y <- matplotList$y[, - notCols]
         
         if (is.null (matplotList$ylim))
-            matplotList$ylim <- range (c (partialResids, matplotList$y))
+            matplotList$ylim <- range (c (parResids, matplotList$y))
 
         ## and plot:
 
         ret$obsVals <- obsVals * tr["scale"] - tr["shift"]
-        ret$partialResids <- partialResids
         
         ## first the points (the partial residuals)
-        plot(ret$obsVals, ret$partialResids,
-             type="p",
+        plot(ret$obsVals, parResids,
+             type=if(partialResids) "p" else "n",
              xlab=matplotList$xlab,
              ylab=matplotList$ylab,
              ylim=matplotList$ylim,
@@ -177,6 +187,8 @@ function (                          # plot fp estimate, optionally with credible
         }
     }
 
+    ret$partialResids <- parResids
+    
     ## also save the transform parameters in the return value
     ret$transform <- tr
 

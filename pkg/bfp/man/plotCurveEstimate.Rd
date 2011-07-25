@@ -10,16 +10,17 @@
   credible intervals and / or bands can be added to the plot.
 }
 \usage{
-plotCurveEstimate(model, termName, plevel = 0.95, slevel = plevel, plot
-= TRUE, legendPos = "topleft", rug = FALSE, ..., main = NULL)
+plotCurveEstimate(model, termName, plevel = 0.95, slevel = plevel,
+plot = TRUE, legendPos = "topleft", rug = FALSE, partialResids=TRUE, 
+hpd=TRUE,..., main = NULL) 
 }
 
 \arguments{
   \item{model}{an object of class \code{\link{BayesMfp}} or \code{\link{BmaSamples}}}
   \item{termName}{string denoting an FP term, as written by the
   \code{\link[=summary.BayesMfp]{summary}} method} 
-  \item{plevel}{credible level for pointwise HPD, and \code{NULL} means
-  no pointwise HPD (default: 0.95)}
+  \item{plevel}{credible level for pointwise intervals, and \code{NULL}
+  means no pointwise intervals (default: 0.95)}
   \item{slevel}{credible level for simultaneous credible band (SCB),
   \code{NULL} means no SCB (defaults to \code{plevel})}
   \item{plot}{if \code{FALSE}, only return values needed to produce the
@@ -28,6 +29,10 @@ plotCurveEstimate(model, termName, plevel = 0.95, slevel = plevel, plot
     sample size (for \code{\link{BmaSamples}}) in the plot, \code{NULL} suppresses the
     printing (default is \dQuote{topleft})}
   \item{rug}{add a rug to the plot? (default: \code{FALSE})}
+  \item{partialResids}{add partial residuals to the plot? (default:
+    \code{TRUE})}
+  \item{hpd}{use HPD intervals (\code{TRUE}, default) or quantile-based
+  (\code{FALSE}) intervals?} 
   \item{\dots}{further arguments in case of a \code{\link{BayesMfp}}
     object (see details) and arguments for plotting with
     \code{\link{matplot}}}
@@ -53,8 +58,8 @@ plotCurveEstimate(model, termName, plevel = 0.95, slevel = plevel, plot
   \item{grid}{grid on the transformed scale}
   \item{mode}{mode curve values, only for \code{\link{BayesMfp}} object}
   \item{mean}{pointwise mean curve values, only for \code{\link{BmaSamples}} object}
-  \item{plower}{lower boundaries for pointwise HPD}
-  \item{pupper}{upper boundaries for pointwise HPD}
+  \item{plower}{lower boundaries for pointwise intervals}
+  \item{pupper}{upper boundaries for pointwise intervals}
   \item{slower}{lower boundaries for SCB}
   \item{supper}{upper boundaries for SCB}
   \item{obsVals}{observed values of the covariate on the original scale}
@@ -88,6 +93,9 @@ p2 <- plotCurveEstimate (testBma, "x2")
 
 ## look at the returned list
 str(p2)
+
+## try the new options:
+plotCurveEstimate (testBma, "x2", partialResids=FALSE, hpd=FALSE)
 }
 
 \keyword{regression}

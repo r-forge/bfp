@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mon 20/09/2010 17:11 (CEST)>
+## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mit 26/01/2011 14:35 (CET)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on (MC) Bayesian model average.
@@ -18,8 +18,10 @@
 ## 03/03/2010   also accept a "main" plotting argument
 ## 20/09/2010   create matplotList$y in such a way that no R CMD check note is
 ##              triggered.
+## 26/01/2011   add options "partialResids" and "hpd"
 #####################################################################################
 
+## todo: options partialResids and hpd as in hypergsplines!
 plotCurveEstimate.BmaSamples <-
     function (                          # plot fp estimate, optionally with credible intervals and / or bands
               model,                    # for this BmaSamples object
@@ -30,6 +32,8 @@ plotCurveEstimate.BmaSamples <-
               legendPos = "topleft",    # where to place sample size information? if NULL it is not
                                         # printed
               rug=FALSE,                # add rug to plot?
+              partialResids=TRUE,
+              hpd=TRUE,
               ...,                       # arguments for plotting with matplot
               main=NULL
               )
@@ -51,14 +55,28 @@ plotCurveEstimate.BmaSamples <-
     ret$mean <- colMeans(mat, na.rm=TRUE)
 
     if (!is.null (plevel)){
-        plowerUpper <- apply (mat, 2, empiricalHpd, level = plevel)
+        plowerUpper <-
+            if(hpd)
+                apply(mat, 2, empiricalHpd, level = plevel)
+            else
+                apply(mat, 2, quantile,
+                      p=c((1 - plevel) / 2, (1 + plevel) / 2))
+        
         ret$plower <- plowerUpper[1, ]
         ret$pupper <- plowerUpper[2, ]
     }
 
     ## simultaneous credible band around the mean
     if (!is.null (slevel)){
-        bandData <- scrHpd (mat, level = slevel, mode = ret$mean)
+        bandData <-
+            if(hpd)
+                scrHpd(mat,
+                       level = slevel,
+                       mode = ret$mean)
+            else
+                scrBesag(mat,
+                         level=slevel)
+
         ret$slower <- bandData[1, ]
         ret$supper <- bandData[2, ]
     }
@@ -69,7 +87,7 @@ plotCurveEstimate.BmaSamples <-
 
     ## obsScaledVals <- g[pos]
     ## dataSetPos <- match(model$x[, termName], obsScaledVals)
-    partialResids <- ret$mean[pos] + resids
+    parResids <- ret$mean[pos] + resids
 
     if (plot){
         ## determine plotting arguments for matlines
@@ -111,15 +129,14 @@ plotCurveEstimate.BmaSamples <-
         matplotList$y <- matplotList$y[, - notCols]
         
         if (is.null (matplotList$ylim))
-            matplotList$ylim <- range (c (partialResids, matplotList$y))
+            matplotList$ylim <- range (c (parResids, matplotList$y))
 
         ## and plot:
 
         ## first the points
         ret$obsVals <- ret$original[pos]
-        ret$partialResids <- partialResids
-        plot(ret$obsVals, ret$partialResids,
-             type="p",
+        plot(ret$obsVals, parResids,
+             type=if(partialResids) "p" else "n",
              xlab=matplotList$xlab,
              ylab=matplotList$ylab,
              ylim=matplotList$ylim,
@@ -144,6 +161,7 @@ plotCurveEstimate.BmaSamples <-
             legend (legendPos, legend = legendText, bty = "n")
         }
     }
+    ret$partialResids <- parResids
     ret$transform <- tr
 
     invisible (ret)

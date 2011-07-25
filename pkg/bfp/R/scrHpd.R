@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[scrHpd.R] by DSB Fre 02/10/2009 14:51 (CEST)>
+## Time-stamp: <[scrHpd.R] by DSB Mit 26/01/2011 14:03 (CET)>
 ##
 ## Description:
 ## Calculate a series of simultaneous credible bounds from a samples matrix.
@@ -16,7 +16,7 @@
 
 ## all methods assume that samples is a m by n matrix where
 ## m is the number of samples and n the number of parameters
-## hence each sample is a row in the matrix samples
+## ==> hence each sample is a row in the matrix samples!
 
 ## scrHpd calculates a series of simultaneous credible bounds,
 ## minimizing the absolute distances to the mode vector at each gridpoint
