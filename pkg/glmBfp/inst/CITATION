@@ -1,0 +1,17 @@
+citHeader(paste("Please cite the R-package 'glmBfp' in publications",
+                "as follows when you use it:")) 	  
+
+citEntry(entry="article",
+	 title="Hyper-g priors for generalized linear models",
+	 author=personList(person(first="Daniel", last="Sabanes Bove", 
+	 			  email="daniel.sabanesbove@ifspm.uzh.ch"),
+	 	           person(first="Leonhard", last="Held")), 
+ 	 journal="Bayesian Analysis",
+	 year=2011,
+         note="to appear in Vol. 6, No. 1",
+	 url="http://ba.stat.cmu.edu/journal/forthcoming/sabanes.pdf",
+	 textVersion=paste("Sabanes Bove, D. and Held, L. (2011):",
+	                   "Hyper-g priors for generalized linear models.",
+			   "To appear.",
+	 	    	   "URL: http://ba.stat.cmu.edu/abstracts/Sabanes.php")) 
+

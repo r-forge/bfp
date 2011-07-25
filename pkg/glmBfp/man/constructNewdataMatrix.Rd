@@ -1,0 +1,15 @@
+\name{constructNewdataMatrix}
+\alias{constructNewdataMatrix}
+\title{Construct the covariates matrix for new data based on an existing GlmBayesMfp object...}
+\usage{constructNewdataMatrix(object, newdata)}
+\description{Construct the covariates matrix for new data based on an existing GlmBayesMfp object}
+\details{This is an internal function, which constructs a model matrix for new covariate
+data, based on the formula and scaling info in an existing GlmBayesMfp object.
+The matrix can then be passed to prediction functions.}
+\value{The (uncentered!) model matrix with the FP columns shifted and scaled as for the
+original data.}
+\keyword{internal}
+\keyword{utilities}
+\arguments{\item{object}{a valid \code{\link{GlmBayesMfp}}-Object}
+\item{newdata}{the new covariate data as a data.frame (with the same
+covariate names as in the call to \code{\link{glmBayesMfp}})}}

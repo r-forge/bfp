@@ -1,0 +1,22 @@
+\name{scrHpd}
+\alias{scrHpd}
+\title{Calculate an SCB from a samples matrix...}
+\usage{scrHpd(samples, mode=apply(samples, 1, median), level=0.95)}
+\description{Calculate an SCB from a samples matrix}
+\details{Calculate an SCB from a samples matrix, which minimizes
+the absolute distances of the contained samples to a mode vector, at
+each gridpoint. Therefore the SCB might be considered an \dQuote{HPD
+SCB}.}
+\value{A matrix with columns \dQuote{lower} and \dQuote{upper}, with the
+lower and upper SCB bounds, respectively.}
+\references{Besag, J.; Green, P.; Higdon, D. \& Mengersen, K. (1995):
+\dQuote{Bayesian computation and stochastic systems (with
+discussion)}, \emph{Statistical Science}, 10, 3-66.}
+\seealso{\code{\link{empiricalHpd}}}
+\keyword{htest}
+\keyword{multivariate}
+\arguments{\item{samples}{m by n matrix where m is the number of parameters,
+n is the number of samples and  hence each (multivariate) sample is a column in
+the matrix \code{samples}}
+\item{mode}{mode vector of length m (defaults to the vector of medians)}
+\item{level}{credible level for the SCB (default: 0.95)}}

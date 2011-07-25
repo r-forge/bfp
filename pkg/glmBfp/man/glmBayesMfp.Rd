@@ -1,0 +1,90 @@
+\name{glmBayesMfp}
+\title{Bayesian model inference for fractional polynomial GLMs...}
+\usage{glmBayesMfp(formula=formula(data), data=parent.frame(), weights,
+    family=gaussian, phi=1, empiricalBayes=FALSE,
+    priorSpecs=list(gPrior = HypergPrior(), modelPrior = "sparse"),
+    method=c("ask", "exhaustive", "sampling"), subset,
+    na.action=na.omit, verbose=TRUE, debug=FALSE, nModels,
+    nCache=1e+09, chainlength=10000, nGaussHermite=20, useBfgs=FALSE,
+    largeVariance=100, useOpenMP=TRUE, binaryLogisticCorrection=FALSE)}
+\description{Bayesian model inference for fractional polynomial GLMs}
+\details{Bayesian model inference for fractional polynomial models from the generalized linear model
+family is conducted by means of either exhaustive model space evaluation or posterior model
+sampling. The approach is based on analytical marginal likelihood approximations, using
+integrated Laplace approximation.
+
+The formula is of the form
+\code{y ~ bfp (x1, max = 4) + uc (x2 + x3)}, that is, the
+auxiliary functions \code{\link{bfp}} and \code{\link{uc}} must be
+used for defining the fractional polynomial and uncertain fixed form
+covariates terms, respectively. There must be an intercept, and no
+other fixed covariates are allowed. All \code{max} arguments of the
+\code{\link{bfp}} terms must be identical.
+
+The prior specifications are a list:
+\describe{
+\item{gPrior}{A g-prior class object. Defaults to a hyper-g prior. See
+\code{\linkS4class{GPrior}} for more information.} 
+\item{modelPrior}{choose if a flat model prior (\code{"flat"}), a
+model prior favoring sparse models explicitly (default, \code{"sparse"}),
+or a dependent model prior (\code{"dependent"}) should be used.}
+}
+
+If \code{method = "ask"}, the user is prompted with the maximum
+cardinality of the model space and can then decide whether to use
+posterior sampling or the exhaustive model space evaluation.
+
+Note that if you specify only one FP term, the exhaustive model search
+must be done, due to the structure of the model sampling algorithm.
+However, in reality this will not be a problem as the model space will
+typically be very small.}
+\alias{glmBayesMfp}
+\alias{GlmBayesMfp}
+\value{An object of S3 class \code{GlmBayesMfp}.}
+\keyword{models}
+\keyword{regression}
+\arguments{\item{formula}{model formula}
+\item{data}{optional data.frame for model variables (defaults to the parent
+frame)}
+\item{weights}{optionally a vector of positive weights (if not provided, a
+vector of one's)}
+\item{family}{distribution and link (as in the glm function)}
+\item{phi}{value of the dispersion parameter (defaults to 1)}
+\item{empiricalBayes}{rank the models in terms of \emph{conditional}
+marginal likelihood, using an empirical Bayes estimate of g? (not default)
+Due to coding structure, the prior on g must be given in \code{priorSpecs}
+although it does not have an effect when \code{empiricalBayes==TRUE}.}
+\item{priorSpecs}{prior specifications, see details}
+\item{method}{which method should be used to explore the  posterior model
+space? (default: ask the user)}
+\item{subset}{optional subset expression}
+\item{na.action}{default is to skip rows with missing data, and no other
+option supported at the moment}
+\item{verbose}{should information on computation progress be given?
+(default)}
+\item{debug}{print debugging information? (not default)}
+\item{nModels}{how many best models should be saved? (default: 1\% of the
+total number of (cached) models). Must not be larger than \code{nCache} if
+\code{method == "sampling"}.}
+\item{nCache}{maximum number of best models to be cached at the same time
+during the model sampling, only has effect if method = sampling}
+\item{chainlength}{length of the model sampling chain (only has an effect if
+sampling has been chosen as method)}
+\item{nGaussHermite}{number of quantiles used in Gauss Hermite quadrature
+for marginal likelihood approximation (and later in the MCMC sampler for the
+approximation of the marginal covariance factor density). If
+\code{empiricalBayes}, this option has no effect.}
+\item{useBfgs}{Shall the BFGS algorithm be used in the internal maximization
+(not default)? Else, the default Brent optimize routine is used, which seems
+to be more robust. If \code{empiricalBayes}, this option has no effect and
+always the Brent optimize routine is used.}
+\item{largeVariance}{When should the BFGS variance estimate be considered
+\dQuote{large}, so that a reestimation of it is computed? (Only has an
+effect if \code{useBfgs == TRUE}, default: 100)}
+\item{useOpenMP}{shall OpenMP be used to accelerate the computations?
+(default)}
+\item{binaryLogisticCorrection}{should a higher-order correction of the
+Laplace approximation be used, which works only (!!!) for binary logistic
+regression? (not default)
+todo: this user option should later be replaced
+todo: by an automatic check if the higher order correction can be applied.}}
