@@ -29,7 +29,7 @@ public:
                       // otherwise return the approximate unnormalized *joint* density f(y, z | mod).
                       bool conditional,
                       bool verbose,
-                      bool binaryLogisticCorrection,
+                      bool higherOrderCorrection,
                       PosInt nIter=40) :
                           mod(mod),
                           fpInfo(fpInfo),
@@ -43,7 +43,7 @@ public:
                EPS, // take EPS as the convergence epsilon
                verbose), // and debug if verbose is wished.
                verbose(verbose),
-               binaryLogisticCorrection(binaryLogisticCorrection),
+               higherOrderCorrection(higherOrderCorrection),
                nIter(nIter)
                {
                }
@@ -64,7 +64,7 @@ private:
     // be verbose?
     const bool verbose;
 
-    const bool binaryLogisticCorrection;
+    const bool higherOrderCorrection;
 
     // number of IWLS iterations
     PosInt nIter;

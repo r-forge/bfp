@@ -2,7 +2,7 @@
 \alias{evalZdensity}
 \title{Evaluate the (negative log) unnormalized marginal z density in a given...}
 \usage{evalZdensity(config, object, zValues, conditional=FALSE, debug=FALSE,
-    binaryLogisticCorrection=FALSE)}
+    higherOrderCorrection=FALSE)}
 \description{Evaluate the (negative log) unnormalized marginal z density in a given
 model.}
 \details{Based on the result list from \code{\link{glmBayesMfp}}, for the first model
@@ -19,8 +19,5 @@ null model is not allowed. It is interpreted in the context of
 \item{conditional}{return the approximate *conditional* density f(y | z)?
 (not default)}
 \item{debug}{print debugging information? (not default)}
-\item{binaryLogisticCorrection}{should a higher-order correction of the
-Laplace approximation be used, which works only (!!!) for binary logistic
-regression? (not default)
-todo: this user option should later be replaced
-todo: by an automatic check if the higher order correction can be applied.}}
+\item{higherOrderCorrection}{should a higher-order correction of the
+Laplace approximation be used? (not default)}}

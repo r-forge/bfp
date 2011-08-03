@@ -1,6 +1,6 @@
-bfgs.d bfgs.o: ../bfgs.cpp /home/daniel/R/forge/glmBfp/src/bfgs.h \
- /home/daniel/R/forge/glmBfp/src/functionWraps.h \
- /home/daniel/R/forge/glmBfp/src/rcppExport.h \
+bfgs.d bfgs.o: ../bfgs.cpp /home/daniel/R/forge/bfp/glmBfp/src/bfgs.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/functionWraps.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/rcppExport.h \
  /home/daniel/R/library/Rcpp/include/RcppCommon.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/config.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/macros/unroll.h \
@@ -37,6 +37,7 @@ bfgs.d bfgs.o: ../bfgs.cpp /home/daniel/R/forge/glmBfp/src/bfgs.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/expands_to_logical.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/matrix_interface.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_sugar_expression.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_eigen_base.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/has_na.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/storage_type.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/r_sexptype_traits.h \
@@ -467,6 +468,9 @@ bfgs.d bfgs.o: ../bfgs.cpp /home/daniel/R/forge/glmBfp/src/bfgs.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/head.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/tail.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sum.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/mean.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/var.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sd.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/cumsum.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/matrix_functions.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/outer.h \
@@ -525,13 +529,13 @@ bfgs.d bfgs.o: ../bfgs.cpp /home/daniel/R/forge/glmBfp/src/bfgs.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/stats/random/rhyper.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloWrap.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloSugar.h \
- /home/daniel/R/forge/glmBfp/src/types.h
+ /home/daniel/R/forge/bfp/glmBfp/src/types.h
 
-/home/daniel/R/forge/glmBfp/src/bfgs.h:
+/home/daniel/R/forge/bfp/glmBfp/src/bfgs.h:
 
-/home/daniel/R/forge/glmBfp/src/functionWraps.h:
+/home/daniel/R/forge/bfp/glmBfp/src/functionWraps.h:
 
-/home/daniel/R/forge/glmBfp/src/rcppExport.h:
+/home/daniel/R/forge/bfp/glmBfp/src/rcppExport.h:
 
 /home/daniel/R/library/Rcpp/include/RcppCommon.h:
 
@@ -606,6 +610,8 @@ bfgs.d bfgs.o: ../bfgs.cpp /home/daniel/R/forge/glmBfp/src/bfgs.h \
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/matrix_interface.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_sugar_expression.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/traits/is_eigen_base.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/has_na.h:
 
@@ -1467,6 +1473,12 @@ bfgs.d bfgs.o: ../bfgs.cpp /home/daniel/R/forge/glmBfp/src/bfgs.h \
 
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sum.h:
 
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/mean.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/var.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sd.h:
+
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/cumsum.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/matrix_functions.h:
@@ -1583,4 +1595,4 @@ bfgs.d bfgs.o: ../bfgs.cpp /home/daniel/R/forge/glmBfp/src/bfgs.h \
 
 /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloSugar.h:
 
-/home/daniel/R/forge/glmBfp/src/types.h:
+/home/daniel/R/forge/bfp/glmBfp/src/types.h:

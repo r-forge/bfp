@@ -6,7 +6,7 @@
     method=c("ask", "exhaustive", "sampling"), subset,
     na.action=na.omit, verbose=TRUE, debug=FALSE, nModels,
     nCache=1e+09, chainlength=10000, nGaussHermite=20, useBfgs=FALSE,
-    largeVariance=100, useOpenMP=TRUE, binaryLogisticCorrection=FALSE)}
+    largeVariance=100, useOpenMP=TRUE, higherOrderCorrection=FALSE)}
 \description{Bayesian model inference for fractional polynomial GLMs}
 \details{Bayesian model inference for fractional polynomial models from the generalized linear model
 family is conducted by means of either exhaustive model space evaluation or posterior model
@@ -83,8 +83,6 @@ always the Brent optimize routine is used.}
 effect if \code{useBfgs == TRUE}, default: 100)}
 \item{useOpenMP}{shall OpenMP be used to accelerate the computations?
 (default)}
-\item{binaryLogisticCorrection}{should a higher-order correction of the
-Laplace approximation be used, which works only (!!!) for binary logistic
-regression? (not default)
-todo: this user option should later be replaced
-todo: by an automatic check if the higher order correction can be applied.}}
+\item{higherOrderCorrection}{should a higher-order correction of the
+Laplace approximation be used, which works only for canonical GLMs? (not
+default)}}

@@ -75,7 +75,7 @@ getGlmVarLogMargLik(const ModelPar &mod,
                                             // *conditional* density f(y | z).
                                             bookkeep.empiricalBayes,
                                             bookkeep.debug,
-                                            bookkeep.binaryLogisticCorrection);
+                                            bookkeep.higherOrderCorrection);
 
         // cache this function, because we do not want to evaluate it more often
         // than necessary.
@@ -1105,7 +1105,7 @@ cpp_glmBayesMfp(SEXP r_interface)
     const bool useOpenMP = as<bool>(rcpp_options["useOpenMP"]);
 #endif
     const GaussHermite gaussHermite(as<List>(rcpp_options["gaussHermite"]));
-    const bool binaryLogisticCorrection = as<bool>(rcpp_options["binaryLogisticCorrection"]);
+    const bool higherOrderCorrection = as<bool>(rcpp_options["higherOrderCorrection"]);
 
 
     // ----------------------------------------------------------------------------------
@@ -1149,7 +1149,7 @@ cpp_glmBayesMfp(SEXP r_interface)
                   largeVariance,
                   useBfgs,
                   debug,
-                  binaryLogisticCorrection);
+                  higherOrderCorrection);
 
     // model configuration:
     const GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, rcpp_gPrior,

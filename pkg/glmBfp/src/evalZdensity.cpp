@@ -108,7 +108,7 @@ cpp_evalZdensity(SEXP r_interface)
     const DoubleVector zValues = rcpp_options["zValues"];
     const bool conditional = as<bool>(rcpp_options["conditional"]);
     const bool debug = as<bool>(rcpp_options["debug"]);
-    const bool binaryLogisticCorrection = as<bool>(rcpp_options["binaryLogisticCorrection"]);
+    const bool higherOrderCorrection = as<bool>(rcpp_options["higherOrderCorrection"]);
 
 
     // ----------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ cpp_evalZdensity(SEXP r_interface)
                                          config,
                                          conditional,
                                          debug,
-                                         binaryLogisticCorrection);
+                                         higherOrderCorrection);
 
      // evaluate it at the given z values.
      NumericVector results;

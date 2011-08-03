@@ -9,8 +9,8 @@ Author: Daniel Sabanes Bove <daniel.sabanesbove@ifspm.uzh.ch>
 Description: The package implements the Bayesian paradigm for
     fractional polynomials in generalized linear models. See package
     "bfp" for the treatment of normal models.
-Version: 0.0-23
-Date: 2011-07-25
+Version: 0.0-24
+Date: 2011-08-03
 Depends: R (>= 2.12.0), Rcpp (>= 0.8.8), RcppArmadillo (>= 0.2.9)
 Collate: 'helpers.R' 'computeModels.R' 'constructNewdataMatrix.R'
     'evalZdensity.R' 'formula.R' 'fpScale.R' 'getFpTransforms.R'

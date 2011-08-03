@@ -82,7 +82,7 @@ struct Book
     const bool useBfgs;
     const bool debug;
 
-    const bool binaryLogisticCorrection;
+    const bool higherOrderCorrection;
 
     // constructor which checks the chainlength
     Book(bool empiricalBayes,
@@ -95,7 +95,7 @@ struct Book
          double largeVariance,
          bool useBfgs,
          bool debug,
-         bool binaryLogisticCorrection);
+         bool higherOrderCorrection);
 
 };
 
@@ -385,6 +385,14 @@ struct GlmModelConfig
     // the constant factor deriving from the link and the distribution,
     // which we need for the generalized g-prior
     double cfactor;
+
+    // save also the names of link and distribution
+    const std::string familyString;
+    const std::string linkString;
+
+    // does this model use the canonical link?
+    const bool canonicalLink;
+
 
     // constructor
     GlmModelConfig(Rcpp::List& rcpp_family,

@@ -1,6 +1,6 @@
 linalgInterface.d linalgInterface.o: ../linalgInterface.cpp \
- /home/daniel/R/forge/glmBfp/src/linalgInterface.h \
- /home/daniel/R/forge/glmBfp/src/types.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/linalgInterface.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/types.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadillo.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloForward.h \
  /home/daniel/R/library/Rcpp/include/RcppCommon.h \
@@ -39,6 +39,7 @@ linalgInterface.d linalgInterface.o: ../linalgInterface.cpp \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/expands_to_logical.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/matrix_interface.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_sugar_expression.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_eigen_base.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/has_na.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/storage_type.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/r_sexptype_traits.h \
@@ -467,6 +468,9 @@ linalgInterface.d linalgInterface.o: ../linalgInterface.cpp \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/head.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/tail.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sum.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/mean.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/var.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sd.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/cumsum.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/matrix_functions.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/outer.h \
@@ -528,9 +532,9 @@ linalgInterface.d linalgInterface.o: ../linalgInterface.cpp \
  /usr/local/lib/R/include/R_ext/BLAS.h \
  /usr/local/lib/R/include/R_ext/Lapack.h
 
-/home/daniel/R/forge/glmBfp/src/linalgInterface.h:
+/home/daniel/R/forge/bfp/glmBfp/src/linalgInterface.h:
 
-/home/daniel/R/forge/glmBfp/src/types.h:
+/home/daniel/R/forge/bfp/glmBfp/src/types.h:
 
 /home/daniel/R/library/RcppArmadillo/include/RcppArmadillo.h:
 
@@ -609,6 +613,8 @@ linalgInterface.d linalgInterface.o: ../linalgInterface.cpp \
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/matrix_interface.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_sugar_expression.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/traits/is_eigen_base.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/has_na.h:
 
@@ -1465,6 +1471,12 @@ linalgInterface.d linalgInterface.o: ../linalgInterface.cpp \
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/tail.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sum.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/mean.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/var.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sd.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/cumsum.h:
 

@@ -1,6 +1,6 @@
 distributions.d distributions.o: ../distributions.cpp \
- /home/daniel/R/forge/glmBfp/src/distributions.h \
- /home/daniel/R/forge/glmBfp/src/types.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/distributions.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/types.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadillo.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloForward.h \
  /home/daniel/R/library/Rcpp/include/RcppCommon.h \
@@ -39,6 +39,7 @@ distributions.d distributions.o: ../distributions.cpp \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/expands_to_logical.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/matrix_interface.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_sugar_expression.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_eigen_base.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/has_na.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/storage_type.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/r_sexptype_traits.h \
@@ -467,6 +468,9 @@ distributions.d distributions.o: ../distributions.cpp \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/head.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/tail.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sum.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/mean.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/var.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sd.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/cumsum.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/matrix_functions.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/outer.h \
@@ -525,11 +529,11 @@ distributions.d distributions.o: ../distributions.cpp \
  /home/daniel/R/library/Rcpp/include/Rcpp/stats/random/rhyper.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloWrap.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloSugar.h \
- /home/daniel/R/forge/glmBfp/src/rcppExport.h
+ /home/daniel/R/forge/bfp/glmBfp/src/rcppExport.h
 
-/home/daniel/R/forge/glmBfp/src/distributions.h:
+/home/daniel/R/forge/bfp/glmBfp/src/distributions.h:
 
-/home/daniel/R/forge/glmBfp/src/types.h:
+/home/daniel/R/forge/bfp/glmBfp/src/types.h:
 
 /home/daniel/R/library/RcppArmadillo/include/RcppArmadillo.h:
 
@@ -608,6 +612,8 @@ distributions.d distributions.o: ../distributions.cpp \
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/matrix_interface.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_sugar_expression.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/traits/is_eigen_base.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/has_na.h:
 
@@ -1465,6 +1471,12 @@ distributions.d distributions.o: ../distributions.cpp \
 
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sum.h:
 
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/mean.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/var.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sd.h:
+
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/cumsum.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/matrix_functions.h:
@@ -1581,4 +1593,4 @@ distributions.d distributions.o: ../distributions.cpp \
 
 /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloSugar.h:
 
-/home/daniel/R/forge/glmBfp/src/rcppExport.h:
+/home/daniel/R/forge/bfp/glmBfp/src/rcppExport.h:

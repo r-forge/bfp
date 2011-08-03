@@ -4,11 +4,6 @@
 #include <rcppExport.h>
 #include <linalgInterface.h>
 
-extern "C" {
-
-double F77_NAME(laplace)(const int* nObs, const int* nCoefs, const double* linPred, const double* L);
-
-}
 
 
 // call the function object
@@ -72,44 +67,87 @@ NegLogUnnormZDens::operator()(double z)
                      iwlsObject.computeLogUnPosteriorDens(Parameter(iwlsResults.coefs, z));
 
 
-        // ------------- begin test
+        // the Raudenbush & Yang & Yosef correction to the Laplace approximation
+        // in the canonical link case
 
-        if(binaryLogisticCorrection)
+        // Warning: this may not work yet for some reason for some data sets,
+        // strange negative correctionFactor values can occur!
+        // (both for the removed Fortran and for the actual C++ code...)
+        if(higherOrderCorrection && config.canonicalLink)
         {
 
-            // the Raudenbush & Yang & Yosef correction to the Laplace approximation:
-            // (now only specific for binary logistic regression !!)
+            // initialize E(T_4), E(T_6):
+            // (excluding constant factors which are multiplied at the end)
+            double exp_T4 = 0.0;
+            double exp_T6 = 0.0;
 
-            // compute the matrix L with columns l_i = (iwlsResults.qFactor)^-1 * x_i :
+            // for the sum over m_i^(3) * x_i * B_i:
+            AVector k = arma::zeros(iwlsObject.nCoefs);
 
-            AMatrix L = trans(iwlsObject.design);
+            // design matrix is also needed
+            const AMatrix& design = iwlsObject.design;
 
-            trs(false,
-                false,
-                iwlsResults.qFactor,
-                L);
+            // iterate through the observations:
+            for(PosInt i = 0; i < iwlsObject.nObs; ++i)
+            {
+                // calculate the fitted probability and resulting derivatives m_i^(x)
+                // along the way.
+                const double mu = config.link->linkinv(iwlsResults.linPred(i));
+                double m3, m4, m6;
 
-            int nObs = iwlsObject.nObs;
-            int nCoefs = iwlsObject.nCoefs;
+                // see page 147 in Raudenbush et al. for the formulas of m3, m4, m6
+                if(config.familyString == "binomial")
+                {
+                    const double m2 = mu * (1.0 - mu);
+                    m3 = m2 * (1.0 - 2.0 * mu);
+                    m4 = m2 * (1.0 - 6.0 * m2);
+                    m6 = m4 * (1.0 - 12.0 * m2) - 12.0 * m3 * m3;
+                }
+                else if (config.familyString == "poisson")
+                {
+                    m3 = mu;
+                    m4 = mu;
+                    m6 = mu;
+                }
+                else
+                {
+                    Rf_error("Higher order correction not implemented for this family.");
+                }
 
-            const double correctionFactor =
-                    F77_CALL(laplace)(& nObs,
-                                      & nCoefs,
-                                      iwlsResults.linPred.memptr(),
-                                      L.memptr());
+                // add to the sums:
+                AVector tmp = arma::trans(design.row(i));
+                trs(false, false, iwlsResults.qFactor, tmp);
+                const double B = arma::dot(tmp, tmp);
+                const double B2 = B * B;
+
+                exp_T4 += m4 * B2;
+                exp_T6 += m6 * B2 * B;
+                k += (m3 * B) * arma::trans(design.row(i));
+            }
+
+            // calculate k^T * Cov * k, and overwrite k with the intermediate result:
+            trs(false, false, iwlsResults.qFactor, k);
+            double exp_T3T3 = arma::dot(k, k);
+
+            // So the correction factor for the conditional marginal likelihood is (with the new terms):
+            double correctionFactor = - 1.0 / 8.0 * exp_T4 -
+                    1.0 / 48.0 * exp_T6 +
+                    5.0 / 24.0 * exp_T3T3;
 
             if(verbose)
             {
                 Rprintf("\nNegLogUnnormZDens: Higher-order correction factor is %f", 1.0 + correctionFactor);
             }
 
-            // since we return here the negative log of the conditional marg lik:
-            ret -= log1p(correctionFactor);
+            if(correctionFactor > -1.0)
+            {
+                // since we return here the negative log of the conditional marg lik:
+                ret -= log1p(correctionFactor);
+            } else {
+                Rf_warning("negative value for correction factor! We are not using the higher order correction here.");
+            }
 
-
-        } // end if(binaryLogisticCorrection)
-
-        // ------------- end test
+        } // end if(higherOrderCorrection)
 
         // check finiteness of return value
         if(! R_finite(ret))

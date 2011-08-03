@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[evalZdensity.R] by DSB Don 29/07/2010 16:16 (CEST)>
+## Time-stamp: <[evalZdensity.R] by DSB Fre 29/07/2011 15:13 (CEST)>
 ##
 ## Description:
 ## Evaluate the unnormalized marginal z density in a given model at a number of
@@ -20,6 +20,7 @@
 ##              as an unnormalized f(z | y).
 ## 29/07/2010   add the new option to get a better Laplace approximation in the
 ##              case of binary logistic regression.
+## 29/07/2011   now "higherOrderCorrection"
 #####################################################################################
 
 ##' @include helpers.R
@@ -39,11 +40,8 @@
 ##' @param conditional return the approximate *conditional* density f(y | z)?
 ##' (not default)
 ##' @param debug print debugging information? (not default)
-##' @param binaryLogisticCorrection should a higher-order correction of the
-##' Laplace approximation be used, which works only (!!!) for binary logistic
-##' regression? (not default)
-##' todo: this user option should later be replaced
-##' todo: by an automatic check if the higher order correction can be applied.
+##' @param higherOrderCorrection should a higher-order correction of the
+##' Laplace approximation be used? (not default)
 ##' 
 ##' @return the negative log marginal unnormalized density values at the
 ##' \code{zValues}. (Note the words \dQuote{negative}, \dQuote{log}, and
@@ -57,7 +55,7 @@ evalZdensity <-
              zValues,
              conditional=FALSE,
              debug=FALSE,
-             binaryLogisticCorrection=FALSE)
+             higherOrderCorrection=FALSE)
 {
     ## check the object
     if(! inherits(object, "GlmBayesMfp"))
@@ -68,7 +66,7 @@ evalZdensity <-
               is.numeric(zValues),
               is.bool(conditional),
               is.bool(debug),
-              is.bool(binaryLogisticCorrection))
+              is.bool(higherOrderCorrection))
     
     ## get the old attributes of the object
     attrs <- attributes(object)
@@ -85,7 +83,7 @@ evalZdensity <-
     options <- list(zValues=as.double(zValues),
                     conditional=conditional,
                     debug=debug,
-                    binaryLogisticCorrection=binaryLogisticCorrection)
+                    higherOrderCorrection=higherOrderCorrection)
 
     ## then call C++ to do the rest:
     results <- .External(cpp_evalZdensity,

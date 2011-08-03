@@ -1,5 +1,5 @@
 glmBayesMfp.d glmBayesMfp.o: ../glmBayesMfp.cpp \
- /home/daniel/R/forge/glmBfp/src/rcppExport.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/rcppExport.h \
  /home/daniel/R/library/Rcpp/include/RcppCommon.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/config.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/macros/unroll.h \
@@ -36,6 +36,7 @@ glmBayesMfp.d glmBayesMfp.o: ../glmBayesMfp.cpp \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/expands_to_logical.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/matrix_interface.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_sugar_expression.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_eigen_base.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/has_na.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/storage_type.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/traits/r_sexptype_traits.h \
@@ -466,6 +467,9 @@ glmBayesMfp.d glmBayesMfp.o: ../glmBayesMfp.cpp \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/head.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/tail.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sum.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/mean.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/var.h \
+ /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sd.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/cumsum.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/matrix_functions.h \
  /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/outer.h \
@@ -524,21 +528,21 @@ glmBayesMfp.d glmBayesMfp.o: ../glmBayesMfp.cpp \
  /home/daniel/R/library/Rcpp/include/Rcpp/stats/random/rhyper.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloWrap.h \
  /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloSugar.h \
- /home/daniel/R/forge/glmBfp/src/combinatorics.h \
- /home/daniel/R/forge/glmBfp/src/dataStructure.h \
- /home/daniel/R/forge/glmBfp/src/types.h \
- /home/daniel/R/forge/glmBfp/src/functionWraps.h \
- /home/daniel/R/forge/glmBfp/src/fpUcHandling.h \
- /home/daniel/R/forge/glmBfp/src/links.h \
- /home/daniel/R/forge/glmBfp/src/distributions.h \
- /home/daniel/R/forge/glmBfp/src/gpriors.h \
- /home/daniel/R/forge/glmBfp/src/zdensity.h \
- /home/daniel/R/forge/glmBfp/src/iwls.h \
- /home/daniel/R/forge/glmBfp/src/design.h \
- /home/daniel/R/forge/glmBfp/src/bfgs.h \
- /home/daniel/R/forge/glmBfp/src/optimize.h
+ /home/daniel/R/forge/bfp/glmBfp/src/combinatorics.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/dataStructure.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/types.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/functionWraps.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/fpUcHandling.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/links.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/distributions.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/gpriors.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/zdensity.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/iwls.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/design.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/bfgs.h \
+ /home/daniel/R/forge/bfp/glmBfp/src/optimize.h
 
-/home/daniel/R/forge/glmBfp/src/rcppExport.h:
+/home/daniel/R/forge/bfp/glmBfp/src/rcppExport.h:
 
 /home/daniel/R/library/Rcpp/include/RcppCommon.h:
 
@@ -613,6 +617,8 @@ glmBayesMfp.d glmBayesMfp.o: ../glmBayesMfp.cpp \
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/matrix_interface.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/is_sugar_expression.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/traits/is_eigen_base.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/traits/has_na.h:
 
@@ -1474,6 +1480,12 @@ glmBayesMfp.d glmBayesMfp.o: ../glmBayesMfp.cpp \
 
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sum.h:
 
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/mean.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/var.h:
+
+/home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/sd.h:
+
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/functions/cumsum.h:
 
 /home/daniel/R/library/Rcpp/include/Rcpp/sugar/matrix/matrix_functions.h:
@@ -1590,28 +1602,28 @@ glmBayesMfp.d glmBayesMfp.o: ../glmBayesMfp.cpp \
 
 /home/daniel/R/library/RcppArmadillo/include/RcppArmadilloSugar.h:
 
-/home/daniel/R/forge/glmBfp/src/combinatorics.h:
+/home/daniel/R/forge/bfp/glmBfp/src/combinatorics.h:
 
-/home/daniel/R/forge/glmBfp/src/dataStructure.h:
+/home/daniel/R/forge/bfp/glmBfp/src/dataStructure.h:
 
-/home/daniel/R/forge/glmBfp/src/types.h:
+/home/daniel/R/forge/bfp/glmBfp/src/types.h:
 
-/home/daniel/R/forge/glmBfp/src/functionWraps.h:
+/home/daniel/R/forge/bfp/glmBfp/src/functionWraps.h:
 
-/home/daniel/R/forge/glmBfp/src/fpUcHandling.h:
+/home/daniel/R/forge/bfp/glmBfp/src/fpUcHandling.h:
 
-/home/daniel/R/forge/glmBfp/src/links.h:
+/home/daniel/R/forge/bfp/glmBfp/src/links.h:
 
-/home/daniel/R/forge/glmBfp/src/distributions.h:
+/home/daniel/R/forge/bfp/glmBfp/src/distributions.h:
 
-/home/daniel/R/forge/glmBfp/src/gpriors.h:
+/home/daniel/R/forge/bfp/glmBfp/src/gpriors.h:
 
-/home/daniel/R/forge/glmBfp/src/zdensity.h:
+/home/daniel/R/forge/bfp/glmBfp/src/zdensity.h:
 
-/home/daniel/R/forge/glmBfp/src/iwls.h:
+/home/daniel/R/forge/bfp/glmBfp/src/iwls.h:
 
-/home/daniel/R/forge/glmBfp/src/design.h:
+/home/daniel/R/forge/bfp/glmBfp/src/design.h:
 
-/home/daniel/R/forge/glmBfp/src/bfgs.h:
+/home/daniel/R/forge/bfp/glmBfp/src/bfgs.h:
 
-/home/daniel/R/forge/glmBfp/src/optimize.h:
+/home/daniel/R/forge/bfp/glmBfp/src/optimize.h:

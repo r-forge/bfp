@@ -1,3 +1,10 @@
+2011-07-29  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* various: now the option "higherOrderCorrection" allows the
+	higher order Laplace correction also for other canonical GLMs
+	besides the logistic regression. (And it should speed up the
+	computation, too!)
+
 2011-07-08  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* various: add the "dependent" model prior

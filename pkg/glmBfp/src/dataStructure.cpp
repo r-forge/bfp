@@ -116,7 +116,7 @@ Book::Book(bool empiricalBayes,
            double largeVariance,
            bool useBfgs,
            bool debug,
-           bool binaryLogisticCorrection) :
+           bool higherOrderCorrection) :
                 modelCounter(0),
                 nanCounter(0),
                 empiricalBayes(empiricalBayes),
@@ -128,7 +128,7 @@ Book::Book(bool empiricalBayes,
                 largeVariance(largeVariance),
                 useBfgs(useBfgs),
                 debug(debug),
-                binaryLogisticCorrection(binaryLogisticCorrection)
+                higherOrderCorrection(higherOrderCorrection)
 {
     if (doSampling)
     {
@@ -499,11 +499,12 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
                                bool debug) :
     dispersions(as<NumericVector>(rcpp_family["dispersions"])),
     linPredStart(as<NumericVector>(rcpp_family["linPredStart"])),
-    nullModelInfo(rcpp_nullModelInfo)
+    nullModelInfo(rcpp_nullModelInfo),
+    familyString(as<std::string>(rcpp_family["family"])),
+    linkString(as<std::string>(rcpp_family["link"])),
+    canonicalLink((familyString == "binomial" && linkString == "logit") ||
+                      (familyString == "poisson" && linkString == "log"))
 {
-    // extract the family name
-    std::string familyString = rcpp_family["family"];
-
     // and the weights and phi from the R family object
     const AVector weights = as<NumericVector>(rcpp_family["weights"]);
     const double phi = rcpp_family["phi"];
@@ -528,9 +529,6 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
     {
         Rf_error("Distribution not implemented");
     }
-
-    // read the link information from the family object
-    std::string linkString = rcpp_family["link"];
 
     if (linkString == "logit")
     {

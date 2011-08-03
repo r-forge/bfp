@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[glmBayesMfp.R] by DSB Fre 08/07/2011 15:15 (CEST)>
+## Time-stamp: <[glmBayesMfp.R] by DSB Fre 29/07/2011 15:12 (CEST)>
 ##
 ## Description:
 ## Main user interface for Bayesian inference for fractional polynomials in generalized linear
@@ -44,6 +44,7 @@
 ## 29/07/2010   add the new option to get a better Laplace approximation in the
 ##              case of binary logistic regression.
 ## 08/07/2011   add the new modelPrior option "dependent"
+## 29/07/2011   now "higherOrderCorrection"
 #####################################################################################
 
 ##' @include helpers.R
@@ -127,11 +128,9 @@
 ##' effect if \code{useBfgs == TRUE}, default: 100)
 ##' @param useOpenMP shall OpenMP be used to accelerate the computations?
 ##' (default)
-##' @param binaryLogisticCorrection should a higher-order correction of the
-##' Laplace approximation be used, which works only (!!!) for binary logistic
-##' regression? (not default)
-##' todo: this user option should later be replaced
-##' todo: by an automatic check if the higher order correction can be applied. 
+##' @param higherOrderCorrection should a higher-order correction of the
+##' Laplace approximation be used, which works only for canonical GLMs? (not
+##' default) 
 ##'
 ##' @aliases glmBayesMfp GlmBayesMfp
 ##' @return An object of S3 class \code{GlmBayesMfp}.
@@ -160,7 +159,7 @@ glmBayesMfp <-
               useBfgs=FALSE,
               largeVariance=100,
               useOpenMP=TRUE,
-              binaryLogisticCorrection=FALSE)
+              higherOrderCorrection=FALSE)
 {
     ## checks
     stopifnot(is.bool(verbose),
@@ -169,7 +168,7 @@ glmBayesMfp <-
               is.bool(empiricalBayes),
               is(priorSpecs$gPrior, "GPrior"),
               is.bool(useOpenMP),
-              is.bool(binaryLogisticCorrection))
+              is.bool(higherOrderCorrection))
     
     ## save call for return object
     call <- match.call()
@@ -525,7 +524,7 @@ glmBayesMfp <-
                     gaussHermite=gaussHermite,   # nodes and weights for Gauss
                                         # Hermite quadratures
                     useOpenMP=useOpenMP, # should we use openMP for speed up?
-                    binaryLogisticCorrection=binaryLogisticCorrection) # should
+                    higherOrderCorrection=higherOrderCorrection) # should
                                         # the higher-order Laplace correction be used?    
     
     ## then go C++
