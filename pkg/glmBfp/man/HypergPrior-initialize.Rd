@@ -1,13 +1,29 @@
 \name{HypergPrior-initialize}
-\title{Initialization method for the "HypergPrior" class...}
-\usage{\S4method{initialize}{HypergPrior}(.Object, a, \dots)}
-\description{Initialization method for the "HypergPrior" class}
-\value{the initialized object}
+\alias{"HypergPrior-initialize"}
 \alias{HypergPrior-initialize}
-\alias{initialize,HypergPrior-method}
-\keyword{methods}
+\alias{"initialize,HypergPrior-method"}
+\title{Initialization method for the "HypergPrior" class}
+\usage{
+  \S4method{initialize}{HypergPrior}(.Object, a, \dots)
+}
+\arguments{
+  \item{.Object}{the \code{\linkS4class{HypergPrior}} we
+  want to initialize}
+
+  \item{a}{the hyperparameter value}
+
+  \item{\dots}{unused}
+}
+\value{
+  the initialized object
+}
+\description{
+  Initialization method for the "HypergPrior" class
+}
+\author{
+  Daniel Sabanes Bove
+  \email{daniel.sabanesbove@ifspm.uzh.ch}
+}
 \keyword{internal}
-\author{Daniel Sabanes Bove \email{daniel.sabanesbove@ifspm.uzh.ch}}
-\arguments{\item{.Object}{the \code{\linkS4class{HypergPrior}} we want to initialize}
-\item{a}{the hyperparameter value}
-\item{\dots}{unused}}
+\keyword{methods}
+

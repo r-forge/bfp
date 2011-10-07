@@ -1,32 +1,54 @@
 \name{plotCurveEstimate}
 \alias{plotCurveEstimate}
-\title{Function for plotting a fractional polynomial curve estimate...}
-\usage{plotCurveEstimate(samples, termName, plevel=0.95, slevel=plevel,
-    plot=TRUE, rug=FALSE, ...)}
-\description{Function for plotting a fractional polynomial curve estimate}
-\details{Plot a fractional polynomial curve estimate using samples from a single GLM
-model or a model average.}
-\value{a list of various plotting information:
-\item{original}{grid on the original covariate scale}
-\item{grid}{grid on the transformed scale}
-\item{mean}{pointwise mean curve values}
-\item{plower}{lower boundaries for pointwise HPD}
-\item{pupper}{upper boundaries for pointwise HPD}
-\item{slower}{lower boundaries for SCB}
-\item{supper}{upper boundaries for SCB}
-\item{obsVals}{observed values of the covariate on the original scale}
-\item{partialResids}{not implemented: partial residuals}
-\item{transform}{vector of shift and scale parameter}}
+\title{Function for plotting a fractional polynomial curve estimate}
+\usage{
+  plotCurveEstimate(samples, termName, plevel = 0.95,
+  slevel = plevel, plot = TRUE, rug = FALSE, ...)
+}
+\arguments{
+  \item{samples}{an object of class
+  \code{\linkS4class{GlmBayesMfpSamples}}, produced by
+  \code{\link{sampleGlm}} and \code{\link{sampleBma}}.}
+
+  \item{termName}{string denoting an FP term, as written by
+  the
+  \code{\link[=as.data.frame.GlmBayesMfp]{as.data.frame}}
+  method}
+
+  \item{plevel}{credible level for pointwise HPD, and
+  \code{NULL} means no pointwise HPD (default: 0.95)}
+
+  \item{slevel}{credible level for simultaneous credible
+  band (SCB), \code{NULL} means no SCB (defaults to
+  \code{plevel})}
+
+  \item{plot}{if \code{FALSE}, only return values needed to
+  produce the plot, but do not plot (default is
+  \code{TRUE}, so a plot is made)}
+
+  \item{rug}{add a rug to the plot? (default:
+  \code{FALSE})}
+
+  \item{\dots}{further arguments for plotting with
+  \code{\link{matplot}}}
+}
+\value{
+  a list of various plotting information:
+  \item{original}{grid on the original covariate scale}
+  \item{grid}{grid on the transformed scale}
+  \item{mean}{pointwise mean curve values}
+  \item{plower}{lower boundaries for pointwise HPD}
+  \item{pupper}{upper boundaries for pointwise HPD}
+  \item{slower}{lower boundaries for SCB}
+  \item{supper}{upper boundaries for SCB}
+  \item{obsVals}{observed values of the covariate on the
+  original scale} \item{partialResids}{not implemented:
+  partial residuals} \item{transform}{vector of shift and
+  scale parameter}
+}
+\description{
+  Plot a fractional polynomial curve estimate using samples
+  from a single GLM model or a model average.
+}
 \keyword{regression}
-\arguments{\item{samples}{an object of class \code{\linkS4class{GlmBayesMfpSamples}},
-produced by \code{\link{sampleGlm}} and \code{\link{sampleBma}}.}
-\item{termName}{string denoting an FP term, as written by the
-\code{\link[=as.data.frame.GlmBayesMfp]{as.data.frame}} method}
-\item{plevel}{credible level for pointwise HPD, and \code{NULL} means
-no pointwise HPD (default: 0.95)}
-\item{slevel}{credible level for simultaneous credible band (SCB),
-\code{NULL} means no SCB (defaults to \code{plevel})}
-\item{plot}{if \code{FALSE}, only return values needed to produce the
-plot, but do not plot (default is \code{TRUE}, so a plot is made)}
-\item{rug}{add a rug to the plot? (default: \code{FALSE})}
-\item{\dots}{further arguments for plotting with \code{\link{matplot}}}}
+

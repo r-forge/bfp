@@ -1,8 +1,18 @@
 \name{logMargLiks}
 \alias{logMargLiks}
-\title{Extract the log marginal likelihood estimates from a GlmBayesMfp object...}
-\usage{logMargLiks(GlmBayesMfpObject)}
-\description{Extract the log marginal likelihood estimates from a GlmBayesMfp object}
-\value{the vector of log marginal likelihood estimates}
+\title{Extract the log marginal likelihood estimates from a GlmBayesMfp object}
+\usage{
+  logMargLiks(GlmBayesMfpObject)
+}
+\arguments{
+  \item{GlmBayesMfpObject}{the object}
+}
+\value{
+  the vector of log marginal likelihood estimates
+}
+\description{
+  Extract the log marginal likelihood estimates from a
+  GlmBayesMfp object
+}
 \keyword{utilities}
-\arguments{\item{GlmBayesMfpObject}{the object}}
+

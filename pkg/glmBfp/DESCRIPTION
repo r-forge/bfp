@@ -1,23 +1,53 @@
 Package: glmBfp
-Imports: statmod, methods, coda, Runuran (>= 0.12)
-Maintainer: Daniel Sabanes Bove <daniel.sabanesbove@ifspm.uzh.ch>
+Imports:
+    statmod,
+    methods,
+    coda,
+    Runuran (>= 0.12)
+Maintainer: Daniel Sabanes Bove
+    <daniel.sabanesbove@ifspm.uzh.ch>
 License: GPL (>= 2)
 Title: Bayesian Fractional Polynomials for GLMs
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
-Author: Daniel Sabanes Bove <daniel.sabanesbove@ifspm.uzh.ch>
-Description: The package implements the Bayesian paradigm for
-    fractional polynomials in generalized linear models. See package
-    "bfp" for the treatment of normal models.
-Version: 0.0-24
-Date: 2011-08-03
-Depends: R (>= 2.12.0), Rcpp (>= 0.8.8), RcppArmadillo (>= 0.2.9)
-Collate: 'helpers.R' 'computeModels.R' 'constructNewdataMatrix.R'
-    'evalZdensity.R' 'formula.R' 'fpScale.R' 'getFpTransforms.R'
-    'getDesignMatrix.R' 'getFamily.R' 'getLogGPrior.R'
-    'getLogMargLikEstimate.R' 'getMarginalZ.R' 'getNullModelInfo.R'
-    'posteriors.R' 'GlmBayesMfp-methods.R' 'GPrior-classes.R'
-    'glmBayesMfp.R' 'GlmBayesMfpSamples-class.R'
-    'GlmBayesMfpSamples-methods.R' 'glmBfp-package.R' 'hpds.R'
-    'inclusionProbs.R' 'McmcOptions-class.R' 'McmcOptions-methods.R'
-    'optimize.R' 'plotCurveEstimate.R' 'sampleGlm.R' 'sampleBma.R'
+Author: Daniel Sabanes Bove
+    <daniel.sabanesbove@ifspm.uzh.ch>
+Description: The package implements the Bayesian paradigm
+    for fractional polynomials in generalized linear
+    models. See package "bfp" for the treatment of normal
+    models.
+Version: 0.0-25
+Date: 2011-10-07
+Depends:
+    R (>= 2.12.0),
+    Rcpp (>= 0.8.8),
+    RcppArmadillo (>= 0.2.9)
+Collate:
+    'helpers.R'
+    'computeModels.R'
+    'constructNewdataMatrix.R'
+    'evalZdensity.R'
+    'formula.R'
+    'fpScale.R'
+    'getFpTransforms.R'
+    'getDesignMatrix.R'
+    'getFamily.R'
+    'getLogGPrior.R'
+    'getLogMargLikEstimate.R'
+    'getMarginalZ.R'
+    'getNullModelInfo.R'
+    'posteriors.R'
+    'GlmBayesMfp-methods.R'
+    'GPrior-classes.R'
+    'glmBayesMfp.R'
+    'GlmBayesMfpSamples-class.R'
+    'GlmBayesMfpSamples-methods.R'
+    'glmBfp-package.R'
+    'hpds.R'
+    'inclusionProbs.R'
+    'McmcOptions-class.R'
+    'McmcOptions-methods.R'
+    'optimize.R'
+    'plotCurveEstimate.R'
+    'sampleGlm.R'
+    'sampleBma.R'

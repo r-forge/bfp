@@ -1,12 +1,12 @@
 \name{McmcOptions-class}
 \alias{McmcOptions-class}
-\title{Class for the three canonical MCMC options...}
-\description{Class for the three canonical MCMC options}
-\details{The slots are:
-\describe{
-\item{iterations}{number of MCMC iterations}
-\item{burnin}{number of burn-in iterations which are not saved}
-\item{step}{only every step-th iteration is saved after the burn-in}
-}}
+\title{Class for the three canonical MCMC options}
+\description{
+  The slots are: \describe{ \item{iterations}{number of
+  MCMC iterations} \item{burnin}{number of burn-in
+  iterations which are not saved} \item{step}{only every
+  step-th iteration is saved after the burn-in} }
+}
 \keyword{classes}
 \keyword{internal}
+
