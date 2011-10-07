@@ -1,3 +1,8 @@
+2011-10-07  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* inst/CITATION: The paper is now published in Statistics and
+	Computing, so I included the vol/number/page info.
+
 2011-01-26  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* R/plotCurveEstimate: Add options "partialResids" and "hpd" to
