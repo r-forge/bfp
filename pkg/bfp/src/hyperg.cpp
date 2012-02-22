@@ -27,8 +27,7 @@ double logPsi(double b, double c, int n, int p, double R2){
     	// there were numerical problems with hyp2f1, so we do a Laplace approximation:
     	
     	// components of quadratic equation in exp(tau) are
-    	double logAlpha = log(2 * b - pmodel - c) + log1p(-R2);
-    	double alpha = exp(logAlpha);
+    	double alpha = (2 * b - pmodel - c) * (1 - R2);
     	
     	double beta = 4 * b - pmodel - c + R2 * (n - 1 - 2 * b);
     	
@@ -73,7 +72,7 @@ double logBF_hyperg(double R2, int n, int p, double alpha)
      hyperg prior for regression coefficients; alpha > 2 
      log marginal for null model is 0 */
 
-	double ret;
+    double ret;
 	
     if (p == 1) 
     	ret = 0.0;
