@@ -1,5 +1,7 @@
 #include <hyperg.h>
 
+
+// 22/02/2012: corrected Laplace approximation formula
 // compute the log of the psi function,
 // either by calling the hyp2f1 function or by a Laplace approximation
 double logPsi(double b, double c, int n, int p, double R2){
@@ -32,22 +34,21 @@ double logPsi(double b, double c, int n, int p, double R2){
     	
     	double gamma = 2 * b;
     	
+    	// exp(hat(tau)) is the mode of g:
+    	double gMode = (- beta - sqrt(pow(beta, 2.0) - 4 * alpha * gamma)) / (2 * alpha);
+
     	// hat(tau)
-    	double tauMode = log(- beta + sqrt(pow(beta, 2.0) - 4 * alpha * gamma)) 
-    					- M_LN2 - logAlpha;
-    	
-       	// exp(hat(tau)) is the mode of g:
-    	double gMode = exp(tauMode);
-    	
+    	double tauMode = log(gMode);
+
     	// the log integrand evaluated at the mode is
     	double logIntegrandAtTauMode = b * tauMode 
-    								+ (n - 1 - pmodel - c) / 2.0 * log1p(gMode)
-    								- (n - 1) / 2.0 * log1p((1 - R2) * gMode);
+    				       + (n - 1 - pmodel - c) / 2.0 * log1p(gMode)
+    				       - (n - 1) / 2.0 * log1p((1 - R2) * gMode);
     	
     	// the log variance is
     	double logSigma2 = 
-    		- M_LN2
-    		+ tauMode
+    		M_LN2
+    		- tauMode
     		- logspace_sub(
     				log(static_cast<double>(n - 1)) + log1p(-R2) - 2 * log1p((1 - R2) * gMode),
     				log(n - 1 - pmodel - c) - 2 * log1p(gMode) 
