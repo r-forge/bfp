@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[glmBayesMfp.R] by DSB Fre 29/07/2011 15:12 (CEST)>
+## Time-stamp: <[glmBayesMfp.R] by DSB Mit 15/02/2012 15:43 (CET)>
 ##
 ## Description:
 ## Main user interface for Bayesian inference for fractional polynomials in generalized linear
@@ -45,6 +45,8 @@
 ##              case of binary logistic regression.
 ## 08/07/2011   add the new modelPrior option "dependent"
 ## 29/07/2011   now "higherOrderCorrection"
+## 15/02/2012   check that not two terms contain the same covariate in
+##              the formula
 #####################################################################################
 
 ##' @include helpers.R
@@ -260,6 +262,16 @@ glmBayesMfp <-
     ## consistency check:
     stopifnot(identical(length(ucTermList), nUcGroups))
 
+    ## check that not two entries are present for any covariate,
+    ## i.e. the covariate names must be unique
+    if(! identical(covariates,
+                   unique(covariates)))
+    {
+        stop(simpleError(paste("Duplicate covariates in formula:",
+                               paste(covariates[duplicated(covariates)],
+                                     sep=", "))))
+    }
+    
     ## build new formula from the cleaned covariate entries
     newFormula <-                       # is saved for predict method at the end
         update (sortedFormula,
