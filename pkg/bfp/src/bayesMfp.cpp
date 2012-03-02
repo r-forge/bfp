@@ -1097,7 +1097,7 @@ double getVarLogPrior( // compute varying part of logarithm of model prior
         for (unsigned int i = 0; i != currFp.nFps; i++)
         { // for each fp covariate
             unsigned int degree = mod.fpPars.at(i).size();
-            double thisVal = -lchoose(currFp.fpcards[i] - 1 + degree, degree)
+            double thisVal = -Rf_lchoose(currFp.fpcards[i] - 1 + degree, degree)
                     - log1p(currFp.fpmaxs[i]);
             thisVarLogPrior.add(thisVal);
         }
@@ -1145,8 +1145,8 @@ double getVarLogPrior( // compute varying part of logarithm of model prior
             //                              Note: degree 0 and linear degree 1 FP are subtracted
         }
 
-        double result = - log1p(nCovs) - lchoose(nCovs, nIncluded) -
-                log1p(nInclContinuous) - lchoose(nInclContinuous, nonlinearFps.size()) -
+        double result = - log1p(nCovs) - Rf_lchoose(nCovs, nIncluded) -
+                log1p(nInclContinuous) - Rf_lchoose(nInclContinuous, nonlinearFps.size()) -
                 sumLogNonlinearPossibilities;
 
         return result;

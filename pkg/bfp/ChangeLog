@@ -1,3 +1,8 @@
+2012-03-01  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* src/various: Use Rcpp for creation of results lists, in order to
+	avoid strange memory-suspicious errors.
+
 2012-02-22  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* src/hyperg.cpp: Corrected the computation of the Laplace

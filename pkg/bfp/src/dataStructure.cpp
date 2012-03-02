@@ -7,6 +7,7 @@
 #include <cassert>
 #include <algorithm>
 #include <numeric>
+#include <rcppExport.h>
 
 using std::lexicographical_compare;
 using std::pair;
@@ -16,6 +17,10 @@ using std::min;
 using std::accumulate;
 using std::max;
 using std::max_element;
+
+using Rcpp::List;
+using Rcpp::NumericVector;
+using Rcpp::_;
 
 // model info functions
 modelInfo& modelInfo::operator=(const modelInfo& m)
@@ -31,51 +36,18 @@ modelInfo& modelInfo::operator=(const modelInfo& m)
 	return *this;	
 }
 	
-SEXP
+List
 modelInfo::convert2list(double addLogMargLikConst,
                         long double logNormConst,
                         const book& bookkeep) const
 {
-    // allocate return list
-    SEXP ret;
-    Rf_protect(ret = Rf_allocVector(VECSXP, 6));
-
-    SEXP names;
-    Rf_protect(names = Rf_allocVector(STRSXP, 6));
-
-    Rf_setAttrib(ret, R_NamesSymbol, names);
-    Rf_unprotect(1);
-
-    // assemble components
-    SET_VECTOR_ELT(ret, 0, Rf_ScalarReal(logMargLik + addLogMargLikConst));
-    SET_STRING_ELT(names, 0, Rf_mkChar("logM"));
-
-    SET_VECTOR_ELT(ret, 1, Rf_ScalarReal(logPrior));
-    SET_STRING_ELT(names, 1, Rf_mkChar("logP"));
-
-    SEXP posterior;
-    Rf_protect(posterior = Rf_allocVector(REALSXP, 2));
-
-    SET_VECTOR_ELT(ret, 2, posterior);
-    SET_STRING_ELT(names, 2, Rf_mkChar("posterior"));
-
-    REAL(posterior)[0] = exp(logPost - logNormConst);
-    REAL(posterior)[1] = hits * 1.0 / bookkeep.chainlength;
-
-    Rf_unprotect(1);
-
-    SET_VECTOR_ELT(ret, 3, Rf_ScalarReal(postExpectedg));
-    SET_STRING_ELT(names, 3, Rf_mkChar("postExpectedg"));
-
-    SET_VECTOR_ELT(ret, 4, Rf_ScalarReal(postExpectedShrinkage));
-    SET_STRING_ELT(names, 4, Rf_mkChar("postExpectedShrinkage"));
-
-    SET_VECTOR_ELT(ret, 5, Rf_ScalarReal(R2));
-    SET_STRING_ELT(names, 5, Rf_mkChar("R2"));
-
-    // unprotect and return
-    Rf_unprotect(1);
-    return ret;
+    return List::create(_["logM"] = logMargLik + addLogMargLikConst,
+                        _["logP"] = logPrior,
+                        _["posterior"] = NumericVector::create(exp(logPost - logNormConst),
+                                                               hits * 1.0 / bookkeep.chainlength),
+                        _["postExpectedg"] = postExpectedg,
+                        _["postExpectedShrinkage"] = postExpectedShrinkage,
+                        _["R2"] = R2);
 }
 
 // model parameter functions
@@ -108,90 +80,56 @@ int modelPar::size() const
 	return fpSize + ucSize;
 }
 
-SEXP
+List
 modelPar::convert2list(const fpInfo& currFp) const
 {
-    // allocate return list
-    SEXP ret;
-    Rf_protect(ret = Rf_allocVector(VECSXP, 2));
-
-    SEXP names;
-    Rf_protect(names = Rf_allocVector(STRSXP, 2));
-
-    Rf_setAttrib(ret, R_NamesSymbol, names);
-    Rf_unprotect(1);
-
     // powers
-    SEXP powers;
-    Rf_protect(powers = Rf_allocVector(VECSXP, nFps));
-    Rf_setAttrib(powers, R_NamesSymbol, currFp.fpnames);
+    List powers(nFps);
+    powers.names() = currFp.fpnames;
 
-    for (PosInt i = 0; i != nFps; i++)
+    for (PosInt i = 0; i != nFps; ++i)
     {
-        SEXP thesePowers;
-        Rf_protect(thesePowers = Rf_allocVector(REALSXP, fpPars[i].size()));
-
-        currFp.inds2powers(fpPars[i], REAL(thesePowers));
-
-        SET_VECTOR_ELT(powers, i, thesePowers);
-        Rf_unprotect(1);
+        powers[i] = currFp.inds2powers(fpPars[i]);
     }
 
-    SET_VECTOR_ELT(ret, 0, powers);
-    Rf_unprotect(1);
-    SET_STRING_ELT(names, 0, Rf_mkChar("powers"));
-
-    // ucTerms
-    SEXP ucTerms;
-    Rf_protect(ucTerms = Rf_allocVector(INTSXP, ucSize));
-
-    copy(ucPars.begin(), ucPars.end(), INTEGER(ucTerms));
-
-    SET_VECTOR_ELT(ret, 1, ucTerms);
-    Rf_unprotect(1);
-    SET_STRING_ELT(names, 1, Rf_mkChar("ucTerms"));
-
-    Rf_unprotect(1);
-    return ret;
+    // return with uc settings
+    return List::create(_["powers"] = powers,
+                        _["ucTerms"] = ucPars);
 }
 
 
 // internal helper function to combine the contents of
 // two named R lists into one named R list
-static SEXP
-combineLists(SEXP firstList, SEXP secondList)
+List
+combineLists(List firstList, List secondList)
 {
-    // allocate result list with names
-    const R_len_t nFirst = Rf_length(firstList);
-    const R_len_t nSecond = Rf_length(secondList);
+    // allocate result list
+    List ret(firstList.length() + secondList.length());
 
-    SEXP ret;
-    Rf_protect(ret = Rf_allocVector(VECSXP, nFirst + nSecond));
+    // collect the names
+    StringVector names;
 
-    SEXP names;
-    Rf_protect(names = Rf_allocVector(STRSXP, nFirst + nSecond));
-
-    Rf_setAttrib(ret, R_NamesSymbol, names);
-    Rf_unprotect(1);
+    StringVector firstNames = firstList.names();
+    StringVector secondNames = secondList.names();
 
     // now fill in contents of the first list
-    SEXP firstNames = Rf_getAttrib(firstList, R_NamesSymbol);
-    for(R_len_t i = 0; i < nFirst; ++i)
+    for(R_len_t i = 0; i < firstList.length(); ++i)
     {
-        SET_VECTOR_ELT(ret, i, VECTOR_ELT(firstList, i));
-        SET_STRING_ELT(names, i, STRING_ELT(firstNames, i));
+        ret[i] = firstList[i];
+        names.push_back(firstNames.at(i));
     }
 
     // now fill in contents of the second list
-    SEXP secondNames = Rf_getAttrib(secondList, R_NamesSymbol);
-    for(R_len_t i = 0; i < nSecond; ++i)
+    for(R_len_t i = 0; i < secondList.length(); ++i)
     {
-        SET_VECTOR_ELT(ret, i + nFirst, VECTOR_ELT(secondList, i));
-        SET_STRING_ELT(names, i + nFirst, STRING_ELT(secondNames, i));
+        ret[i + firstList.length()] = secondList[i];
+        names.push_back(secondNames.at(i));
     }
 
+    // assign names to list
+    ret.names() = names;
+
     // unprotect and return
-    Rf_unprotect(1);
     return ret;
 }
 
@@ -325,13 +263,21 @@ fpInfo::fpInfo(SEXP R_nFps,
 }
 
 
-void fpInfo::inds2powers(const Powers &m, double* p) const // convert inds m into power array p
+DoubleVector
+fpInfo::inds2powers(const Powers& m) const // convert inds m (a "Powers" object) into powers vector p (a DoubleVector)
 {
-	unsigned int i = 0;
-	for (Powers::const_iterator j = m.begin(); j != m.end(); i++, j++){
-		p[i] = powerset[*j];
-	}
+    DoubleVector ret;
+
+    for (Powers::const_iterator j = m.begin();
+            j != m.end();
+            j++)
+    {
+        ret.push_back(powerset[*j]);
+    }
+
+    return ret;
 }
+
 
 // safeSum //
 
@@ -641,18 +587,19 @@ ModelCache::getLinearInclusionProbs(long double logNormConstant, PosInt nFps) co
     return ret;
 }
 
+
+
 // convert the best nModels from the cache into an R list
-SEXP
+List
 ModelCache::getListOfBestModels(const fpInfo& currFp,
                                 double addLogMargLikConst,
                                 long double logNormConst,
                                 const book& bookkeep) const
 {
-    // allocate the return R-list
-    SEXP ret;
-
+    // allocate the return list
+    List ret(std::min(bookkeep.nModels,
+                      static_cast<PosInt>(modelIterSet.size())));
     // cast is necessary for gcc-4.2 on Mac on R-forge.
-    Rf_protect(ret = Rf_allocVector(VECSXP, min(bookkeep.nModels, static_cast<PosInt>(modelIterSet.size()))));
 
     // process the ordered list of best models from the end (because the set is ordered increasingly)
     PosInt i = 0;
@@ -663,13 +610,12 @@ ModelCache::getListOfBestModels(const fpInfo& currFp,
     {
         // and for this model, combine the config and info lists to one list and
         // put that in the i-th slot of the return list.
-        SET_VECTOR_ELT(ret, i, combineLists((**s).first.convert2list(currFp),
-                                            (**s).second.convert2list(addLogMargLikConst,
-                                                                      logNormConst,
-                                                                      bookkeep)));
+        ret[i] = combineLists((**s).first.convert2list(currFp),
+                              (**s).second.convert2list(addLogMargLikConst,
+                                                        logNormConst,
+                                                        bookkeep));
     }
 
-    // unprotect and return
-    Rf_unprotect(1);
+    // return
     return ret;
 }

@@ -8,6 +8,8 @@
 #include <iterator>
 #include <types.h>
 
+#include <rcppExport.h>
+
 
 struct safeSum
 {
@@ -90,7 +92,7 @@ struct fpInfo{ // collects all information on fractional polynomials needed to b
            const Matrix& x);
 
     // convert inds m into power array p
-    void inds2powers(const Powers &m, double* p) const;
+    DoubleVector inds2powers(const Powers &m) const;
 };
 
 
@@ -114,7 +116,7 @@ struct modelInfo{ // contents: must be assignable
 
 	modelInfo& operator=(const modelInfo& m); // assignment operator
 
-	SEXP
+	Rcpp::List
 	convert2list(double addLogMargLikConst,
                      long double logNormConst,
                      const book& bookkeep) const;
@@ -137,7 +139,7 @@ struct modelPar{ // key: must have a strict weak ordering
 	
 	int size() const;
 
-	SEXP
+	Rcpp::List
 	convert2list(const fpInfo& currFp) const;
 };
 
@@ -259,7 +261,7 @@ public:
     getLinearInclusionProbs(long double logNormConstant, PosInt nFps) const;
 
     // convert the best nModels from the cache into an R list
-    SEXP
+    Rcpp::List
     getListOfBestModels(const fpInfo& currFp,
                         double addLogMargLikConst,
                         long double logNormConst,
