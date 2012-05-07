@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mit 26/01/2011 14:35 (CET)>
+## Time-stamp: <[plotCurveEstimate.BmaSamples.R] by DSB Mit 25/04/2012 15:54 (CEST)>
 ##
 ## Description:
 ## Plot predictor curve estimates based on (MC) Bayesian model average.
@@ -19,6 +19,7 @@
 ## 20/09/2010   create matplotList$y in such a way that no R CMD check note is
 ##              triggered.
 ## 26/01/2011   add options "partialResids" and "hpd"
+## 25/04/2012   add "median" as output
 #####################################################################################
 
 ## todo: options partialResids and hpd as in hypergsplines!
@@ -53,6 +54,7 @@ plotCurveEstimate.BmaSamples <-
 
     ## compute pwise data
     ret$mean <- colMeans(mat, na.rm=TRUE)
+    ret$median <- apply(mat, 2L, median, na.rm=TRUE)
 
     if (!is.null (plevel)){
         plowerUpper <-

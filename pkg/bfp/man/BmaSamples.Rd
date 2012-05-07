@@ -10,7 +10,7 @@
 \usage{
 BmaSamples(object, sampleSize = length(object) * 10, postProbs =
 posteriors(object), gridList = list(), gridSize = 203, newdata=NULL,
-verbose = TRUE)  
+verbose = TRUE, includeZeroSamples=FALSE)  
 }
 
 \arguments{
@@ -27,6 +27,10 @@ verbose = TRUE)
     preferably ranges) as before (default: no new covariate data)}  
   \item{verbose}{should information on sampling progress be printed?
     (default)}
+  \item{includeZeroSamples}{should the function and coefficient samples
+    include zero samples, from models where these covariates are not
+    included at all? (default: \code{FALSE}, so the zero samples are
+    not included)}
 }
 
 \value{
@@ -106,5 +110,9 @@ newdata <- data.frame(x1 = rnorm(15),
                       x3 = rexp(n=15))
 testBma <- BmaSamples(test, newdata=newdata)
 predict(testBma)
+
+## test that inclusion of zero samples works
+testBma <- BmaSamples (test, includeZeroSamples=TRUE)
+testBma
 }
 \keyword{regression}

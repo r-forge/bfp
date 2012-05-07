@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BmaSamples.R] by DSB Don 17/06/2010 16:03 (CEST)>
+## Time-stamp: <[BmaSamples.R] by DSB Mit 25/04/2012 16:17 (CEST)>
 ##
 ## Description:
 ## Sample from models in a BayesMfp object using "BmaSamples" for MC model averaging
@@ -32,6 +32,9 @@
 ##              actual predictive samples for "newdata" are now generated at the
 ##              end of the function.
 ## 17/06/2010   correct shifting of the new design matrix columns
+## 25/04/2012   add option to include 0 samples (when the FP or linear covariate
+##              is not included in the model), defaults to FALSE for backwards
+##              compatibility
 #####################################################################################
 
 BmaSamples <-
@@ -44,7 +47,8 @@ BmaSamples <-
              gridSize = 203, # obvious. if there are many observed values, gridSize may be much
                                         # lower!
              newdata = NULL, # new covariate data with exactly the names (and preferably ranges) as before
-             verbose = TRUE)  # should information on progress been printed?             
+             verbose = TRUE,  # should information on progress been printed?
+             includeZeroSamples=FALSE)  # include zero samples?
 {
     ## check the length of the object
     if(! (length(object) >= 1))
@@ -90,9 +94,7 @@ BmaSamples <-
         if(length(objNames) == 1)       # if there is only one model ...
         {
             rep(objNames, sampleSize)
-        }
-        else                            # else more than one model ...
-        {
+        } else {                          # else more than one model ...
             sample (objNames,
                     size = sampleSize,
                     replace = TRUE,
@@ -124,8 +126,18 @@ BmaSamples <-
     for (i in fpIndsSeq){
         fpName <- termNames$bfp[i]
 
-        m <- sapply (nams, function (one) as.logical (length (object[[ one ]]$powers[[i]])))
-        m <- sum (m * ret$modelFreqs)
+        ## determine number of samples for this FP
+        m <-
+            if(includeZeroSamples)
+            {
+                sampleSize
+            } else {
+                tmp <- sapply (nams,
+                               function (one){
+                                   as.logical (length (object[[one]]$powers[[i]]))})
+        
+                sum (tmp * ret$modelFreqs)
+            }
         
         if (m > 0){
             ## determine additional grid values:
@@ -155,11 +167,21 @@ BmaSamples <-
     ret$uc <- list ()                   
     for (i in seq_along (inds$ucList)){
         ucName <- termNames$uc[i]
+
+        ## determine number of samples for this UC group
+        m <-
+            if(includeZeroSamples)
+            {
+                sampleSize
+            } else {
+                tmp <- sapply (nams,
+                               function (one){
+                                   any (object[[ one ]]$ucTerms == i)})
+                sum (tmp * ret$modelFreqs)
+            }
         
-        m <- sapply (nams, function (one) any (object[[ one ]]$ucTerms == i))
-        m <- sum (m * ret$modelFreqs)
-        
-        if (m > 0){
+        if(m > 0)
+        {
             mat <- matrix (nrow = m, ncol = length (inds$ucList[[i]]),
                            dimnames = list (NULL, colNames[inds$ucList[[i]]]))
             attr (mat, "counter") <- 0  # counts how many samples are already in the matrix
@@ -169,7 +191,7 @@ BmaSamples <-
     }
 
     ## here are the model-specific fits from all models in object:
-    ret$fitted <- matrix (nrow = length (object), ncol = nObs)
+    ret$fitted <- matrix (nrow = length(object), ncol = nObs)
 
     ## for samples from the posterior predictive means:
     if(nNewObs > 0L)
@@ -185,8 +207,10 @@ BmaSamples <-
 
     ## now sample from each model as often as indicated by the modelFreqs
     ## and save fit and predictive samples
-    sampleCounter <- 0             # invariant: already sampleCounter samples processed
-    for (j in seq_along (object)){ # process every model in object (to obtain fitted values along the way)
+    sampleCounter <- 0      # invariant: already sampleCounter samples processed 
+    ## process every model in object (to obtain fitted values along the way) 
+    for (j in seq_along (object)) 
+    {
         if (verbose)
             cat (j, " ")
 
@@ -200,7 +224,8 @@ BmaSamples <-
                                         # expected shrinkage factor
         ret$fitted[j, ] <- fitted (mod, design = design, post = post) # to obtain fit
 
-        if ((modName <- names (mod)) %in% nams){     # sampling from this model?
+        if((modName <- names (mod)) %in% nams)     # sampling from this model?
+        {
             m <- ret$modelFreqs[modName]
             oneInds <- seq_len (m)
 
@@ -273,44 +298,72 @@ BmaSamples <-
                     ## and add this to the predictive means
                     ret$predictMeans[, sampleCounter + oneInds] <-
                         ret$predictMeans[, sampleCounter + oneInds] +
-                            newDesignNonFixed %*% simCoefs 
+                            newDesignNonFixed %*% simCoefs
+                    
+                }
+            }
+
+            ## sort samples into containers, from upper to lower coefficients
+            rowCounter <- 0                 # invariant: already rowCounter rows of simCoefs processed         
+
+            for (k in fpIndsSeq){           # next: fp functions means
+                fpName <- termNames$bfp[k]
+                at <- attributes (ret$bfp[[fpName]])                                  
+                pi <- mod[[1]]$powers[[k]]
+                
+                if (len <- length (pi)) # if there is at least one power
+                {
+                    xMat <- getFpTransforms (at[["scaledGrid"]], pi, center=TRUE)
+                    means <-  xMat %*% simCoefs[rowCounter + seq_len (len),, 
+                                                drop = FALSE]
+                    
+                    rowCounter <- rowCounter + len
+                } else if(includeZeroSamples) { # no power, but include zero samples
+
+                    means <- matrix(data=0,
+                                    nrow=nrow(at[["scaledGrid"]]),
+                                    ncol=m)
                 }
 
-                ## sort samples into containers, from upper to lower coefficients
-                rowCounter <- 0                 # invariant: already rowCounter rows of simCoefs processed         
+                if((len > 0L) | includeZeroSamples)
+                {
+                    count <- at[["counter"]]
+                    ret$bfp[[fpName]][count + oneInds, ] <- t(means)
+                    attr (ret$bfp[[fpName]], "counter") <- count + m
+                }
+            }
 
-                for (k in fpIndsSeq){           # next: fp functions means
-                    fpName <- termNames$bfp[k]
+            for(ucInd in seq_along(termNames$uc)) # uncertain fixed form
+            {
+                ucName <- termNames$uc[ucInd]
+                p <- ncol(ret$uc[[ucName]])
+
+                if(ucInd %in% mod[[1]]$ucTerms) # if included
+                {
+                    coefSamples <- 
+                        simCoefs[rowCounter + seq_len(p), ]
                     
-                    pi <- mod[[1]]$powers[[k]]
-                    if (len <- length (pi)) {          # if there is at least one power
-                        at <- attributes (ret$bfp[[fpName]])
-                        count <- at[["counter"]]
-
-                        xMat <- getFpTransforms (at[["scaledGrid"]], pi, center=TRUE)
-                        means <-  xMat %*% simCoefs[rowCounter + seq_len (len), , drop = FALSE]
-                        rowCounter <- rowCounter + len
-
-                        ret$bfp[[fpName]][count + oneInds, ] <- t(means)
-                        attr (ret$bfp[[fpName]], "counter") <- count + m
-                    }
+                    rowCounter <- rowCounter + p   
+                } else if(includeZeroSamples) { # not included, but include
+                                        # zero samples
+                    coefSamples <-
+                        matrix(data=0,
+                               nrow=p,
+                               ncol=m)
                 }
 
-                for (ucInd in mod[[1]]$ucTerms){# uncertain fixed form
-                    ucName <- termNames$uc[ucInd]
-                    
+                if((ucInd %in% mod[[1]]$ucTerms) | includeZeroSamples)
+                {
                     count <- attr (ret$uc[[ucName]], "counter")
-
-                    ret$uc[[ucName]][count + oneInds, ] <-
-                        t(simCoefs[rowCounter + seq_len (p <- ncol(ret$uc[[ucName]])), ])
-                    rowCounter <- rowCounter + p
-
+                    ret$uc[[ucName]][count + oneInds, ] <- t(coefSamples)
                     attr (ret$uc[[ucName]], "counter") <- count + m
                 }
             }
+
             sampleCounter <- sampleCounter + m # correct invariant
         }
     }
+    
 
     ## add predictive samples (mainly for backwards compatibility)
     if(nNewObs > 0L)

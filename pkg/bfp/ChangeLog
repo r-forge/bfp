@@ -1,3 +1,9 @@
+2012-04-25  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/plotCurveEstimate.BmaSamples.R: add "median" as output
+
+	* R/BmaSamples.R: add option to include zero samples
+
 2012-03-01  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* src/various: Use Rcpp for creation of results lists, in order to

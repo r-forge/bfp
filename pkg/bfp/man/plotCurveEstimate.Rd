@@ -57,7 +57,10 @@ hpd=TRUE,..., main = NULL)
   \item{original}{grid on the original covariate scale}
   \item{grid}{grid on the transformed scale}
   \item{mode}{mode curve values, only for \code{\link{BayesMfp}} object}
-  \item{mean}{pointwise mean curve values, only for \code{\link{BmaSamples}} object}
+  \item{mean}{pointwise mean curve values, only for
+    \code{\link{BmaSamples}} object}
+  \item{median}{pointwise median curve values, only for
+  \code{\link{BmaSamples}} object} 
   \item{plower}{lower boundaries for pointwise intervals}
   \item{pupper}{upper boundaries for pointwise intervals}
   \item{slower}{lower boundaries for SCB}
