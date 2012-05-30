@@ -1,3 +1,7 @@
+2012-05-30  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Minor changes in hope to pass R CMD check on R-Forge.
+
 2012-04-25  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* R/plotCurveEstimate.BmaSamples.R: add "median" as output

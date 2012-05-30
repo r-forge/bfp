@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ## 
-## Time-stamp: <[BayesMfp.R] by DSB Fre 14/01/2011 16:27 (CET)>
+## Time-stamp: <[BayesMfp.R] by DSB Mit 30/05/2012 13:32 (CEST)>
 ##
 ## Description:
 ## Main function of the bfp package: Bayesian Inference for a multivariate
@@ -96,7 +96,7 @@ getNumberPossibleFps <- function (  # computes number of possible univariate fps
     }
 
     ## evaluate call for model frame building
-    m <- match.call(expand = FALSE)
+    m <- match.call(expand.dots = FALSE)
 
     ## select normal parts of the call
     temp <- c("", "formula", "data", "subset", "na.action") # "" is the function name
@@ -135,7 +135,7 @@ getNumberPossibleFps <- function (  # computes number of possible univariate fps
         stop (simpleError("No fractional polynomial terms in formula! Aborting."))
 
     vars <- attr (Terms, "variables")    # language object
-    varlist <- eval (vars, env = data)              # list
+    varlist <- eval(vars, envir = data)              # list
     covariates <- paste(as.list (vars)[-c(1,2)]) # vector with covariate entries (no list or response or Intercept)
 
     bfpInner <- varlist[bfpTermInd]     # saved for later use
@@ -175,7 +175,7 @@ getNumberPossibleFps <- function (  # computes number of possible univariate fps
     m$formula <- newTerms
     m$scale <- m$family <- m$verbose <- NULL
     m[[1]] <- as.name("model.frame")
-    m <- eval(m, sys.parent())
+    m <- eval(m, envir=sys.parent())
     Y <- model.response(m, type = "double")
 
     ## build design matrix

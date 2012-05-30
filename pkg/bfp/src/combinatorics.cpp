@@ -47,12 +47,9 @@ void ksub_next ( int n, int k, IntVector& a, bool *more, int &m, int &m2)
 
   if ( k < 0 || n < k )
   {
-    cout << "\n";
-    cout << "KSUB_NEXT - Fatal error!\n";
-    cout << "N = " << n << "\n";
-    cout << "K = " << k << "\n";
-    cout << "but 0 <= K <= N is required!\n";
-    exit ( 1 );
+      Rf_error("\nKSUB_NEXT - Fatal error!\nN = %d\nK = %d\nbut 0 <= K <= N is required!\n",
+               n,
+               k);
   }
 
   if ( !( *more ) )
