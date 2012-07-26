@@ -3,8 +3,9 @@
 \title{Construct a (smooth) marginal z density approximation from a model
 information list}
 \usage{
-  getMarginalZ(info, method = c("linear", "spline",
-  "logspline", "normalspline", "normal"), plot = FALSE)
+  getMarginalZ(info,
+    method = c("linear", "spline", "logspline", "normalspline", "normal"),
+    plot = FALSE)
 }
 \arguments{
   \item{info}{the model information list}

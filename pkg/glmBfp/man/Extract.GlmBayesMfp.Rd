@@ -1,7 +1,10 @@
 \name{Extract.GlmBayesMfp}
 \alias{Extract.GlmBayesMfp}
-\alias{"[.GlmBayesMfp"}
+\alias{[.GlmBayesMfp}
 \title{Extract method for GlmBayesMfp objects}
+\usage{
+  \method{[}{GlmBayesMfp} (x, ...)
+}
 \arguments{
   \item{x}{valid \code{\link{GlmBayesMfp}} object}
 

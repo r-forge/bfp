@@ -2,9 +2,9 @@
 \alias{sampleBma}
 \title{Produce posterior samples from a Bayesian model average over GLMs}
 \usage{
-  sampleBma(object, mcmc = McmcOptions(), postProbs =
-  posteriors(object), nMargLikSamples = NULL, verbose =
-  TRUE, ...)
+  sampleBma(object, mcmc = McmcOptions(),
+    postProbs = posteriors(object), nMargLikSamples = NULL,
+    verbose = TRUE, ...)
 }
 \arguments{
   \item{object}{valid \code{GlmBayesMfp} object containing

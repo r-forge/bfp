@@ -3,15 +3,16 @@
 \alias{GlmBayesMfp}
 \title{Bayesian model inference for fractional polynomial GLMs}
 \usage{
-  glmBayesMfp(formula = formula(data), data =
-  parent.frame(), weights, family = gaussian, phi = 1,
-  empiricalBayes = FALSE, priorSpecs = list(gPrior =
-  HypergPrior(), modelPrior = "sparse"), method = c("ask",
-  "exhaustive", "sampling"), subset, na.action = na.omit,
-  verbose = TRUE, debug = FALSE, nModels, nCache = 1e+09,
-  chainlength = 10000, nGaussHermite = 20, useBfgs = FALSE,
-  largeVariance = 100, useOpenMP = TRUE,
-  higherOrderCorrection = FALSE)
+  glmBayesMfp(formula = formula(data),
+    data = parent.frame(), weights, family = gaussian,
+    phi = 1, empiricalBayes = FALSE,
+    priorSpecs = list(gPrior = HypergPrior(), modelPrior = "sparse"),
+    method = c("ask", "exhaustive", "sampling"), subset,
+    na.action = na.omit, verbose = TRUE, debug = FALSE,
+    nModels, nCache = 1e+09, chainlength = 10000,
+    nGaussHermite = 20, useBfgs = FALSE,
+    largeVariance = 100, useOpenMP = TRUE,
+    higherOrderCorrection = FALSE)
 }
 \arguments{
   \item{formula}{model formula}

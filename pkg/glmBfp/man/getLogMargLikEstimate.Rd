@@ -3,7 +3,7 @@
 \title{Compute the Chib-Jeliazkov log marginal likelihood estimate from the MCMC output}
 \usage{
   getLogMargLikEstimate(numeratorTerms, denominatorTerms,
-  highDensityPointLogUnPosterior, endLag = 40L)
+    highDensityPointLogUnPosterior, endLag = 40L)
 }
 \arguments{
   \item{numeratorTerms}{terms for the sum in the numerator

@@ -2,10 +2,11 @@
 \alias{sampleGlm}
 \title{Produce posterior samples from one GLM}
 \usage{
-  sampleGlm(object, mcmc = McmcOptions(), estimateMargLik =
-  TRUE, gridList = list(), gridSize = 203L, newdata = NULL,
-  fixedZ = NULL, marginalZApprox = NULL, verbose = TRUE,
-  debug = FALSE, useOpenMP = TRUE)
+  sampleGlm(object, mcmc = McmcOptions(),
+    estimateMargLik = TRUE, gridList = list(),
+    gridSize = 203L, newdata = NULL, fixedZ = NULL,
+    marginalZApprox = NULL, verbose = TRUE, debug = FALSE,
+    useOpenMP = TRUE)
 }
 \arguments{
   \item{object}{the \code{GlmBayesMfp} object, from which

@@ -2,8 +2,8 @@
 \alias{cppOptimize}
 \title{Interface to the internal C++ optimization routine "optimize"}
 \usage{
-  cppOptimize(f_, min.x, max.x, prec =
-  .Machine$double.eps^0.25)
+  cppOptimize(f_, min.x, max.x,
+    prec = .Machine$double.eps^0.25)
 }
 \arguments{
   \item{f_}{the function}

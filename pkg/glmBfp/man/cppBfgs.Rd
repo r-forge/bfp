@@ -2,8 +2,8 @@
 \alias{cppBfgs}
 \title{Interface to the internal C++ optimization routine "bfgs"}
 \usage{
-  cppBfgs(x0, f_, min.x = c(-Inf), max.x = c(+Inf), prec =
-  1e-05, verbose = FALSE)
+  cppBfgs(x0, f_, min.x = c(-Inf), max.x = c(+Inf),
+    prec = 1e-05, verbose = FALSE)
 }
 \arguments{
   \item{x0}{the start value}

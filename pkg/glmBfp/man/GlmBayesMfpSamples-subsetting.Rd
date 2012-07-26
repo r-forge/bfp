@@ -1,11 +1,7 @@
 \name{GlmBayesMfpSamples-subsetting}
-\alias{"[,GlmBayesMfpSamples,ANY,missing,missing-method"}
+\alias{[,GlmBayesMfpSamples,ANY,missing,missing-method}
 \alias{GlmBayesMfpSamples-subsetting}
 \title{Subset method for GlmBayesMfpSamples objects}
-\usage{
-  \S4method{[}{GlmBayesMfpSamples,ANY,missing,missing}(x,
-  i)
-}
 \arguments{
   \item{x}{the \code{\linkS4class{GlmBayesMfpSamples}}
   object}

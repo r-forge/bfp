@@ -17,8 +17,6 @@
 
   \item{rangeVals}{extra numbers if the shifting and
   scaling should consider values in this range}
-
-  \item{x}{the covariate name}
 }
 \value{
   name of the provided covariate, with the other function

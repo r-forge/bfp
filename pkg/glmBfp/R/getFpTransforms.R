@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[getFpTransforms.R] by DSB Fre 02/07/2010 15:51 (CEST)>
+## Time-stamp: <[getFpTransforms.R] by DSB Fre 15/06/2012 16:05 (CEST)>
 ##
 ## Description:
 ## Transform a variable according to FP transformation formula and attach proper
@@ -10,6 +10,7 @@
 ##
 ## History:
 ## 06/01/2010   copy from package bfp, slightly pimp and add Roxygen stuff
+## 15/06/2012   simplify %bt% documentation for new roxygen package
 #####################################################################################
 
 
@@ -22,9 +23,8 @@
 ##' @param pow the single power
 ##' @return the transformed vector
 ##'
-##' @usage '\%bt\%'(x, pow)
 ##' @name boxTidwell
-##' @aliases boxTidwell '\%bt\%'
+##' @aliases boxTidwell '%bt%'
 ##' @keywords utilities internal
 '%bt%' <- function (x,            
                     pow)

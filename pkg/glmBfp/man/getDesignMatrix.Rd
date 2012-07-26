@@ -3,7 +3,7 @@
 \title{Construct the design matrix for a given bfp GLM model}
 \usage{
   getDesignMatrix(modelConfig = object[[1]]$configuration,
-  object, fixedColumns = TRUE)
+    object, fixedColumns = TRUE)
 }
 \arguments{
   \item{modelConfig}{the model configuration list which

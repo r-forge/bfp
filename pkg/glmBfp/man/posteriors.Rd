@@ -2,8 +2,8 @@
 \alias{posteriors}
 \title{Extract posterior model probability estimates from a GlmBayesMfp object}
 \usage{
-  posteriors(GlmBayesMfpObject, type = c("normalized",
-  "sampling"))
+  posteriors(GlmBayesMfpObject,
+    type = c("normalized", "sampling"))
 }
 \arguments{
   \item{GlmBayesMfpObject}{the object}

@@ -3,7 +3,7 @@
 \alias{'\%bt\%'}
 \title{Box Tidwell transformation}
 \usage{
-  '\%bt\%'(x, pow)
+  %bt%(x, pow)
 }
 \arguments{
   \item{x}{the numeric vector}

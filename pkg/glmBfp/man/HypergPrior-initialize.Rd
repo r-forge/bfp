@@ -1,11 +1,7 @@
 \name{HypergPrior-initialize}
-\alias{"HypergPrior-initialize"}
 \alias{HypergPrior-initialize}
-\alias{"initialize,HypergPrior-method"}
+\alias{initialize,HypergPrior-method}
 \title{Initialization method for the "HypergPrior" class}
-\usage{
-  \S4method{initialize}{HypergPrior}(.Object, a, \dots)
-}
 \arguments{
   \item{.Object}{the \code{\linkS4class{HypergPrior}} we
   want to initialize}

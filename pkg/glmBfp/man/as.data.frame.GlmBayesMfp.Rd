@@ -3,7 +3,7 @@
 \title{Convert a GlmBayesMfp object into a data frame}
 \usage{
   \method{as.data.frame}{GlmBayesMfp} (x, row.names = NULL,
-  ..., freq = TRUE)
+    ..., freq = TRUE)
 }
 \arguments{
   \item{x}{valid \code{\link{GlmBayesMfp}} object}

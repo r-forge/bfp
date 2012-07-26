@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[glmBayesMfp.R] by DSB Mit 15/02/2012 15:43 (CET)>
+## Time-stamp: <[glmBayesMfp.R] by DSB Fre 15/06/2012 16:04 (CEST)>
 ##
 ## Description:
 ## Main user interface for Bayesian inference for fractional polynomials in generalized linear
@@ -189,7 +189,7 @@ glmBayesMfp <-
 
     
     ## evaluate call for model frame building
-    m <- match.call(expand = FALSE)
+    m <- match.call(expand.dots = FALSE)
 
     ## select normal parts of the call
     temp <- c("", "formula", "data", "weights", "subset", "na.action") # "" is the function name
@@ -231,7 +231,7 @@ glmBayesMfp <-
     
     ## get vector with covariate entries
     vars <- attr (Terms, "variables")    # language object
-    varlist <- eval (vars, env = data)              # list
+    varlist <- eval (vars, envir = data)              # list
     covariates <- paste(as.list (vars)[-c(1,2)]) # vector with covariate entries (no list or response or Intercept)
 
     ## remove bfp() from entries and save the inner arguments

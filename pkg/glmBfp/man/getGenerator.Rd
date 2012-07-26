@@ -4,7 +4,7 @@
 constant)}
 \usage{
   getGenerator(method, unnormDensFun, xVals,
-  unnormDensVals)
+    unnormDensVals)
 }
 \arguments{
   \item{method}{the methods string}

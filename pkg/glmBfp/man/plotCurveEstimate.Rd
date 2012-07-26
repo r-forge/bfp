@@ -3,7 +3,7 @@
 \title{Function for plotting a fractional polynomial curve estimate}
 \usage{
   plotCurveEstimate(samples, termName, plevel = 0.95,
-  slevel = plevel, plot = TRUE, rug = FALSE, ...)
+    slevel = plevel, plot = TRUE, rug = FALSE, ...)
 }
 \arguments{
   \item{samples}{an object of class

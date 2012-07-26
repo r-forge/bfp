@@ -1,12 +1,7 @@
 \name{InvGammaGPrior-initialize}
-\alias{"initialize,InvGammaGPrior-method"}
-\alias{"InvGammaGPrior-initialize"}
+\alias{initialize,InvGammaGPrior-method}
 \alias{InvGammaGPrior-initialize}
 \title{Initialization method for the "InvGammaGPrior" class}
-\usage{
-  \S4method{initialize}{InvGammaGPrior}(.Object, a, b,
-  \dots)
-}
 \arguments{
   \item{.Object}{the \code{\linkS4class{InvGammaGPrior}} we
   want to initialize}

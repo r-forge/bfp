@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanés Bové [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ##        
-## Time-stamp: <[formula.R] by DSB Mit 18/11/2009 15:16 (CET)>
+## Time-stamp: <[formula.R] by DSB Fre 15/06/2012 16:04 (CEST)>
 ##
 ## Description:
 ## Helper functions for formula construction.
@@ -11,6 +11,7 @@
 ## 18/11/2009   file creation: extra file for this seems to be better.
 ##              Try to get one Rd file with rdname roclets (see make.Rd2.roclet documentation 
 ##              in roxygen package)
+## 15/06/2012   remove x documentation from uc so that it is not duplicate
 #####################################################################################
 
 ##' Mark a covariate for transformation with fractional polynomials
@@ -47,8 +48,6 @@ bfp <-function (x,
 ##' Using this function, you can mark a covariate or a group of combined covariates for joint
 ##' variable selection (\dQuote{uncertain covariate fixed form covariate groups}) in the formula for
 ##' \code{\link{glmBayesMfp}}. 
-##'
-##' @param x the covariate name
 ##'
 ##' @return Just the name of the provided covariate
 ##'

@@ -2,8 +2,8 @@
 \alias{scrHpd}
 \title{Calculate an SCB from a samples matrix}
 \usage{
-  scrHpd(samples, mode = apply(samples, 1, median), level =
-  0.95)
+  scrHpd(samples, mode = apply(samples, 1, median),
+    level = 0.95)
 }
 \arguments{
   \item{samples}{m by n matrix where m is the number of
