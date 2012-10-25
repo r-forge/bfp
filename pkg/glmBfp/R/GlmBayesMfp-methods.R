@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[GlmBayesMfp-methods.R] by DSB Die 25/05/2010 16:08 (CEST)>
+## Time-stamp: <[GlmBayesMfp-methods.R] by DSB Mit 24/10/2012 15:27 (CEST)>
 ##
 ## Description:
 ## Additional convenience methods for GlmBayesMfp class objects.
@@ -97,7 +97,7 @@ as.data.frame.GlmBayesMfp <- function (x,
     ## posterior probabilites:
     ret <- data.frame (posterior=
                        posteriors(x, type="normalized"))
-    if (! is.null(attr (x, "chainlength")) &&
+    if (! is.null(attr(x, "searchConfig")$chainlength) &&
         freq)
         ret$frequency <- posteriors (x, type="sampling")
 

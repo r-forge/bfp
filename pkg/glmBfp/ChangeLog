@@ -1,3 +1,10 @@
+2012-10-24  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/GlmBayesMfp-methods.R: correct extraction of Monte Carlo model
+	probability estimates.
+
+	* Add vignette with Pima Indian data set example.
+
 2012-07-26  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Small changes in documentation.
