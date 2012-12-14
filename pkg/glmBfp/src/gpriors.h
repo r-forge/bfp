@@ -11,7 +11,9 @@
 #ifndef GPRIORS_H_
 #define GPRIORS_H_
 
-#include <Rmath.h>
+#include <rcppExport.h>
+#include <functionWraps.h>
+
 
 // ***************************************************************************************************//
 
@@ -25,6 +27,13 @@ struct GPrior
     // we need a virtual destructor here,
     // cf. Accelerated C++ pp. 242 ff.
     virtual ~GPrior(){}
+
+    // add method which is only overwritten by the incomplete inverse gamma class
+    virtual double
+    getTBFLogMargLik(double residualDeviance, int df) const
+    {
+        return R_NaReal;
+    }
 };
 
 // ***************************************************************************************************//
@@ -46,6 +55,35 @@ public:
     {
         return - (a + 1.0) * log(g) - b / g + a * log(b) - Rf_lgammafn(a);
     }
+
+private:
+    // the parameters for the inverse gamma density
+    const double a;
+    const double b;
+};
+
+// ***************************************************************************************************//
+
+// Incomplete Inverse gamma g prior
+
+class IncInvGammaGPrior : public GPrior
+{
+public:
+    // ctr
+    IncInvGammaGPrior(double a, double b) :
+        a(a),
+        b(b)
+        {
+        }
+
+    // Log prior density
+    double
+    logDens(double g) const;
+
+    // for this class we have a closed form for the log marginal likelihood
+    // resulting from the TBF approach
+    double
+    getTBFLogMargLik(double residualDeviance, int df) const;
 
 private:
     // the parameters for the inverse gamma density

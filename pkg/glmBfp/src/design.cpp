@@ -83,20 +83,33 @@ getFpMatrix(const std::vector<AVector>& tcols,
 // ***************************************************************************************************//
 
 // construct centered design matrix including intercept for the model
+// optionally the intercept column is not included
 AMatrix
 getDesignMatrix(const ModelPar &mod,
                 const DataValues &data,
                 const FpInfo &fpInfo,
-                const UcInfo& ucInfo)
+                const UcInfo& ucInfo,
+                bool includeIntercept)
 {
-    // initialize the return matrix: it has p + 1 columns
-    AMatrix ret(data.nObs, mod.size(ucInfo) + 1);
+    // total number of columns
+    int nColumns = mod.size(ucInfo);
+    if(includeIntercept)
+    {
+        ++nColumns;
+    }
 
-    // start with the intercept column
-    ret.col(0) = data.onesVector;
+    // initialize the return matrix
+    AMatrix ret(data.nObs, nColumns);
 
     // invariant: nextColumn is the next column to be written
-    PosInt nextColumn = 1;
+    PosInt nextColumn = 0;
+
+    // start with the intercept column?
+    if(includeIntercept)
+    {
+        ret.col(0) = data.onesVector;
+        ++nextColumn;
+    }
 
     // go on with centered fp matrices
     for (PosInt i = 0; i != fpInfo.nFps; i++)

@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanés Bové [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: BFPs for GLMs
 ##        
-## Time-stamp: <[getNullModelInfo.R] by DSB Mit 30/06/2010 14:34 (CEST)>
+## Time-stamp: <[getNullModelInfo.R] by DSB Mit 21/11/2012 10:00 (CET)>
 ##
 ## Description:
 ## Internal helper function to compute all information about the null model.
@@ -16,19 +16,19 @@
 ##              the likelihood is not zero. The "integrate" routine can fail easily
 ##              there!
 ## 30/06/2010   include the 2 * pi constant in the log marginal likelihood
+## 21/11/2012   include null deviance in return list for TBFs ("nullDeviance")
 #####################################################################################
 
 
 ##' Internal helper function to compute all information about the null model
 ##'
-##' This function is used by \code{\link{glmBayesMfp}}. It still includes a lot of
-##' unnecessary code for demonstration purposes (especially for the marginal likelihood
-##' computation).
+##' This function is used by \code{\link{glmBayesMfp}}.
 ##' 
 ##' @param family the family object including the loglikelihood etc.
 ##' @return a list including the elements
 ##' \describe{
 ##' \item{logMargLik}{log marginal likelihood of the null model}
+##' \item{nullDeviance}{the deviance of the null model}
 ##' }
 ##' 
 ##' @keywords internal
@@ -76,8 +76,11 @@ getNullModelInfo <- function(family)
     ## value of the loglikelihood at the mode
     modeLogLik <- gaussApproxOptim$val
 
+    ## also the null deviance is given by
+    ret$nullDeviance <- - 2 * modeLogLik
+
     ## so the Laplace approximation is
-    ret$logMargLik <- modeLogLik + 0.5 * log(2 * pi / beta0Prec)
+    ret$logMargLik <- modeLogLik + 0.5 * log(2 * pi / beta0Prec)    
 
     ## --------------------------------------------------
     ## return the list

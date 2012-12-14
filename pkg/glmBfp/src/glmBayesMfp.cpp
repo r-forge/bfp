@@ -38,7 +38,7 @@ using namespace Rcpp;
 
 // ***************************************************************************************************//
 
-// compute varying part of log marginal likelihood for specific GLM model
+// compute varying part of log marginal likelihood for specific GLM / Cox model
 // plus byproducts.
 double
 getGlmVarLogMargLik(const ModelPar &mod,
@@ -51,7 +51,8 @@ getGlmVarLogMargLik(const ModelPar &mod,
                     Cache& cache,
                     double& zMode,
                     double& zVar,
-                    double& laplaceApprox)
+                    double& laplaceApprox,
+                    double& residualDeviance)
 {
     // echo detailed progress in debug mode
     if(bookkeep.debug)
@@ -62,6 +63,9 @@ getGlmVarLogMargLik(const ModelPar &mod,
     // check if any interrupt signals have been entered
     R_CheckUserInterrupt();
 
+    // the return value will be placed in here:
+    double ret = 0.0;
+
     // protect everything for problems in IWLS
     try
     {
@@ -71,18 +75,54 @@ getGlmVarLogMargLik(const ModelPar &mod,
                                             fpInfo,
                                             ucInfo,
                                             config,
-                                            // If we want empirical Bayes for z, then we want the
-                                            // *conditional* density f(y | z).
-                                            bookkeep.empiricalBayes,
-                                            bookkeep.debug,
-                                            bookkeep.higherOrderCorrection);
+                                            bookkeep);
+        residualDeviance = negLogUnnormZDens.getResidualDeviance();
+
+        // try to ask for analytic solutions in the TBF case
+        // (they are available for the incomplete inverse gamma hyperprior)
+        if(bookkeep.tbf)
+        {
+            if(bookkeep.debug)
+            {
+                Rprintf("\ngetGlmVarLogMargLik: TBF used, ask for analytic solution ...");
+            }
+
+            if(bookkeep.empiricalBayes)
+            {
+                ret = negLogUnnormZDens.getTBFMaxLogCondMargLik(zMode);
+
+                if(bookkeep.debug)
+                {
+                    Rprintf("\ngetGlmVarLogMargLik: local empirical Bayes estimate of g is %f", exp(zMode));
+                }
+            }
+            else
+            {
+                ret = negLogUnnormZDens.getTBFLogMargLik();
+            }
+
+            if(! R_IsNA(ret))
+            {
+                if(bookkeep.debug)
+                {
+                    Rprintf("\ngetGlmVarLogMargLik: analytic solution was found with result %f", ret);
+                }
+                return ret;
+            }
+            else
+            {
+                if(bookkeep.debug)
+                {
+                    Rprintf("\ngetGlmVarLogMargLik: no analytic solution possible for this hyperprior on g");
+                }
+            }
+
+            // if no analytic solutions are available, we continue with the code below
+        }
 
         // cache this function, because we do not want to evaluate it more often
         // than necessary.
         CachedFunction<NegLogUnnormZDens> cachedNegLogUnnormZDens(negLogUnnormZDens);
-
-        // the return value will be placed in here:
-        double ret = 0;
 
         if(bookkeep.empiricalBayes)
         {
@@ -232,11 +272,8 @@ getGlmVarLogMargLik(const ModelPar &mod,
             stream << "getGlmVarLogMargLik got non-finite log marginal likelihood approximation " << ret;
             throw std::domain_error(stream.str().c_str());
         }
-
-        // only then return the estimate
-        return ret;
     }
-    catch (std::domain_error error)
+    catch (std::domain_error& error)
     {
         if(bookkeep.debug)
         {
@@ -245,6 +282,9 @@ getGlmVarLogMargLik(const ModelPar &mod,
 
         return R_NaN;
     }
+
+    // only then return the estimate
+    return ret;
 }
 
 // ***************************************************************************************************//
@@ -325,6 +365,8 @@ getVarLogPrior(
 
 // ***************************************************************************************************//
 
+// 21/11/2012: modify for tbf methodology
+
 // compute (varying part of) marginal likelihood and prior of model and insert it into model set
 void
 computeGlm(const ModelPar &mod,
@@ -349,6 +391,7 @@ computeGlm(const ModelPar &mod,
     double zMode = R_NaReal;
     double zVar = R_NaReal;
     double laplaceApprox = R_NaReal;
+    double residualDeviance = R_NaReal;
     Cache cache;
 
     // compute log marginal likelihood, and also as byproducts unnormalized z density information.
@@ -361,7 +404,7 @@ computeGlm(const ModelPar &mod,
     else // not the null model, so at least one other coefficient than the intercept present in the model
     {
         thisVarLogMargLik = getGlmVarLogMargLik(mod, data, fpInfo, ucInfo, bookkeep, config, gaussHermite,
-                                                cache, zMode, zVar, laplaceApprox);
+                                                cache, zMode, zVar, laplaceApprox, residualDeviance);
     }
 
     // if we get back NaN
@@ -374,7 +417,7 @@ computeGlm(const ModelPar &mod,
     else
     {
         // put all into the modelInfo
-        GlmModelInfo info(thisVarLogMargLik, thisLogPrior, cache, zMode, zVar, laplaceApprox);
+        GlmModelInfo info(thisVarLogMargLik, thisLogPrior, cache, zMode, zVar, laplaceApprox, residualDeviance);
 
         // altogether we have the model:
         Model thisModel(mod, info);
@@ -632,7 +675,7 @@ glmSampling(const DataValues& data,
     old.logPrior = logPrior;
 
     // put all into the modelInfo
-    GlmModelInfo startInfo(old.logMargLik, logPrior, Cache(), R_NaReal, R_NaReal, R_NaReal);
+    GlmModelInfo startInfo(old.logMargLik, logPrior, Cache(), R_NaReal, R_NaReal, R_NaReal, 0.0);
 
     modelCache.insert(old.modPar, startInfo);
 
@@ -805,6 +848,7 @@ glmSampling(const DataValues& data,
                 double zMode = 0.0;
                 double zVar = 0.0;
                 double laplaceApprox = 0.0;
+                double residualDeviance = R_NaReal;
                 Cache cache;
 
                 // so we must compute the log marg lik now.
@@ -818,7 +862,8 @@ glmSampling(const DataValues& data,
                                                  cache,
                                                  zMode,
                                                  zVar,
-                                                 laplaceApprox);
+                                                 laplaceApprox,
+                                                 residualDeviance);
 
                 // check if the new model is OK
                 if (R_IsNaN(now.logMargLik))
@@ -845,7 +890,8 @@ glmSampling(const DataValues& data,
                                                cache,
                                                zMode,
                                                zVar,
-                                               laplaceApprox));
+                                               laplaceApprox,
+                                               residualDeviance));
                 }
             }
             else // "now" is an old model
@@ -989,6 +1035,9 @@ glmExhaustive(const DataValues& data,
 
 // ***************************************************************************************************//
 
+// 21/11/2012: add tbf option
+// 03/12/2012: add Cox regression with tbfs
+
 // R call is:
 //
 //Ret <-
@@ -1043,6 +1092,8 @@ cpp_glmBayesMfp(SEXP r_interface)
     const AVector y(n_y.begin(), n_y.size(),
                    false);
 
+    const IntVector censInd = as<IntVector>(rcpp_data["censInd"]);
+
     // FP configuration:
 
     // vector of maximum fp degrees
@@ -1084,7 +1135,7 @@ cpp_glmBayesMfp(SEXP r_interface)
     try {
         onlyComputeModelsInList = true;
         List rcpp_modelConfigs = rcpp_searchConfig["modelConfigs"];
-    } catch (std::exception e) {
+    } catch (std::exception& e) {
         onlyComputeModelsInList = false;
     }
     // we need to try-catch it because there might be no element "modelConfigs" in
@@ -1093,6 +1144,8 @@ cpp_glmBayesMfp(SEXP r_interface)
     // distributions info:
 
     const std::string modelPrior = as<std::string>(rcpp_distribution["modelPrior"]);
+    const bool doGlm = as<bool>(rcpp_distribution["doGlm"]);
+    const bool tbf = as<bool>(rcpp_distribution["tbf"]);
     List rcpp_nullModelInfo = rcpp_distribution["nullModelInfo"];
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
@@ -1118,7 +1171,7 @@ cpp_glmBayesMfp(SEXP r_interface)
     IntSet fixedCols;
     fixedCols.insert(1);
 
-    const DataValues data(x, xCentered, y, totalNumber, fixedCols);
+    const DataValues data(x, xCentered, y, censInd, totalNumber, fixedCols);
 
     // FP configuration:
     const FpInfo fpInfo(fpcards, fppos, fpmaxs, fpnames, x);
@@ -1139,7 +1192,9 @@ cpp_glmBayesMfp(SEXP r_interface)
     const UcInfo ucInfo(ucSizes, maxUcDim, ucIndices, ucColList);
 
     // model search configuration:
-    Book bookkeep(empiricalBayes,
+    Book bookkeep(tbf,
+                  doGlm,
+                  empiricalBayes,
                   chainlength,
                   doSampling,
                   verbose,

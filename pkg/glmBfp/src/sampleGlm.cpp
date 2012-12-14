@@ -10,6 +10,8 @@
 #include <dataStructure.h>
 #include <types.h>
 #include <iwls.h>
+#include <design.h>
+#include <coxfit.h>
 #include <bfgs.h>
 #include <optimize.h>
 #include <fpUcHandling.h>
@@ -47,11 +49,14 @@ struct Options
             bool debug,
             bool isNullModel,
             bool useFixedZ,
+            bool tbf,
+            bool doGlm,
             PosInt iterations,
             PosInt burnin,
             PosInt step) :
         estimateMargLik(estimateMargLik), verbose(verbose),
                 debug(debug), isNullModel(isNullModel), useFixedZ(useFixedZ),
+                tbf(tbf), doGlm(doGlm),
                 nSamples(ceil((iterations - burnin) * 1.0 / step)),
                 iterations(iterations), burnin(burnin),
                 step(step)
@@ -63,12 +68,37 @@ struct Options
     const bool debug;
     const bool isNullModel;
     const bool useFixedZ;
+    const bool tbf;
+    const bool doGlm;
 
     const PosInt nSamples;
     const PosInt iterations;
     const PosInt burnin;
     const PosInt step;
 };
+
+// ***************************************************************************************************//
+
+// this is just for being sure that the memory is returned correctly even in case
+// of an error or user interrupt from R.
+struct Fitter
+{
+    Fitter() :
+        iwlsObject(0),
+        coxfitObject(0)
+    {}
+
+    ~Fitter()
+    {
+        delete iwlsObject;
+        delete coxfitObject;
+    }
+
+    Iwls * iwlsObject;
+    Coxfit * coxfitObject;
+};
+
+
 
 // ***************************************************************************************************//
 
@@ -226,8 +256,8 @@ drawNormalVector(const AVector& mean,
 {
     // get vector from N(0, I)
     AVector w = drawNormalVariates(mean.n_rows, // as many normal variates as required by the dimension.
-                                   0,
-                                   1);
+                                   0.0,
+                                   1.0);
 
     // then solve L' * ret = w, and overwrite w with the result:
     trs(false,
@@ -315,6 +345,8 @@ cpp_sampleGlm(SEXP r_interface)
     const AVector y(n_y.begin(), n_y.size(),
                    false);
 
+    const IntVector censInd = as<IntVector>(rcpp_data["censInd"]);
+
     // FP configuration:
 
     // vector of maximum fp degrees
@@ -344,7 +376,8 @@ cpp_sampleGlm(SEXP r_interface)
     List rcpp_nullModelInfo = rcpp_distribution["nullModelInfo"];
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
-
+    const bool tbf = as<bool>(rcpp_distribution["tbf"]);
+    const bool doGlm = as<bool>(rcpp_distribution["doGlm"]);
 
     // options:
 
@@ -380,7 +413,7 @@ cpp_sampleGlm(SEXP r_interface)
      fixedCols.insert(1);
 
      // totalnumber is set to 0 because we do not care about it.
-     const DataValues data(x, xCentered, y, 0, fixedCols);
+     const DataValues data(x, xCentered, y, censInd, 0, fixedCols);
 
      // FP configuration:
      const FpInfo fpInfo(fpcards, fppos, fpmaxs, fpnames, x);
@@ -417,6 +450,8 @@ cpp_sampleGlm(SEXP r_interface)
                            debug,
                            isNullModel,
                            useFixedZ,
+                           tbf,
+                           doGlm,
                            iterations,
                            burnin,
                            step);
@@ -441,23 +476,49 @@ cpp_sampleGlm(SEXP r_interface)
      // prepare the sampling
      // ----------------------------------------------------------------------------------
 
-     // construct IWLS object, which can be used for all IWLS stuff,
-     // and also contains the design matrix etc
-     Iwls iwlsObject(thisModel.par,
-                     data,
-                     fpInfo,
-                     ucInfo,
-                     config,
-                     config.linPredStart,
-                     options.useFixedZ,
-                     EPS,
-                     options.debug);
+     Fitter fitter;
+     int nCoefs;
 
-     // check that we have the same answer about the null model as R
-     assert(iwlsObject.isNullModel == options.isNullModel);
+     if(options.doGlm)
+     {
+         // construct IWLS object, which can be used for all IWLS stuff,
+         // and also contains the design matrix etc
+         fitter.iwlsObject = new Iwls(thisModel.par,
+                                      data,
+                                      fpInfo,
+                                      ucInfo,
+                                      config,
+                                      config.linPredStart,
+                                      options.useFixedZ,
+                                      EPS,
+                                      options.debug,
+                                      options.tbf);
+
+         nCoefs = fitter.iwlsObject->nCoefs;
+
+         // check that we have the same answer about the null model as R
+         assert(fitter.iwlsObject->isNullModel == options.isNullModel);
+     }
+     else
+     {
+         AMatrix design = getDesignMatrix(thisModel.par, data, fpInfo, ucInfo, false);
+         fitter.coxfitObject = new Coxfit(data.response,
+                                          data.censInd,
+                                          design,
+                                          config.weights,
+                                          arma::zeros<AVector>(data.nObs),
+                                          1);
+
+         // the number of coefficients (here it does not include the intercept!!)
+         nCoefs = design.n_cols;
+
+         // check that we do not have a null model here:
+         assert(nCoefs > 0);
+     }
+
 
      // allocate sample container
-     Samples samples(iwlsObject.nCoefs, options.nSamples);
+     Samples samples(nCoefs, options.nSamples);
 
      // count how many proposals we have accepted:
      PosInt nAccepted(0);
@@ -465,32 +526,101 @@ cpp_sampleGlm(SEXP r_interface)
      // at what z do we start?
      double startZ = useFixedZ ? rcpp_options["fixedZ"] : thisModel.info.zMode;
 
-     // get the mode for beta given the mode of the approximated marginal posterior as z
-     PosInt iwlsIterations = iwlsObject.startWithNewLinPred(30,
-                                                            // this is the corresponding g
-                                                            exp(startZ),
-                                                            // and the start value for the linear predictor is taken from the Glm model config
-                                                            config.linPredStart);
-
-     // echo debug-level message?
-     if(options.debug)
-     {
-         Rprintf("\ncpp_sampleGlm: Initial IWLS for high density point finished after %d iterations",
-                 iwlsIterations);
-     }
-
      // start container with current things
-     Mcmc now(marginalZ, data.nObs, iwlsObject.nCoefs);
+     Mcmc now(marginalZ, data.nObs, nCoefs);
 
-     // this is the current proposal info:
-     now.proposalInfo = iwlsObject.getResults();
+     if(doGlm)
+     {
+         // get the mode for beta given the mode of the approximated marginal posterior as z
+         // if TBF approach is used, this will be the only time the IWLS is used,
+         // because we only need the MLE and the Cholesky factor of its
+         // precision matrix estimate, which do not depend on z.
+         PosInt iwlsIterations = fitter.iwlsObject->startWithNewLinPred(40,
+                                                                        // this is the corresponding g
+                                                                        exp(startZ),
+                                                                        // and the start value for the linear predictor is taken from the Glm model config
+                                                                        config.linPredStart);
 
-     // and this is the current parameters sample:
-     now.sample = Parameter(now.proposalInfo.coefs,
-                            startZ);
+         // echo debug-level message?
+         if(options.debug)
+         {
+             Rprintf("\ncpp_sampleGlm: Initial IWLS for high density point finished after %d iterations",
+                     iwlsIterations);
+         }
 
-     // compute the (unnormalized) log posterior of the proposal
-     now.logUnPosterior = iwlsObject.computeLogUnPosteriorDens(now.sample);
+         // this is the current proposal info:
+         now.proposalInfo = fitter.iwlsObject->getResults();
+
+         // and this is the current parameters sample:
+         now.sample = Parameter(now.proposalInfo.coefs,
+                                startZ);
+
+         if(options.tbf)
+         {
+             // we will not compute this in the TBF case:
+             now.logUnPosterior = R_NaReal;
+
+             // start to compute the variance of the intercept parameter:
+
+             // here the inverse cholesky factor of the precision matrix will
+             // be stored. First, it's the identity matrix.
+             AMatrix inverseQfactor = arma::eye(now.proposalInfo.qFactor.n_rows,
+                                                now.proposalInfo.qFactor.n_cols);
+
+             // do the inversion
+             trs(false,
+                 false,
+                 now.proposalInfo.qFactor,
+                 inverseQfactor);
+
+             // now we can compute the variance of the intercept estimate:
+             const AVector firstCol = inverseQfactor.col(0);
+             const double interceptVar = arma::dot(firstCol, firstCol);
+
+             // ok, now alter the qFactor appropriately to reflect the
+             // independence assumption between the intercept estimate
+             // and the other coefficients estimates
+             now.proposalInfo.qFactor.col(0) = arma::zeros<AVector>(now.proposalInfo.qFactor.n_rows);
+             now.proposalInfo.qFactor(0, 0) = sqrt(1.0 / interceptVar);
+         }
+         else
+         {
+             // compute the (unnormalized) log posterior of the proposal
+             now.logUnPosterior = fitter.iwlsObject->computeLogUnPosteriorDens(now.sample);
+         }
+     }
+     else
+     {
+         PosInt coxfitIterations = fitter.coxfitObject->fit();
+         CoxfitResults coxResults = fitter.coxfitObject->finalizeAndGetResults();
+         fitter.coxfitObject->checkResults();
+
+         // echo debug-level message?
+         if(options.debug)
+         {
+             Rprintf("\ncpp_sampleGlm: Cox fit finished after %d iterations",
+                     coxfitIterations);
+         }
+
+         // we will not compute this in the TBF case:
+         now.logUnPosterior = R_NaReal;
+
+         // compute the Cholesky factorization of the covariance matrix
+         now.proposalInfo.qFactor = coxResults.imat;
+         int info = potrf(false,
+                          now.proposalInfo.qFactor);
+
+         // check that all went well
+         if(info != 0)
+         {
+             std::ostringstream stream;
+             stream << "dpotrf(coxResults.imat) got error code " << info << "in sampleGlm";
+             throw std::domain_error(stream.str().c_str());
+         }
+
+         // the MLE of the coefficients
+         now.proposalInfo.coefs = coxResults.coefs;
+     }
 
      // so the parameter object "now" is then also the high density point
      // required for the marginal likelihood estimate:
@@ -506,7 +636,14 @@ cpp_sampleGlm(SEXP r_interface)
      // echo debug-level message?
      if(options.debug)
      {
-         Rprintf("\ncpp_sampleGlm: Starting MCMC loop");
+         if(tbf)
+         {
+             Rprintf("\ncpp_sampleGlm: Starting MC simulation");
+         }
+         else
+         {
+             Rprintf("\ncpp_sampleGlm: Starting MCMC loop");
+         }
      }
 
 
@@ -527,74 +664,125 @@ cpp_sampleGlm(SEXP r_interface)
          // with the current setup of the RFunction wrapper class)
          now.sample.z = marginalZ.gen(1);
 
-         // then do 1 IWLS step, starting from the last linear predictor and the new z
-         // (here the return value is not very interesting, as it must be 1)
-         iwlsObject.startWithNewCoefs(1,
-                                      exp(now.sample.z),
-                                      now.sample.coefs);
-
-         // get the results
-         now.proposalInfo = iwlsObject.getResults();
-
-         // draw the proposal coefs:
-         now.sample.coefs = drawNormalVector(now.proposalInfo.coefs,
-                                             now.proposalInfo.qFactor);
-
-         // compute the (unnormalized) log posterior of the proposal
-         now.logUnPosterior = iwlsObject.computeLogUnPosteriorDens(now.sample);
-
-         // ----------------------------------------------------------------------------------
-         // get the reverse jump normal density
-         // ----------------------------------------------------------------------------------
-
-         // copy the old Mcmc object
-         Mcmc reverse(old);
-
-         // do again 1 IWLS step, starting from the sampled linear predictor and the old z
-         iwlsObject.startWithNewCoefs(1,
-                                      exp(reverse.sample.z),
-                                      now.sample.coefs);
-
-         // get the results for the reverse jump Gaussian:
-         // only the proposal has changed in contrast to the old container,
-         // the sample stays the same!
-         reverse.proposalInfo = iwlsObject.getResults();
-
-
-         // ----------------------------------------------------------------------------------
-         // compute the proposal density ratio
-         // ----------------------------------------------------------------------------------
-
-         // first the log of the numerator, i.e. log(f(old | new)):
-         double logProposalRatioNumerator = reverse.computeLogProposalDens();
-
-         // second the log of the denominator, i.e. log(f(new | old)):
-         double logProposalRatioDenominator = now.computeLogProposalDens();
-
-         // so the log proposal density ratio is
-         double logProposalRatio = logProposalRatioNumerator - logProposalRatioDenominator;
-
-         // ----------------------------------------------------------------------------------
-         // compute the posterior density ratio
-         // ----------------------------------------------------------------------------------
-
-         double logPosteriorRatio = now.logUnPosterior - old.logUnPosterior;
-
-         // ----------------------------------------------------------------------------------
-         // accept or reject proposal
-         // ----------------------------------------------------------------------------------
-
-         double acceptanceProb = exp(logPosteriorRatio + logProposalRatio);
-
-         if(unif() < acceptanceProb)
+         if(options.tbf)
          {
-             old = now;
+             if(options.isNullModel)
+             {
+                 // note that we do not encounter this in the Cox case
+                 assert(options.doGlm);
 
+                 // draw the proposal coefs, which is here just the intercept
+                 now.sample.coefs = drawNormalVector(now.proposalInfo.coefs,
+                                                     now.proposalInfo.qFactor);
+
+             }
+             else
+             {   // here we have at least one non-intercept coefficient
+
+                 // get vector from N(0, I)
+                 AVector w = drawNormalVariates(now.proposalInfo.coefs.n_elem,
+                                                0.0,
+                                                1.0);
+
+                 // then solve L' * ret = w, and overwrite w with the result:
+                 trs(false,
+                     true,
+                     now.proposalInfo.qFactor,
+                     w);
+
+                 // compute the shrinkage factor t = g / (g + 1)
+                 const double g = exp(now.sample.z);
+                 const double shrinkFactor = g / (g + 1.0);
+
+                 // scale the variance of the non-intercept coefficients
+                 // with this factor.
+                 // In the Cox case: no intercept present, so scale everything
+                 int startCoef = options.doGlm ? 1 : 0;
+
+                 w.rows(startCoef, w.n_rows - 1) *= sqrt(shrinkFactor);
+
+                 // also scale the mean of the non-intercept coefficients
+                 // appropriately:
+                 // In the Cox case: no intercept present, so scale everything
+                 now.sample.coefs = now.proposalInfo.coefs;
+                 now.sample.coefs.rows(startCoef, now.sample.coefs.n_rows - 1) *= shrinkFactor;
+
+                 // so altogether we have:
+                 now.sample.coefs += w;
+             }
              ++nAccepted;
          }
-         else
+         else // the generalized hyper-g prior case
          {
-             now = old;
+             // do 1 IWLS step, starting from the last linear predictor and the new z
+             // (here the return value is not very interesting, as it must be 1)
+             fitter.iwlsObject->startWithNewCoefs(1,
+                                                  exp(now.sample.z),
+                                                  now.sample.coefs);
+
+             // get the results
+             now.proposalInfo = fitter.iwlsObject->getResults();
+
+             // draw the proposal coefs:
+             now.sample.coefs = drawNormalVector(now.proposalInfo.coefs,
+                                                 now.proposalInfo.qFactor);
+
+             // compute the (unnormalized) log posterior of the proposal
+             now.logUnPosterior = fitter.iwlsObject->computeLogUnPosteriorDens(now.sample);
+
+             // ----------------------------------------------------------------------------------
+             // get the reverse jump normal density
+             // ----------------------------------------------------------------------------------
+
+             // copy the old Mcmc object
+             Mcmc reverse(old);
+
+             // do again 1 IWLS step, starting from the sampled linear predictor and the old z
+             fitter.iwlsObject->startWithNewCoefs(1,
+                                          exp(reverse.sample.z),
+                                          now.sample.coefs);
+
+             // get the results for the reverse jump Gaussian:
+             // only the proposal has changed in contrast to the old container,
+             // the sample stays the same!
+             reverse.proposalInfo = fitter.iwlsObject->getResults();
+
+
+             // ----------------------------------------------------------------------------------
+             // compute the proposal density ratio
+             // ----------------------------------------------------------------------------------
+
+             // first the log of the numerator, i.e. log(f(old | new)):
+             double logProposalRatioNumerator = reverse.computeLogProposalDens();
+
+             // second the log of the denominator, i.e. log(f(new | old)):
+             double logProposalRatioDenominator = now.computeLogProposalDens();
+
+             // so the log proposal density ratio is
+             double logProposalRatio = logProposalRatioNumerator - logProposalRatioDenominator;
+
+             // ----------------------------------------------------------------------------------
+             // compute the posterior density ratio
+             // ----------------------------------------------------------------------------------
+
+             double logPosteriorRatio = now.logUnPosterior - old.logUnPosterior;
+
+             // ----------------------------------------------------------------------------------
+             // accept or reject proposal
+             // ----------------------------------------------------------------------------------
+
+             double acceptanceProb = exp(logPosteriorRatio + logProposalRatio);
+
+             if(unif() < acceptanceProb)
+             {
+                 old = now;
+
+                 ++nAccepted;
+             }
+             else
+             {
+                 now = old;
+             }
          }
 
          // ----------------------------------------------------------------------------------
@@ -620,7 +808,10 @@ cpp_sampleGlm(SEXP r_interface)
              // ----------------------------------------------------------------------------------
 
              // compute marginal likelihood terms and save them?
-             if(options.estimateMargLik)
+             // (Note that the tbf bool is just for safety here,
+             // the R function sampleGlm will set estimateMargLik to FALSE
+             // when tbf is TRUE.)
+             if(options.estimateMargLik && (! options.tbf))
              {
                  // echo debug-level message?
                  if(options.debug)
@@ -636,17 +827,17 @@ cpp_sampleGlm(SEXP r_interface)
                  Mcmc denominator(highDensityPoint);
                  denominator.sample.z = marginalZ.gen(1);
 
-                 iwlsObject.startWithNewLinPred(1,
+                 fitter.iwlsObject->startWithNewLinPred(1,
                                                 exp(denominator.sample.z),
                                                 highDensityPoint.proposalInfo.linPred);
 
-                 denominator.proposalInfo = iwlsObject.getResults();
+                 denominator.proposalInfo = fitter.iwlsObject->getResults();
 
                  denominator.sample.coefs = drawNormalVector(denominator.proposalInfo.coefs,
                                                              denominator.proposalInfo.qFactor);
 
                  // get posterior density of the sample
-                 denominator.logUnPosterior = iwlsObject.computeLogUnPosteriorDens(denominator.sample);
+                 denominator.logUnPosterior = fitter.iwlsObject->computeLogUnPosteriorDens(denominator.sample);
 
                  // get the proposal density at the sample
                  double denominator_logProposalDensity = denominator.computeLogProposalDens();
@@ -656,10 +847,10 @@ cpp_sampleGlm(SEXP r_interface)
                  Mcmc revDenom(highDensityPoint);
 
                  // but choose the new sampled coefficients as starting point
-                 iwlsObject.startWithNewCoefs(1,
+                 fitter.iwlsObject->startWithNewCoefs(1,
                                               exp(revDenom.sample.z),
                                               denominator.sample.coefs);
-                 revDenom.proposalInfo = iwlsObject.getResults();
+                 revDenom.proposalInfo = fitter.iwlsObject->getResults();
 
                  // so the reverse proposal density is
                  double revDenom_logProposalDensity = revDenom.computeLogProposalDens();
@@ -677,10 +868,10 @@ cpp_sampleGlm(SEXP r_interface)
                  // compute the proposal density of the current sample starting from the high density point
                  Mcmc numerator(now);
 
-                 iwlsObject.startWithNewLinPred(1,
+                 fitter.iwlsObject->startWithNewLinPred(1,
                                                 exp(numerator.sample.z),
                                                 highDensityPoint.proposalInfo.linPred);
-                 numerator.proposalInfo = iwlsObject.getResults();
+                 numerator.proposalInfo = fitter.iwlsObject->getResults();
 
                  double numerator_logProposalDensity = numerator.computeLogProposalDens();
 
@@ -688,10 +879,10 @@ cpp_sampleGlm(SEXP r_interface)
                  // sample
                  Mcmc revNum(highDensityPoint);
 
-                 iwlsObject.startWithNewCoefs(1,
+                 fitter.iwlsObject->startWithNewCoefs(1,
                                               exp(revNum.sample.z),
                                               now.sample.coefs);
-                 revNum.proposalInfo = iwlsObject.getResults();
+                 revNum.proposalInfo = fitter.iwlsObject->getResults();
 
                  double revNum_logProposalDensity = revNum.computeLogProposalDens();
 
@@ -733,7 +924,14 @@ cpp_sampleGlm(SEXP r_interface)
      // echo debug-level message?
      if(options.debug)
      {
-         Rprintf("\ncpp_sampleGlm: Finished MCMC loop");
+         if(tbf)
+         {
+             Rprintf("\ncpp_sampleGlm: Finished MC simulation");
+         }
+         else
+         {
+             Rprintf("\ncpp_sampleGlm: Finished MCMC loop");
+         }
      }
 
 

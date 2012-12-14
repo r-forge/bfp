@@ -11,13 +11,11 @@
 \value{
   a list including the elements \describe{
   \item{logMargLik}{log marginal likelihood of the null
+  model} \item{nullDeviance}{the deviance of the null
   model} }
 }
 \description{
-  This function is used by \code{\link{glmBayesMfp}}. It
-  still includes a lot of unnecessary code for
-  demonstration purposes (especially for the marginal
-  likelihood computation).
+  This function is used by \code{\link{glmBayesMfp}}.
 }
 \author{
   Daniel Sabanes Bove

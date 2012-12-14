@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[sampleBma.R] by DSB Die 03/08/2010 11:43 (CEST)>
+## Time-stamp: <[sampleBma.R] by DSB Die 04/12/2012 09:29 (CET)>
 ##
 ## Description:
 ## Produce posterior samples from the Bayesian model average over models
@@ -20,6 +20,8 @@
 ## 26/07/2010   insert many drop=FALSE statements in matrix subsetting
 ## 03/08/2010   there are always z samples (even in the null model), so we do
 ##              need to catch special cases.
+## 26/11/2012   modifications to accommodate the TBF methodology
+## 04/12/2012   modifications to accommodate the Cox models
 #####################################################################################
 
 ##' @include GlmBayesMfp-methods.R
@@ -29,24 +31,30 @@
 ##' @include sampleGlm.R
 {}
 
-##' Produce posterior samples from a Bayesian model average over GLMs
+##' Produce posterior samples from a Bayesian model average over GLMs / Cox
+##' models
 ##'
 ##' Based on the result list from \code{\link{glmBayesMfp}}, sample from the
 ##' Bayesian model average (BMA) over the models contained in this list.
-##' 
-##' The sampling is based on MCMC. Therefore, instead of only specifying the
-##' required number of samples and the model probabilities, one also needs to
-##' specify the burn-in length and the thinning parameter, which will be
-##' applied to every model from which at least one sample is included in the
-##' average. Alternatively, you can ask for MCMC marginal likelihood estimates 
-##' for all models in the list. Then at least \code{nMargLikSamples} will be
-##' produced for each model, whether included in the BMA sample or not.
+##'
+##' If TBF methodology is used (which is specified within the \code{glmBayesMfp}
+##' object), then Monte Carlo (MC) sampling is used. If the fully Bayesian,
+##' generalized hyper-g prior methodology is used, then the sampling is based on
+##' MCMC. Therefore, instead of only specifying the required number of samples
+##' and the model probabilities, one also needs to specify the burn-in length
+##' and the thinning parameter, which will be applied to every model from which
+##' at least one sample is included in the average. Alternatively, you can ask
+##' for MCMC marginal likelihood estimates for all models in the list. Then at
+##' least \code{nMargLikSamples} will be produced for each model, whether
+##' included in the BMA sample or not.
 ##'
 ##' @param object valid \code{GlmBayesMfp} object containing the models over
 ##' which to average
 ##' @param mcmc MCMC options object with class \code{\linkS4class{McmcOptions}},
 ##' specifying the number of required BMA samples (via \code{sampleSize(mcmc)}),
 ##' and the burn-in and thinning parameters applied to each model (see above).
+##' If TBF is used, each sample is accepted, and the number of samples is given
+##' by \code{\link{sampleSize}}(\code{mcmc}).
 ##' @param postProbs vector of posterior probabilites (will be normalized within
 ##' the function) for the weighting of the models in \code{object} (defaults to
 ##' the normalized posterior probabilities)
@@ -91,9 +99,18 @@ sampleBma <-
     nModels <- length(object)
     if(! (nModels >= 1L))
         stop(simpleError("there has to be at least one model in the object"))
+
+    ## get attributes
+    attrs <- attributes(object)
+    
+    ## check whether tbf is used
+    tbf <- attrs$distribution$tbf
+
+    ## is this a GLM or a Cox model?
+    doGlm <- attrs$distribution$doGlm
     
     ## shall we do marginal likelihood estimations?
-    estimateMargLik <- ! is.null(nMargLikSamples)
+    estimateMargLik <- (! tbf) && (! is.null(nMargLikSamples))
     if(estimateMargLik)
     {
         ## then check if everything is OK
@@ -109,18 +126,25 @@ sampleBma <-
                         length(postProbs)),
               postProbs >= 0)
 
+    ## correct MCMC option
+    if(tbf)
+    {
+        mcmc <- McmcOptions(burnin=0L,
+                            step=1L,
+                            samples=sampleSize(mcmc))
+    }
+
     ## Start samples containers
     ## **************************************************
 
     ## "matrices"
-    fitted <- matrix(nrow=attr(object, "data")$nObs,
+    fitted <- matrix(nrow=attrs$data$nObs,
                      ncol=0L)
 
     ## we cannot give here the right number of rows,
     ## so use NULL to which we can cbind anything
     predictions <- NULL
             
-
     ## vectors
     fixed <-
         z <- numeric()
@@ -266,11 +290,14 @@ sampleBma <-
             z <- c(z,
                    thisOut$samples@z[keepSamples])
             
-            ## save the intercept samples
-            fixed <- c(fixed,
-                       thisOut$samples@fixed[keepSamples])
+            ## save the intercept samples, if there are any
+            if(length(thisOut$samples@fixed) > 0L)
+            {
+                fixed <- c(fixed,
+                           thisOut$samples@fixed[keepSamples])
+            }
 
-            ## save the fit samples on the response scale
+            ## save the fit samples on the linear predictor scale
             fitted <- cbind(fitted,
                             thisOut$samples@fitted[, keepSamples, drop=FALSE])
 
@@ -328,7 +355,7 @@ sampleBma <-
                     z=z,
                     bfpCurves=bfpCurves,
                     ucCoefs=ucCoefs,
-                    shiftScaleMax=attr(object, "shiftScaleMax"),
+                    shiftScaleMax=attrs$shiftScaleMax,
                     nSamples=nSamples))
 
     

@@ -9,7 +9,10 @@
 #define ZDENSITY_H_
 
 #include <iwls.h>
+#include <coxfit.h>
 #include <types.h>
+
+// 21/11/2012: major update due to inclusion of TBF methodology
 
 class NegLogUnnormZDens {
 public:
@@ -27,26 +30,31 @@ public:
                       const GlmModelConfig& config,
                       // return the approximate *conditional* density f(y | z, mod) by operator()?
                       // otherwise return the approximate unnormalized *joint* density f(y, z | mod).
-                      bool conditional,
-                      bool verbose,
-                      bool higherOrderCorrection,
-                      PosInt nIter=40) :
-                          mod(mod),
-                          fpInfo(fpInfo),
-                          config(config),
-                          linPredStart(config.linPredStart),
-    iwlsObject(mod, data, fpInfo, ucInfo, config,
-               linPredStart,
-               // take the same original start value for each model, but then update
-               // it inside the iwls object when new calls to the functor are made.
-               conditional, // fixed z if conditional density of y given z is wished
-               EPS, // take EPS as the convergence epsilon
-               verbose), // and debug if verbose is wished.
-               verbose(verbose),
-               higherOrderCorrection(higherOrderCorrection),
-               nIter(nIter)
-               {
-               }
+                      const Book& bookkeep,
+                      PosInt nIter=40);
+
+    // try to get the TBF log marginal likelihood
+    double
+    getTBFLogMargLik() const;
+
+    // get the maximum log conditional marginal likelihood
+    // and put the local EB estimate into zMode
+    double
+    getTBFMaxLogCondMargLik(double& zMode) const;
+
+    // get residual deviance
+    double
+    getResidualDeviance() const
+    {
+        return modResidualDeviance;
+    }
+
+    // destructor
+    ~NegLogUnnormZDens()
+    {
+        delete iwlsObject;
+        delete coxfitObject;
+    }
 
 private:
     // save the model reference and fp info, so we can write a nice warning message if the
@@ -54,20 +62,25 @@ private:
     const ModelPar& mod;
     const FpInfo& fpInfo;
     const GlmModelConfig& config;
+    const Book& bookkeep;
 
     // also save the original start linear predictor
     const AVector linPredStart;
 
-    // the IWLS object
-    Iwls iwlsObject;
+    // pointer to an IWLS object
+    Iwls * iwlsObject;
 
-    // be verbose?
-    const bool verbose;
-
-    const bool higherOrderCorrection;
+    // pointer to a Coxfit object
+    Coxfit * coxfitObject;
 
     // number of IWLS iterations
     PosInt nIter;
+
+    // the size of the model
+    const int modSize;
+
+    // the residual deviance of the model (only filled with correct value if TBF approach is used)
+    double modResidualDeviance;
 };
 
 

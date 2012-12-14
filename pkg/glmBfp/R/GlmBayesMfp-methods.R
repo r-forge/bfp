@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[GlmBayesMfp-methods.R] by DSB Mit 24/10/2012 15:27 (CEST)>
+## Time-stamp: <[GlmBayesMfp-methods.R] by DSB Fre 07/12/2012 11:10 (CET)>
 ##
 ## Description:
 ## Additional convenience methods for GlmBayesMfp class objects.
@@ -10,6 +10,7 @@
 ## History:
 ## 12/02/2010   modify from bfp package
 ## 15/03/2010   adapt print.GlmBayesMfp to new S4 gPrior element
+## 07/12/2012   change default for freq in as.data.frame.GlmBayesMfp
 #####################################################################################
 
 ##' @include posteriors.R
@@ -76,7 +77,7 @@ print.GlmBayesMfp <- function (x, ...)
 ##' \code{\link{GlmBayesMfp}} list) 
 ##' @param \dots unused
 ##' @param freq should empirical frequencies of the models in the sampling
-##' path be given? (default)
+##' path be given? (not default)
 ##' @return The data frame with the following columns:
 ##' \describe{
 ##'     \item{posterior}{the posterior model probabilities}
@@ -91,7 +92,7 @@ print.GlmBayesMfp <- function (x, ...)
 as.data.frame.GlmBayesMfp <- function (x, 
                                        row.names = NULL,
                                        ...,        
-                                       freq = TRUE 
+                                       freq = FALSE
                                        )
 {
     ## posterior probabilites:

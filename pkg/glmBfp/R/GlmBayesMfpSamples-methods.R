@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[GlmBayesMfpSamples-methods.R] by DSB Die 03/08/2010 13:49 (CEST)>
+## Time-stamp: <[GlmBayesMfpSamples-methods.R] by DSB Mon 03/12/2012 18:18 (CET)>
 ##
 ## Description:
 ## Additional convenience methods for GlmBayesMfpSamples class objects.
@@ -40,7 +40,11 @@ setMethod("[",
                   x@predictions <- x@predictions[, i, drop=FALSE]
               }
 
-              x@fixed <- x@fixed[i]
+              if(length(x@fixed))
+              {
+                  x@fixed <- x@fixed[i]
+              }
+              
               x@z <- x@z[i]
 
               bfpCurves <- x@bfpCurves

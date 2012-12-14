@@ -105,8 +105,12 @@ IndexSafeSum::sumNormalizedExp(const SafeSum& s, long double logNormConst) const
 
 // Book //
 
+// 21/11/2012: add tbf option
+
 // constructor which checks the chainlength
-Book::Book(bool empiricalBayes,
+Book::Book(bool tbf,
+           bool doGlm,
+           bool empiricalBayes,
            double cl,
            bool doSampling,
            bool verbose,
@@ -117,8 +121,10 @@ Book::Book(bool empiricalBayes,
            bool useBfgs,
            bool debug,
            bool higherOrderCorrection) :
-                modelCounter(0),
+           modelCounter(0),
                 nanCounter(0),
+                tbf(tbf),
+                doGlm(doGlm),
                 empiricalBayes(empiricalBayes),
                 doSampling(doSampling),
                 verbose(verbose),
@@ -168,7 +174,8 @@ GlmModelInfo::convert2list(long double logNormConst,
                         _["negLogUnnormZDensities"] = negLogUnnormZDensities.convert2list(),
                         _["zMode"] = zMode,
                         _["zVar"] = zVar,
-                        _["laplaceApprox"] = laplaceApprox);
+                        _["laplaceApprox"] = laplaceApprox,
+                        _["residualDeviance"] = residualDeviance);
 }
 
 
@@ -498,6 +505,7 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
                                const AVector& responses,
                                bool debug) :
     dispersions(as<NumericVector>(rcpp_family["dispersions"])),
+    weights(as<NumericVector>(rcpp_family["weights"])),
     linPredStart(as<NumericVector>(rcpp_family["linPredStart"])),
     nullModelInfo(rcpp_nullModelInfo),
     familyString(as<std::string>(rcpp_family["family"])),
@@ -505,8 +513,7 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
     canonicalLink((familyString == "binomial" && linkString == "logit") ||
                       (familyString == "poisson" && linkString == "log"))
 {
-    // and the weights and phi from the R family object
-    const AVector weights = as<NumericVector>(rcpp_family["weights"]);
+    // and the phi from the R family object
     const double phi = rcpp_family["phi"];
 
     if (familyString == "binomial")
@@ -591,6 +598,11 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
         gPrior = new InvGammaGPrior(as<double>(rcpp_gPrior.slot("a")),
                                     as<double>(rcpp_gPrior.slot("b")));
     }
+    else if (gPriorString == "IncInvGammaGPrior")
+    {
+        gPrior = new IncInvGammaGPrior(as<double>(rcpp_gPrior.slot("a")),
+                                       as<double>(rcpp_gPrior.slot("b")));
+    }
     else if (gPriorString == "CustomGPrior")
     {
         gPrior = new CustomGPrior(as<SEXP>(rcpp_gPrior.slot("logDens")));
@@ -608,14 +620,18 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
 
 // dataValues //
 
+// 03/12/2012: add censoring indicator vector
+
 DataValues::DataValues(const AMatrix &x,
                        const AMatrix &xcentered,
                        const AVector &y,
+                       const IntVector &censInd,
                        const double &totalNum,
                        const IntSet& fixedCols) :
             design(x),
             centeredDesign(xcentered),
             response(y),
+            censInd(censInd),
             nObs(design.n_rows),
             onesVector(arma::ones<AVector>(nObs)),
             totalNumber(static_cast<PosLargeInt> (totalNum)),
@@ -699,7 +715,7 @@ ModelCache::getModelInfo(const ModelPar& par) const
     if(ret != modelMap.end())
         return ret->second;
     else
-        return GlmModelInfo(R_NaReal, R_NaReal, Cache(), 0.0, 0.0, 0.0);
+        return GlmModelInfo(R_NaReal, R_NaReal, Cache(), 0.0, 0.0, 0.0, R_NaReal);
 }
 
 // increment the sampling frequency for a model configuration

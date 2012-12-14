@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[plotCurveEstimate.R] by DSB Die 03/08/2010 11:03 (CEST)>
+## Time-stamp: <[plotCurveEstimate.R] by DSB Mon 03/12/2012 18:21 (CET)>
 ##
 ## Description:
 ## Plot predictor curve estimates for a given samples object, produced by sampleGlm.
@@ -20,8 +20,8 @@
 
 ##' Function for plotting a fractional polynomial curve estimate
 ##'
-##' Plot a fractional polynomial curve estimate using samples from a single GLM
-##' model or a model average. 
+##' Plot a fractional polynomial curve estimate using samples from a single
+##' GLM / Cox model or a model average. 
 ##'
 ##' @param samples an object of class \code{\linkS4class{GlmBayesMfpSamples}},
 ##' produced by \code{\link{sampleGlm}} and \code{\link{sampleBma}}.
@@ -34,6 +34,12 @@
 ##' @param plot if \code{FALSE}, only return values needed to produce the
 ##' plot, but do not plot (default is \code{TRUE}, so a plot is made)
 ##' @param rug add a rug to the plot? (default: \code{FALSE})
+##' @param addZeros include zero samples for models where the covariate is not
+##' included? (default: \code{FALSE}) If \code{TRUE}, this changes the
+##' interpretation of the samples, and therefore curve estimates based on these
+##' samples: it is no longer conditional on inclusion of the covariate, but
+##' marginally over all models, also those not including the covariate.
+
 ##' @param \dots further arguments for plotting with \code{\link{matplot}}
 ##' @return a list of various plotting information:
 ##' \item{original}{grid on the original covariate scale}
@@ -56,21 +62,34 @@ plotCurveEstimate <-
               slevel = plevel,          
               plot = TRUE,              
               rug=FALSE,
+              addZeros=FALSE,
               ...)
 {
     ## check class of "samples"
     stopifnot(is(samples, "GlmBayesMfpSamples"))
 
-    ## check that there are samples for this covariate
+    ## extract samples and its attributes (they might be overwritten by cbind
+    ## below) 
     mat <- samples@bfpCurves[[termName]]
+    attrs <- attributes(mat)
+    
+    ## check that there are samples for this covariate
     if (is.null(mat))
-        stop ("There were no samples which include ", termName, " in this model sample!\n")
+        stop ("There were no samples which include ", termName, " in this model sample!\n")   
+    ## add zeros? todo: this should also work if no samples include this covariate!
+    if(addZeros)
+    {
+        mat <- cbind(mat,
+                     matrix(data=0,
+                            nrow=nrow(mat),
+                            ncol=(samples@nSamples - ncol(mat))))
+    }    
     
     ## start return list
     ret <- list ()
 
     ## x values
-    ret$grid <- g <- as.vector (attr (mat, "scaledGrid"))
+    ret$grid <- g <- as.vector (attrs$scaledGrid)
     tr <- samples@shiftScaleMax[termName, c ("shift", "scale")]
     ret$original <- g * tr[2] - tr[1]
 
@@ -97,7 +116,7 @@ plotCurveEstimate <-
     ## ## partial residuals, attention because of possible ties between observed grid values in data!
     ## resids <- residuals (model)
     
-    pos <- attr (mat, "whereObsVals")
+    pos <- attrs$whereObsVals
 
     ## partialResids <- ret$mean[pos] + resids
     partialResids <- NULL
@@ -132,7 +151,7 @@ plotCurveEstimate <-
         if (is.null (matplotList$lty))
             matplotList$lty <- 1
         if (is.null (matplotList$col))
-            matplotList$col <- c ("black", "gray", "blue", "blue", "green", "green")
+            matplotList$col <- c ("black", "blue", "blue", "green", "green")
         if (is.null (matplotList$type))
             matplotList$type <- "l"
         matplotList$x <- ret$original

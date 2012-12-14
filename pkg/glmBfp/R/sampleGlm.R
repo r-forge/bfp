@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[sampleGlm.R] by DSB Don 09/06/2011 11:54 (CEST)>
+## Time-stamp: <[sampleGlm.R] by DSB Die 04/12/2012 09:09 (CET)>
 ##
 ## Description:
 ## Produce posterior samples from one GLM returned by glmBayesMfp, using an MCMC sampler. 
@@ -35,6 +35,8 @@
 ## 08/07/2010   check if the models were fit by empirical Bayes. In that
 ##              case use the fixed z option !
 ## 26/07/2010   Do not drop dimensions when selecting UC coefficients samples
+## 23/11/2012   modifications to accommodate the TBF methodology
+## 03/12/2012   modifications to accommodate the Cox models
 #####################################################################################
 
 ##' @include helpers.R
@@ -45,18 +47,23 @@
 ##' @include getLogMargLikEstimate.R
 {}
 
-##' Produce posterior samples from one GLM
+##' Produce posterior samples from one GLM / Cox model
 ##'
-##' Based on the result list from \code{\link{glmBayesMfp}}, for the first model in the list MCMC
-##' samples are produced. In parallel to the sampling of coefficients and FP curve points,
-##' optionally the marginal likelihood of the model is estimated with MCMC samples. This provides
-##' a check of the integrated Laplace approximation used in the model sampling.
+##' Based on the result list from \code{\link{glmBayesMfp}}, for the first model
+##' in the list MCMC samples are produced. In parallel to the sampling of
+##' coefficients and FP curve points, optionally the marginal likelihood of the
+##' model is estimated with MCMC samples. This provides a check of the
+##' integrated Laplace approximation used in the model sampling. If TBF
+##' methodology is used, then no MCMC is necessary, instead ordinary Monte Carlo
+##' samples from an approximate posterior distribution are obtained.
 ##'
 ##' @param object the \code{GlmBayesMfp} object, from which only the first model
 ##' will be processed (at least for now \ldots)
-##' @param mcmc MCMC options object with class \code{\linkS4class{McmcOptions}}
+##' @param mcmc MCMC options object with class \code{\linkS4class{McmcOptions}}.
+##' If TBF is used, each sample is accepted, and the number of samples is given
+##' by \code{\link{sampleSize}}(\code{mcmc}).
 ##' @param estimateMargLik shall the marginal likelihood be estimated in
-##' parallel? (default)
+##' parallel? (default) Only has an effect if full Bayes and not TBF is used. 
 ##' @param gridList optional list of appropriately named grid vectors for FP
 ##' evaluation. Default is length (\code{gridSize} - 2) grid per covariate
 ##' additional to the observed values (two are at the endpoints) 
@@ -70,7 +77,11 @@
 ##' likelihood.
 ##' @param marginalZApprox method for approximating the marginal density of the
 ##' log covariance factor z, see \code{\link{getMarginalZ}} for the details
-##' (default: same preference list as in \code{\link{getMarginalZ}}) 
+##' (default: same preference list as in \code{\link{getMarginalZ}})
+##' If TBF are used in conjunction with incomplete inverse gamma hyperprior on
+##' g = exp(z), then the posterior distribution of g is again of this form.
+##' Therefore this option does not have any effect in that case, because the
+##' samples are directly obtained from that posterior distribution.
 ##' @param verbose should information on computation progress be given?
 ##' (default)
 ##' @param debug print debugging information? (not default)
@@ -125,26 +136,39 @@ sampleGlm <-
     newdata <- as.data.frame(newdata)
     nNewObs <- nrow(newdata)
 
-    ## covariates matrix for newdata (if there is any):
-    newX <-
-        if(nNewObs > 0L)
-        {
-            constructNewdataMatrix(object=object,
-                                   newdata=newdata)
-        }
-        else
-            NULL
+    ## ## covariates matrix for newdata (if there is any):
+    ## newX <-
+    ##     if(nNewObs > 0L)
+    ##     {
+    ##         constructNewdataMatrix(object=object,
+    ##                                newdata=newdata)
+    ##     }
+    ##     else
+    ##         NULL
 
     ## get the old attributes of the object
     attrs <- attributes(object)
 
+    ## is this a GLM or a Cox model?
+    doGlm <- attrs$distribution$doGlm
+
     ## take only the first model
     model <- object[[1L]]
     config <- model$configuration
+    info <- model$information
 
+    ## get the (centered) design matrix of the model for the original data
+    design <- getDesignMatrix(modelConfig=config,
+                              object=object,
+                              fixedColumns=doGlm)
+    ## the model dimension (including the intercept for GLMs)
+    modelDim <- ncol(design)
+    
     ## check if the model is the null model
-    modelSize <- length(unlist(config))
-    isNullModel <- identical(modelSize, 0L)
+    isNullModel <- identical(modelDim,
+                             ifelse(doGlm,
+                                    1L,
+                                    0L))
 
     ## check / modify the fixedZ option
     if(isNullModel &&
@@ -155,7 +179,7 @@ sampleGlm <-
     else if(attrs$searchConfig$empiricalBayes &&
             is.null(fixedZ))
     {
-        fixedZ <- model$information$zMode
+        fixedZ <- info$zMode
     }
     
     if(useFixedZ <- ! is.null(fixedZ))
@@ -163,6 +187,21 @@ sampleGlm <-
         stopifnot(is.numeric(fixedZ),
                   is.finite(fixedZ),
                   identical(length(fixedZ), 1L))
+    }
+
+    ## extract TBF and g-prior info
+    tbf <- attrs$distribution$tbf
+    gPrior <- attrs$distribution$gPrior
+
+    ## correct estimateMargLik option
+    estimateMargLik <- estimateMargLik && (! tbf)
+
+    ## correct MCMC option
+    if(tbf)
+    {
+        mcmc <- McmcOptions(burnin=0L,
+                            step=1L,
+                            samples=sampleSize(mcmc))
     }
     
     ## compute the selected approximation to the marginal z posterior,
@@ -174,9 +213,41 @@ sampleGlm <-
             list(logDens=function(z) ifelse(z == fixedZ, 0, -Inf),
                  gen=function(n=1) rep.int(fixedZ, n))
         } else {
-            ## the usual way:
-            getMarginalZ(model$information,
-                         method=marginalZApprox)
+            if(tbf && is(gPrior, "IncInvGammaGPrior"))
+            {
+                ## analytical solution possible in this case!
+                ## compute posterior parameters of IncIG:
+                a <- gPrior@a + (modelDim - 1) / 2               
+                b <- gPrior@b + info$residualDeviance / 2
+                
+                list(logDens=
+                     function(z){
+                         logNormConst <-
+                             ifelse(b > 0,
+                                    a * log(b) - pgamma(b, a, log.p=TRUE) - lgamma(a),
+                                    log(a))                         
+                         logNormConst - (a + 1) * log1p(exp(z)) -
+                             b / (1 + exp(z)) + z
+                     },
+                     gen=
+                     function(n=1){
+                         p <- runif(n=n)
+                         
+                         ret <-
+                             if(b > 0)
+                             {
+                                 b / qgamma(p=(1 - p) * pgamma(b, a),
+                                            shape=a) - 1
+                             } else {
+                                 (1 - p)^(-1/a) - 1
+                             }
+                         return(ret)
+                     })
+            } else {
+                ## the usual way:
+                getMarginalZ(info,
+                             method=marginalZApprox)
+            }
         }
     
     ## pack the info in handy lists:
@@ -209,16 +280,26 @@ sampleGlm <-
 
     ## start return list
     results <- list()
+
+    ## add info on tbf
+    results$tbf <- tbf
     
     ## compute acceptance ratio
-    results$acceptanceRatio <- cppResults$nAccepted / mcmc@iterations
+    results$acceptanceRatio <-
+        if(tbf)
+            1 ## we do Monte Carlo in the TBF case!
+        else
+            cppResults$nAccepted / mcmc@iterations
 
     ## are we again verbose?
     if(verbose)
     {
-        cat("\nFinished MCMC simulation with acceptance ratio",
-            round(results$acceptanceRatio, 3),
-            "\n")
+        if(tbf)
+            cat("\nFinished MC simulation from approximate parameter posterior\n")
+        else
+            cat("\nFinished MCMC simulation with acceptance ratio",
+                round(results$acceptanceRatio, 3),
+                "\n")
     }
 
     ## compute log marginal likelihood estimate (which is only defined up to a constant, so
@@ -249,13 +330,6 @@ sampleGlm <-
     ## so the number of samples is:
     nSamples <- ncol(simCoefs)
     
-    ## get the (centered) design matrix of the model for the original data
-    design <- getDesignMatrix(modelConfig=config,
-                              object=object,
-                              fixedColumns=TRUE)
-    ## the model dimension
-    modelDim <- ncol(design)
-
     ## the linear predictor samples for the fitted data:
     fitted <- design %*% simCoefs
 
@@ -279,7 +353,7 @@ sampleGlm <-
             ## so we can get the design matrix
             newDesign <- getDesignMatrix(modelConfig=config,
                                          object=tempObj,
-                                         fixedColumns=TRUE)
+                                         fixedColumns=doGlm)
 
             ## so the linear predictor samples are
             linPredSamples <- newDesign %*% simCoefs
@@ -297,18 +371,26 @@ sampleGlm <-
     
     ## invariant: already coefCounter coefficients samples (rows of simCoefs) processed    
     coefCounter <- 0L
-    
-    ## the intercept samples
-    fixed <- simCoefs[1L, ]
 
-    ## increment coefCounter because we just processed the intercept!
-    coefCounter <- coefCounter + 1L   
+    ## the intercept samples
+    fixed <-
+        if(doGlm)
+        {
+            ## increment coefCounter because we process the intercept!
+            coefCounter <- coefCounter + 1L
+            
+            simCoefs[1L, ]
+        } else {
+            ## There is no intercept in the Cox model, so we return an empty
+            ## vector because that is expected by the GlmBayesMfpSamples class!
+            numeric(0L)
+        }                
    
-    
-    ## samples of fractional polynomial function values evaluated at grids
-    ## will be elements of this list:
+    ## samples of fractional polynomial function values evaluated at grids will
+    ## be elements of this list:
     bfpCurves <- list ()                  
-    ## Note that only those bfp terms are included which also appear in the model configuration. 
+    ## Note that only those bfp terms are included which also appear in the
+    ## model configuration.
     
     ## start processing all FP terms
     for (i in seq_along (attrs$indices$bfp))
@@ -369,7 +451,8 @@ sampleGlm <-
     ## uncertain fixed form covariates coefficients samples
     ## will be elements of this list:
     ucCoefs <- list ()
-    ## Note that only those UC terms are included which also appear in the model configuration. 
+    ## Note that only those UC terms are included which also appear in the model
+    ## configuration.
     
     ## now we need the colnames of the design matrix:
     colNames <- colnames(object$x)
@@ -409,7 +492,6 @@ sampleGlm <-
                            ucCoefs=ucCoefs,
                            shiftScaleMax=attrs$shiftScaleMax,
                            nSamples=nSamples)
-    
     
     ## finished post-processing.
 

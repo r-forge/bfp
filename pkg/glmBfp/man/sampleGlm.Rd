@@ -1,6 +1,6 @@
 \name{sampleGlm}
 \alias{sampleGlm}
-\title{Produce posterior samples from one GLM}
+\title{Produce posterior samples from one GLM / Cox model}
 \usage{
   sampleGlm(object, mcmc = McmcOptions(),
     estimateMargLik = TRUE, gridList = list(),
@@ -14,10 +14,13 @@
   \ldots)}
 
   \item{mcmc}{MCMC options object with class
-  \code{\linkS4class{McmcOptions}}}
+  \code{\linkS4class{McmcOptions}}. If TBF is used, each
+  sample is accepted, and the number of samples is given by
+  \code{\link{sampleSize}}(\code{mcmc}).}
 
   \item{estimateMargLik}{shall the marginal likelihood be
-  estimated in parallel? (default)}
+  estimated in parallel? (default) Only has an effect if
+  full Bayes and not TBF is used.}
 
   \item{gridList}{optional list of appropriately named grid
   vectors for FP evaluation. Default is length
@@ -40,7 +43,12 @@
   \item{marginalZApprox}{method for approximating the
   marginal density of the log covariance factor z, see
   \code{\link{getMarginalZ}} for the details (default: same
-  preference list as in \code{\link{getMarginalZ}})}
+  preference list as in \code{\link{getMarginalZ}}) If TBF
+  are used in conjunction with incomplete inverse gamma
+  hyperprior on g = exp(z), then the posterior distribution
+  of g is again of this form. Therefore this option does
+  not have any effect in that case, because the samples are
+  directly obtained from that posterior distribution.}
 
   \item{verbose}{should information on computation progress
   be given? (default)}
@@ -75,7 +83,9 @@
   FP curve points, optionally the marginal likelihood of
   the model is estimated with MCMC samples. This provides a
   check of the integrated Laplace approximation used in the
-  model sampling.
+  model sampling. If TBF methodology is used, then no MCMC
+  is necessary, instead ordinary Monte Carlo samples from
+  an approximate posterior distribution are obtained.
 }
 \keyword{models}
 \keyword{regression}

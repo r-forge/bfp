@@ -1,3 +1,35 @@
+2012-12-10  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/glmBayesMfp.R: fix bug: order according to survival times when
+	Cox model is requested, otherwise the computed deviances are
+	wrong!! 
+
+2012-12-07  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/GlmBayesMfp-methods.R: change default for freq in
+	as.data.frame.GlmBayesMfp to FALSE, to not generate error messages
+	on objects resulting from exhaustive model search.
+
+2012-12-04  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Finished inclusion of Cox models.
+
+2012-11-29  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Start developing functions for Cox models.
+
+2012-11-26  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/plotCurveEstimate.R: add option to include zeros resulting
+	from models which do not include a covariate in the computations
+	for the curve estimates.
+	Also correct colors.
+
+2012-11-21  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Start adding likelihood ratio statistic based Bayes factors (TBF
+	methodology).
+
 2012-10-24  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* R/GlmBayesMfp-methods.R: correct extraction of Monte Carlo model

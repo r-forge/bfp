@@ -45,13 +45,14 @@ Iwls::Iwls(const ModelPar &mod,
            const UcInfo& ucInfo,
            const GlmModelConfig& config,
            const AVector& linPredStart,
-           bool useFixedZ,
+           bool conditional,
            double epsilon,
-           bool verbose) :
+           bool debug,
+           bool tbf) :
            design(getDesignMatrix(mod, data, fpInfo, ucInfo)),
            nCoefs(design.n_cols),
            isNullModel(nCoefs == 1),
-           useFixedZ(useFixedZ),
+           useFixedZ(conditional),
            nObs(design.n_rows),
            // not possible because this could be the null model: designWithoutIntercept(nObs, nCoefs - 1),
            response(data.response),
@@ -60,46 +61,51 @@ Iwls::Iwls(const ModelPar &mod,
            unscaledPriorPrec(nCoefs, nCoefs),
            results(linPredStart, nCoefs),
            epsilon(epsilon),
-           verbose(verbose)
+           verbose(debug),
+           tbf(tbf)
 {
-    if(! isNullModel)
+    // only do additional computations if not the TBF methodology is used
+    if(! tbf)
     {
-        // Scaled design matrix without the intercept.
-        // This will be diag(dispersions)^(-1/2) * design[, -1]
-        // (attention with 0-based indexing of Armadillo objects!)
-        AMatrix scaledDesignWithoutIntercept = arma::diagmat(invSqrtDispersions) * design.cols(1, nCoefs - 1);
-
-        // then the log of the determinant of B'(dispersions)^(-1)B, which is part of the submatrix of R^-1
-        // (we know that B'(dispersions)^(-1)B is positive definite, so we do not need to check the sign of the determinant)
-        AMatrix scaledDesignWithoutInterceptCrossprod = arma::trans(scaledDesignWithoutIntercept) * scaledDesignWithoutIntercept;
-
-        // input that (the main ingredient) into the unscaled R^-1
-        // but first be sure there are zeroes anywhere else:
-        unscaledPriorPrec.zeros();
-        unscaledPriorPrec.submat(1, 1, nCoefs - 1, nCoefs - 1) = scaledDesignWithoutInterceptCrossprod / config.cfactor;
-
-        // now directly use the cholesky routine to avoid copying too much unnecessarily
-        int info = potrf(false,
-                         scaledDesignWithoutInterceptCrossprod);
-
-        // check that all went well
-        if(info != 0)
+        if(! isNullModel)
         {
-            std::ostringstream stream;
-            stream << "dpotrf(scaledDesignWithoutInterceptCrossprod) got error code " << info << "in Iwls constructor";
-            throw std::domain_error(stream.str().c_str());
+            // Scaled design matrix without the intercept.
+            // This will be diag(dispersions)^(-1/2) * design[, -1]
+            // (attention with 0-based indexing of Armadillo objects!)
+            AMatrix scaledDesignWithoutIntercept = arma::diagmat(invSqrtDispersions) * design.cols(1, nCoefs - 1);
+
+            // then the log of the determinant of B'(dispersions)^(-1)B, which is part of the submatrix of R^-1
+            // (we know that B'(dispersions)^(-1)B is positive definite, so we do not need to check the sign of the determinant)
+            AMatrix scaledDesignWithoutInterceptCrossprod = arma::trans(scaledDesignWithoutIntercept) * scaledDesignWithoutIntercept;
+
+            // input that (the main ingredient) into the unscaled R^-1
+            // but first be sure there are zeroes anywhere else:
+            unscaledPriorPrec.zeros();
+            unscaledPriorPrec.submat(1, 1, nCoefs - 1, nCoefs - 1) = scaledDesignWithoutInterceptCrossprod / config.cfactor;
+
+            // now directly use the cholesky routine to avoid copying too much unnecessarily
+            int info = potrf(false,
+                             scaledDesignWithoutInterceptCrossprod);
+
+            // check that all went well
+            if(info != 0)
+            {
+                std::ostringstream stream;
+                stream << "dpotrf(scaledDesignWithoutInterceptCrossprod) got error code " << info << "in Iwls constructor";
+                throw std::domain_error(stream.str().c_str());
+            }
+            // now scaledDesignWithoutInterceptCrossprod contains the cholesky factor!
+
+            // also do not copy the cholesky factor saved now in nonInterceptDesignCrossprod into an extra matrix,
+            // but use the Triangular view
+            logScaledDesignWithoutInterceptCrossprodDeterminant =
+                    2.0 * arma::as_scalar(arma::sum(arma::log(arma::diagvec(scaledDesignWithoutInterceptCrossprod))));
+        } else {
+            // this is the null model
+
+            // be sure that this is correct:
+            unscaledPriorPrec(0, 0) = 0.0;
         }
-        // now scaledDesignWithoutInterceptCrossprod contains the cholesky factor!
-
-        // also do not copy the cholesky factor saved now in nonInterceptDesignCrossprod into an extra matrix,
-        // but use the Triangular view
-        logScaledDesignWithoutInterceptCrossprodDeterminant =
-                2.0 * arma::as_scalar(arma::sum(arma::log(arma::diagvec(scaledDesignWithoutInterceptCrossprod))));
-    } else {
-        // this is the null model
-
-        // be sure that this is correct:
-        unscaledPriorPrec(0, 0) = 0.0;
     }
 }
 
@@ -110,7 +116,7 @@ Iwls::Iwls(const ModelPar &mod,
 // returns the number of iterations.
 PosInt
 Iwls::startWithLastLinPred(PosInt maxIter,
-                           double g)
+                              double g)
 {
     // initialize iteration counter and stopping criterion
     PosInt iter = 0;
@@ -137,12 +143,16 @@ Iwls::startWithLastLinPred(PosInt maxIter,
         AMatrix XtsqrtW = arma::trans(design) * arma::diagmat(sqrtWeights);
 
         // calculate the precision matrix Q by doing a rank update:
+        // if full Bayes is used, then:
         // Q = tcrossprod(X'sqrt(W)) + 1/g * unscaledPriorPrec
+        // if TBF are used, then:
+        // Q = tcrossprod(X'sqrt(W))
+        double scaleFactor = tbf ? 0.0 : 1.0 / g;
         results.qFactor = unscaledPriorPrec;
         syrk(false,
              false,
              XtsqrtW,
-             1.0 / g,
+             scaleFactor,
              results.qFactor);
 
         // decompose into Cholesky factor, Q = LL':
@@ -154,7 +164,11 @@ Iwls::startWithLastLinPred(PosInt maxIter,
         {
             std::ostringstream stream;
             stream << "Cholesky factorization Q = LL' got error code " << info <<
-                    " in IWLS iteration " << iter << " for z=" << ::log(g);
+                    " in IWLS iteration " << iter;
+            if(! tbf)
+            {
+                stream << " for z=" << ::log(g);
+            }
             throw std::domain_error(stream.str().c_str());
         }
 
@@ -177,7 +191,11 @@ Iwls::startWithLastLinPred(PosInt maxIter,
         {
             std::ostringstream stream;
             stream << "Forward-backward solve got error code " << info <<
-                    " in IWLS iteration " << iter << " for z=" << ::log(g);
+                    " in IWLS iteration " << iter;
+            if(! tbf)
+            {
+                stream << " for z=" << ::log(g);
+            }
             throw std::domain_error(stream.str().c_str());
         }
 
@@ -294,3 +312,40 @@ Iwls::computeLogUnPosteriorDens(const Parameter& sample) const
     // return the correct value
     return ret;
 }
+
+// compute the deviance of the current model, which in R is done by the glm.fit function
+// This is required to compute the TBF.
+// Note that this changes the Iwls object, because it iterates until convergence
+// or until the maximum number of iterations has been reached.
+double
+Iwls::computeDeviance(PosInt maxIter)
+{
+    PosInt iter = startWithLastLinPred(maxIter, R_PosInf);
+
+    // if IWLS did not converge within the maximum number of iterations,
+    // throw error which is then caught by getGlmVarLogMargLik later on
+    if(iter > maxIter)
+    {
+        std::ostringstream stream;
+        stream << "model could not be fitted within " << maxIter <<
+                " IWLS iterations. This could be a result of separability in logistic regression, e.g.";
+        throw std::domain_error(stream.str().c_str());
+    }
+
+    // compute the resulting mean vector from the linear predictor via the response function
+    AVector means(nObs);
+
+#pragma omp parallel for
+    for(PosInt i = 0; i < nObs; ++i)
+    {
+        means(i) = config.link->linkinv(results.linPred(i));
+    }
+
+    // compute the log-likelihood
+    double logLik = config.distribution->loglik(means.memptr());
+
+    // return the deviance, which is just the scaled log-likelihood
+    double ret = - 2.0 * logLik;
+    return ret;
+}
+

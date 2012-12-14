@@ -60,6 +60,8 @@ struct IndexSafeSum
 
 // ***************************************************************************************************//
 
+// 21/11/2012: add tbf option
+
 // bookkeeping, shall later be used by glm and hyper-g!
 struct Book
 {
@@ -70,6 +72,8 @@ struct Book
     SafeSum modelLogPosteriors;
     IndexSafeSum *covGroupWisePosteriors; // for computation of covariate inclusion probs: array (bfp, uc)
 
+    const bool tbf;
+    const bool doGlm;
     const bool empiricalBayes;
     const bool doSampling;
     const bool verbose;
@@ -85,7 +89,9 @@ struct Book
     const bool higherOrderCorrection;
 
     // constructor which checks the chainlength
-    Book(bool empiricalBayes,
+    Book(bool tbf,
+         bool doGlm,
+         bool empiricalBayes,
          double cl,
          bool doSampling,
          bool verbose,
@@ -172,13 +178,15 @@ struct GlmModelInfo : public ModelInfo
                  const Cache& cache,
                  double zMode,
                  double zVar,
-                 double laplaceApprox) :
+                 double laplaceApprox,
+                 double residualDeviance) :
                      ModelInfo(logMargLik,
                                logPrior),
                      negLogUnnormZDensities(cache),
                      zMode(zMode),
                      zVar(zVar),
-                     laplaceApprox(laplaceApprox)
+                     laplaceApprox(laplaceApprox),
+                     residualDeviance(residualDeviance)
                      {
                      }
 
@@ -198,6 +206,9 @@ struct GlmModelInfo : public ModelInfo
     // here is the resulting Laplace approximation of the log marginal likelihood
     double laplaceApprox;
 
+    // this is only filled in the TBF case
+    double residualDeviance;
+
     // convert to R list
     Rcpp::List
     convert2list(long double logNormConst,
@@ -212,7 +223,8 @@ struct GlmModelInfo : public ModelInfo
                   NA_INTEGER),
                   zMode(rcpp_information["zMode"]),
                   zVar(rcpp_information["zVar"]),
-                  laplaceApprox(rcpp_information["laplaceApprox"])
+                  laplaceApprox(rcpp_information["laplaceApprox"]),
+                  residualDeviance(rcpp_information["residualDeviance"])
     {
     }
 };
@@ -345,15 +357,19 @@ private:
 
 // ***************************************************************************************************//
 
+// 21/11/2012: add nullDeviance
+
 struct NullModelInfo
 {
     NullModelInfo(Rcpp::List& rcpp_nullModelInfo) :
-        logMargLik(Rcpp::as<double>(rcpp_nullModelInfo["logMargLik"]))
+        logMargLik(Rcpp::as<double>(rcpp_nullModelInfo["logMargLik"])),
+        nullDeviance(Rcpp::as<double>(rcpp_nullModelInfo["nullDeviance"]))
     {
     }
 
     // log marginal likelihood of the null model
     const double logMargLik;
+    const double nullDeviance;
 };
 
 
@@ -365,6 +381,9 @@ struct GlmModelConfig
 {
     // vector of dispersions (phi / weights)
     const AVector dispersions;
+
+    // vector of weights
+    const AVector weights;
 
     // vector of starting values for the linear predictor
     // constant, because for each model we will initially start from that.
@@ -421,6 +440,8 @@ struct DataValues
     AVector response;
     double sumOfSquaresTotal;
 
+    IntVector censInd;
+
     int nObs;
 
     AVector onesVector;
@@ -432,6 +453,7 @@ struct DataValues
     DataValues(const AMatrix &x,
                const AMatrix &xcentered,
                const AVector &y,
+               const IntVector &censInd,
                const double &totalNum,
                const IntSet& fixedCols);
 };

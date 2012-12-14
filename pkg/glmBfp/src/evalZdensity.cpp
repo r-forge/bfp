@@ -71,6 +71,8 @@ cpp_evalZdensity(SEXP r_interface)
     const AVector y(n_y.begin(), n_y.size(),
                    false);
 
+    const IntVector censInd = as<IntVector>(rcpp_data["censInd"]);
+
     // FP configuration:
 
     // vector of maximum fp degrees
@@ -106,9 +108,23 @@ cpp_evalZdensity(SEXP r_interface)
     // options:
 
     const DoubleVector zValues = rcpp_options["zValues"];
-    const bool conditional = as<bool>(rcpp_options["conditional"]);
-    const bool debug = as<bool>(rcpp_options["debug"]);
-    const bool higherOrderCorrection = as<bool>(rcpp_options["higherOrderCorrection"]);
+//    const bool conditional = as<bool>(rcpp_options["conditional"]);
+//    const bool debug = as<bool>(rcpp_options["debug"]);
+//    const bool higherOrderCorrection = as<bool>(rcpp_options["higherOrderCorrection"]);
+
+    const Book bookkeep(as<bool>(rcpp_distribution["tbf"]),
+                        as<bool>(rcpp_distribution["doGlm"]),
+                        as<bool>(rcpp_options["conditional"]),
+                        100,
+                        false,
+                        as<bool>(rcpp_options["debug"]),
+                        as<std::string>(rcpp_distribution["modelPrior"]),
+                        10,
+                        10,
+                        10,
+                        false,
+                        as<bool>(rcpp_options["debug"]),
+                        as<bool>(rcpp_options["higherOrderCorrection"]));
 
 
     // ----------------------------------------------------------------------------------
@@ -122,7 +138,7 @@ cpp_evalZdensity(SEXP r_interface)
      fixedCols.insert(1);
 
      // totalnumber is set to 0 because we do not care about it.
-     const DataValues data(x, xCentered, y, 0, fixedCols);
+     const DataValues data(x, xCentered, y, censInd, 0, fixedCols);
 
      // FP configuration:
      const FpInfo fpInfo(fpcards, fppos, fpmaxs, fpnames, x);
@@ -144,7 +160,7 @@ cpp_evalZdensity(SEXP r_interface)
 
      // search configuration:
      const GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, rcpp_gPrior,
-                                 data.response, debug);
+                                 data.response, bookkeep.debug);
      // config of this model:
      const ModelPar thisModelConfig(rcpp_config, fpInfo);
 
@@ -159,9 +175,7 @@ cpp_evalZdensity(SEXP r_interface)
                                          fpInfo,
                                          ucInfo,
                                          config,
-                                         conditional,
-                                         debug,
-                                         higherOrderCorrection);
+                                         bookkeep);
 
      // evaluate it at the given z values.
      NumericVector results;

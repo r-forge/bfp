@@ -3,7 +3,8 @@
 \title{Function for plotting a fractional polynomial curve estimate}
 \usage{
   plotCurveEstimate(samples, termName, plevel = 0.95,
-    slevel = plevel, plot = TRUE, rug = FALSE, ...)
+    slevel = plevel, plot = TRUE, rug = FALSE,
+    addZeros = FALSE, ...)
 }
 \arguments{
   \item{samples}{an object of class
@@ -29,6 +30,14 @@
   \item{rug}{add a rug to the plot? (default:
   \code{FALSE})}
 
+  \item{addZeros}{include zero samples for models where the
+  covariate is not included? (default: \code{FALSE}) If
+  \code{TRUE}, this changes the interpretation of the
+  samples, and therefore curve estimates based on these
+  samples: it is no longer conditional on inclusion of the
+  covariate, but marginally over all models, also those not
+  including the covariate.}
+
   \item{\dots}{further arguments for plotting with
   \code{\link{matplot}}}
 }
@@ -48,7 +57,7 @@
 }
 \description{
   Plot a fractional polynomial curve estimate using samples
-  from a single GLM model or a model average.
+  from a single GLM / Cox model or a model average.
 }
 \keyword{regression}
 

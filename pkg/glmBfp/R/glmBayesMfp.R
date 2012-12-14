@@ -2,11 +2,11 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[glmBayesMfp.R] by DSB Fre 15/06/2012 16:04 (CEST)>
+## Time-stamp: <[glmBayesMfp.R] by DSB Mon 10/12/2012 17:27 (CET)>
 ##
 ## Description:
 ## Main user interface for Bayesian inference for fractional polynomials in generalized linear
-## models. 
+## models and Cox models. 
 ##
 ## History:
 ## 26/10/2009   file creation: copy and modify the old BayesMfp.R
@@ -47,6 +47,10 @@
 ## 29/07/2011   now "higherOrderCorrection"
 ## 15/02/2012   check that not two terms contain the same covariate in
 ##              the formula
+## 21/11/2012   add "tbf" option
+## 03/12/2012   add Cox regression
+## 10/12/2012   fix bug: order according to survival times when Cox model is
+##              requested, otherwise the computed deviances are wrong!!
 #####################################################################################
 
 ##' @include helpers.R
@@ -58,20 +62,22 @@
 {}
 
 
-##' Bayesian model inference for fractional polynomial GLMs
+##' Bayesian model inference for fractional polynomial GLMs and Cox models 
 ##'
 ##' Bayesian model inference for fractional polynomial models from the generalized linear model
-##' family is conducted by means of either exhaustive model space evaluation or posterior model
+##' family or the Cox model is conducted by means of either exhaustive model space evaluation or posterior model
 ##' sampling. The approach is based on analytical marginal likelihood approximations, using
-##' integrated Laplace approximation.
+##' integrated Laplace approximation. Alternatively, test-based Bayes factors
+##' (TBFs) are used.
 ##'
-##' The formula is of the form
-##' \code{y ~ bfp (x1, max = 4) + uc (x2 + x3)}, that is, the
-##' auxiliary functions \code{\link{bfp}} and \code{\link{uc}} must be
+##' The formula is of the form \code{y ~ bfp (x1, max = 4) + uc (x2 + x3)}, that
+##' is, the auxiliary functions \code{\link{bfp}} and \code{\link{uc}} must be
 ##' used for defining the fractional polynomial and uncertain fixed form
-##' covariates terms, respectively. There must be an intercept, and no
-##' other fixed covariates are allowed. All \code{max} arguments of the
-##' \code{\link{bfp}} terms must be identical.
+##' covariates terms, respectively. There must be an intercept, and no other
+##' fixed covariates are allowed. All \code{max} arguments of the
+##' \code{\link{bfp}} terms must be identical. \code{y} is the response vector
+##' for GLMs or the vector of survival times for Cox regression. Note that Cox
+##' regression is only implemented with TBFs.
 ##' 
 ##' The prior specifications are a list:
 ##' \describe{
@@ -91,12 +97,18 @@
 ##' However, in reality this will not be a problem as the model space will
 ##' typically be very small.
 ##' @param formula model formula
+##' @param censInd censoring indicator. Default is \code{NULL}, but if
+##' a non-\code{NULL} vector is supplied, this is assumed to be logical
+##' (\code{TRUE} = observed, \code{FALSE} = censored) and Cox regression is
+##' performed.  
 ##' @param data optional data.frame for model variables (defaults to the parent
 ##' frame)
 ##' @param weights optionally a vector of positive weights (if not provided, a
 ##' vector of one's)
 ##' @param family distribution and link (as in the glm function)
 ##' @param phi value of the dispersion parameter (defaults to 1)
+##' @param tbf Use TBF methodology to compute the marginal likelihood? (not
+##' default) Must be \code{TRUE} if Cox regression is done.
 ##' @param empiricalBayes rank the models in terms of \emph{conditional}
 ##' marginal likelihood, using an empirical Bayes estimate of g? (not default)
 ##' Due to coding structure, the prior on g must be given in \code{priorSpecs}
@@ -140,11 +152,13 @@
 ##' @keywords models regression
 ##' @export
 glmBayesMfp <-
-    function (formula = formula(data), 
+    function (formula = formula(data),
+              censInd = NULL,
               data = parent.frame(),   
               weights,            
               family = gaussian,       
               phi=1,
+              tbf=FALSE,
               empiricalBayes=FALSE,
               priorSpecs =            
               list(gPrior=HypergPrior(), 
@@ -164,13 +178,27 @@ glmBayesMfp <-
               higherOrderCorrection=FALSE)
 {
     ## checks
-    stopifnot(is.bool(verbose),
+    stopifnot(is.bool(tbf),
+              is.bool(verbose),
               is.bool(debug),
               is.bool(useBfgs),
               is.bool(empiricalBayes),
               is(priorSpecs$gPrior, "GPrior"),
               is.bool(useOpenMP),
               is.bool(higherOrderCorrection))
+
+    ## see whether GLM or Cox is requested
+    doGlm <- is.null(censInd)
+    if(! doGlm)
+    {
+        ## and check censoring indicator vector in the Cox case.
+        ## Also: we only have Cox regression with TBFs!
+        stopifnot(is.logical(censInd),
+                  tbf)
+
+        ## set family to Gaussian to have some pseudo values in there
+        family <- gaussian
+    }
     
     ## save call for return object
     call <- match.call()
@@ -186,7 +214,6 @@ glmBayesMfp <-
     ## get model prior choice
     priorSpecs$modelPrior <- match.arg(priorSpecs$modelPrior,
                                        choices=c("flat", "sparse", "dependent"))
-
     
     ## evaluate call for model frame building
     m <- match.call(expand.dots = FALSE)
@@ -227,7 +254,6 @@ glmBayesMfp <-
     ## check if bfp's are present
     if (nFps == 0)
         warning(simpleWarning("no fractional polynomial terms in formula"))
-    
     
     ## get vector with covariate entries
     vars <- attr (Terms, "variables")    # language object
@@ -306,6 +332,12 @@ glmBayesMfp <-
     ## get response
     Y <- model.response(m)
 
+    ## check length of censoring vector in the Cox case
+    if(! doGlm)
+    {
+        stopifnot(identical(length(censInd), length(Y)))
+    }
+
     ## initialize (here e.g. the binomial matrix Y case is handled as in 'glm')
     init <- family$init(y=Y, weights=weights)
 
@@ -314,7 +346,6 @@ glmBayesMfp <-
     family$dispersions <- as.double(family$phi / init$weights) # and zero weights ?!
     family$linPredStart <- as.double(init$linPredStart)
     
-  
     ## which terms gave rise to which columns?
     ## (0 = intercept, 1 = first term)
     termNumbers <- attr (X, "assign") 
@@ -371,7 +402,6 @@ glmBayesMfp <-
     ## check that only the intercept (one column) is a fixed term
     if (sum(! (fpMaxs | ucIndices)) > 1)
         stop (simpleError("only the intercept can be a fixed term"))
-
     
     ## attach a loglik-function, which is then called from the C++ code.
     ## It gives then the loglikelihood of the mu vector of means.
@@ -384,7 +414,16 @@ glmBayesMfp <-
     ## included in the Gaussian case!
 
     ## get all information on the null model
-    nullModelInfo <- getNullModelInfo(family=family) 
+    nullModelInfo <- getNullModelInfo(family=family)
+
+    ## modify log marg lik of the null model for TBF methodology:
+    if(tbf)
+    {
+        nullModelInfo$logMargLik <- 0
+    }
+    ## if we use TBF, then the log marginal likelihood is the log test-based Bayes
+    ## factor of the model versus the null model. Of course the Bayes factor of the
+    ## null model versus itself is 1, so the log BF is 0.
     
     ## compute and print cardinality of the model space to guide decision
     fpSetCards <- ifelse (fpMaxs[fpMaxs != 0] <= 3, 8, 5 + fpMaxs[fpMaxs != 0])
@@ -483,11 +522,29 @@ glmBayesMfp <-
         cat ("0%", rep ("_", 100 - 6), "100%\n", sep = "")
     }
 
+    ## if Cox model is requested,
+    ## order the data according to the survival times!
+    if(! doGlm)
+    {
+        sorted <- order(Y)
+        
+        Y <- Y[sorted]
+        censInd <- censInd[sorted]
+        X <- X[sorted, ]
+        Xcentered <- Xcentered[sorted, ]
+
+        if(! all(sorted == seq_along(Y)))
+        {
+            warning("Input data were reordered so that the survival times are sorted") 
+        }
+    }
+
     ## pack the data together
     data <- list(x=X,                   # design matrix
                  xCentered=Xcentered,   # centered design matrix
                  y=as.double(Y),        # response vector
-                 nObs=nrow(X))          # number of observations
+                 nObs=nrow(X),          # number of observations
+                 censInd=as.integer(censInd)) # binary censoring indicator
 
     ## pack the FP info things together
     fpInfos <- list(fpmaxs=as.integer(fpMaxs[fpMaxs != 0]), # vector of maximum fp degrees)
@@ -524,7 +581,11 @@ glmBayesMfp <-
                                         # Brent's optimize)?                        
 
     ## pack prior and likelihood information:
-    distribution <- list(nullModelInfo=nullModelInfo, # all information about the null model.
+    distribution <- list(nullModelInfo=nullModelInfo, # all information about
+                                        # the null model.
+                         doGlm=doGlm,   # should we do a GLM or a Cox model search?
+                         tbf=tbf,       # should TBF methodology be used to
+                                        # compute Bayes factors?
                          gPrior=priorSpecs$gPrior, # prior on the covariance
                                         # factor g (S4 class object)
                          modelPrior=priorSpecs$modelPrior, # model prior string                         

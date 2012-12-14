@@ -3,7 +3,7 @@
 \title{Convert a GlmBayesMfp object into a data frame}
 \usage{
   \method{as.data.frame}{GlmBayesMfp} (x, row.names = NULL,
-    ..., freq = TRUE)
+    ..., freq = FALSE)
 }
 \arguments{
   \item{x}{valid \code{\link{GlmBayesMfp}} object}
@@ -14,7 +14,7 @@
   \item{\dots}{unused}
 
   \item{freq}{should empirical frequencies of the models in
-  the sampling path be given? (default)}
+  the sampling path be given? (not default)}
 }
 \value{
   The data frame with the following columns: \describe{

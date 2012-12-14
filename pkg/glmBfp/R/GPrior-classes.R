@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanés Bové [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: BFPs for GLMs.
 ##        
-## Time-stamp: <[GPrior-classes.R] by DSB Fre 23/07/2010 11:30 (CEST)>
+## Time-stamp: <[GPrior-classes.R] by DSB Don 22/11/2012 11:59 (CET)>
 ##
 ## Description:
 ## Hopefully a clean class system for the different priors on g.
@@ -11,6 +11,7 @@
 ## 15/03/2010   file creation in response to the redesign of the C++ side.
 ## 23/07/2010   we now only warn instead of producing an error when the integral
 ##              is not equal to 1.
+## 22/11/2012   add incomplete inverse gamma prior class
 #####################################################################################
 
 ## ----------------------------------------------------------------------------
@@ -197,6 +198,90 @@ setMethod("initialize",
 InvGammaGPrior <- function(a=0.001, b=0.001)
 {
     return(new("InvGammaGPrior",
+               a=a,
+               b=b))
+}
+
+
+## ----------------------------------------------------------------------------
+
+##' The incomplete inverse gamma g-prior class
+##'
+##' The slots are:
+##' \describe{
+##' \item{a}{the first hyperparameter}
+##' \item{b}{the second hyperparameter}
+##' }
+##'
+##' @seealso the constructor \code{\link{IncInvGammaGPrior}}
+##' 
+##' @name IncInvGammaGPrior-class
+##' @keywords classes
+##' @export
+setClass(Class="IncInvGammaGPrior",
+         representation=
+         representation(a="numeric",
+                        b="numeric"),
+         contains=list("GPrior"),
+         validity=           
+         function(object){
+             if(object@a <= 0)
+             {
+                 return("the parameter a must be positive")
+             }
+             else if(object@b < 0)
+             {
+                 return("the parameter b must be non-negative")
+             }
+             else
+             {
+                 return(TRUE)
+             }})
+
+##' Initialization method for the "IncInvGammaGPrior" class
+##'
+##' @usage \S4method{initialize}{IncInvGammaGPrior}(.Object, a, b, \dots)
+##' @param .Object the \code{\linkS4class{IncInvGammaGPrior}} we want to initialize
+##' @param a the first hyperparameter value
+##' @param b the second hyperparameter value
+##' @param \dots unused
+##' @return the initialized object
+##'
+##' @name IncInvGammaGPrior-initialize
+##' @aliases IncInvGammaGPrior-initialize initialize,IncInvGammaGPrior-method
+##' 
+##' @keywords methods internal
+##' @author Daniel Sabanes Bove \email{daniel.sabanesbove@@ifspm.uzh.ch}
+setMethod("initialize",
+    signature(.Object = "IncInvGammaGPrior"),
+    function (.Object, a, b, ...) 
+    {
+       .Object@logDens <- function(g)
+       {
+           normConst <-
+               if(b > 0)
+               {
+                   a * log(b) - pgamma(b, a, log.p=TRUE) - lgamma(a)
+               } else {
+                   log(a)
+               }
+           
+           return(- (a + 1) * log1p(g) - b / (g + 1) + normConst)
+       }
+       callNextMethod(.Object, a=a, b=b, ...)
+    })
+
+##' Constructor for the incomplete inverse gamma g-prior class
+##'
+##' @param a the first positive hyperparameter (default: 0.001)
+##' @param b the second positive hyperparameter (default: 0.001)
+##' @return a new \code{\linkS4class{IncInvGammaGPrior}} object
+##'
+##' @keywords classes
+##' @export
+IncInvGammaGPrior <- function(a=0.001, b=0.001)
+{
+    return(new("IncInvGammaGPrior",
                a=a,
                b=b))
 }

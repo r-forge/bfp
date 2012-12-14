@@ -1,5 +1,6 @@
 Package: glmBfp
 Imports:
+    survival,
     statmod,
     methods,
     coda,
@@ -16,8 +17,8 @@ Description: The package implements the Bayesian paradigm
     for fractional polynomials in generalized linear
     models. See package "bfp" for the treatment of normal
     models.
-Version: 0.0-27
-Date: 2012-10-25
+Version: 0.0-31
+Date: 2012-12-10
 Depends:
     R (>= 2.12.0),
     Rcpp (>= 0.8.8),
@@ -54,3 +55,4 @@ Collate:
     'plotCurveEstimate.R'
     'sampleGlm.R'
     'sampleBma.R'
+    'testCox.R'

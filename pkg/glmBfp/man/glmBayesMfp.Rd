@@ -1,11 +1,11 @@
 \name{glmBayesMfp}
 \alias{glmBayesMfp}
 \alias{GlmBayesMfp}
-\title{Bayesian model inference for fractional polynomial GLMs}
+\title{Bayesian model inference for fractional polynomial GLMs and Cox models}
 \usage{
-  glmBayesMfp(formula = formula(data),
+  glmBayesMfp(formula = formula(data), censInd = NULL,
     data = parent.frame(), weights, family = gaussian,
-    phi = 1, empiricalBayes = FALSE,
+    phi = 1, tbf = FALSE, empiricalBayes = FALSE,
     priorSpecs = list(gPrior = HypergPrior(), modelPrior = "sparse"),
     method = c("ask", "exhaustive", "sampling"), subset,
     na.action = na.omit, verbose = TRUE, debug = FALSE,
@@ -16,6 +16,12 @@
 }
 \arguments{
   \item{formula}{model formula}
+
+  \item{censInd}{censoring indicator. Default is
+  \code{NULL}, but if a non-\code{NULL} vector is supplied,
+  this is assumed to be logical (\code{TRUE} = observed,
+  \code{FALSE} = censored) and Cox regression is
+  performed.}
 
   \item{data}{optional data.frame for model variables
   (defaults to the parent frame)}
@@ -28,6 +34,10 @@
 
   \item{phi}{value of the dispersion parameter (defaults to
   1)}
+
+  \item{tbf}{Use TBF methodology to compute the marginal
+  likelihood? (not default) Must be \code{TRUE} if Cox
+  regression is done.}
 
   \item{empiricalBayes}{rank the models in terms of
   \emph{conditional} marginal likelihood, using an
@@ -93,11 +103,12 @@
 }
 \description{
   Bayesian model inference for fractional polynomial models
-  from the generalized linear model family is conducted by
-  means of either exhaustive model space evaluation or
-  posterior model sampling. The approach is based on
-  analytical marginal likelihood approximations, using
-  integrated Laplace approximation.
+  from the generalized linear model family or the Cox model
+  is conducted by means of either exhaustive model space
+  evaluation or posterior model sampling. The approach is
+  based on analytical marginal likelihood approximations,
+  using integrated Laplace approximation. Alternatively,
+  test-based Bayes factors (TBFs) are used.
 }
 \details{
   The formula is of the form \code{y ~ bfp (x1, max = 4) +
@@ -107,7 +118,9 @@
   form covariates terms, respectively. There must be an
   intercept, and no other fixed covariates are allowed. All
   \code{max} arguments of the \code{\link{bfp}} terms must
-  be identical.
+  be identical. \code{y} is the response vector for GLMs or
+  the vector of survival times for Cox regression. Note
+  that Cox regression is only implemented with TBFs.
 
   The prior specifications are a list: \describe{
   \item{gPrior}{A g-prior class object. Defaults to a

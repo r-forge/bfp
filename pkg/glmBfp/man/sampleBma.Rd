@@ -1,6 +1,7 @@
 \name{sampleBma}
 \alias{sampleBma}
-\title{Produce posterior samples from a Bayesian model average over GLMs}
+\title{Produce posterior samples from a Bayesian model average over GLMs / Cox
+models}
 \usage{
   sampleBma(object, mcmc = McmcOptions(),
     postProbs = posteriors(object), nMargLikSamples = NULL,
@@ -14,7 +15,9 @@
   \code{\linkS4class{McmcOptions}}, specifying the number
   of required BMA samples (via \code{sampleSize(mcmc)}),
   and the burn-in and thinning parameters applied to each
-  model (see above).}
+  model (see above). If TBF is used, each sample is
+  accepted, and the number of samples is given by
+  \code{\link{sampleSize}}(\code{mcmc}).}
 
   \item{postProbs}{vector of posterior probabilites (will
   be normalized within the function) for the weighting of
@@ -51,15 +54,19 @@
   models contained in this list.
 }
 \details{
-  The sampling is based on MCMC. Therefore, instead of only
-  specifying the required number of samples and the model
-  probabilities, one also needs to specify the burn-in
-  length and the thinning parameter, which will be applied
-  to every model from which at least one sample is included
-  in the average. Alternatively, you can ask for MCMC
-  marginal likelihood estimates for all models in the list.
-  Then at least \code{nMargLikSamples} will be produced for
-  each model, whether included in the BMA sample or not.
+  If TBF methodology is used (which is specified within the
+  \code{glmBayesMfp} object), then Monte Carlo (MC)
+  sampling is used. If the fully Bayesian, generalized
+  hyper-g prior methodology is used, then the sampling is
+  based on MCMC. Therefore, instead of only specifying the
+  required number of samples and the model probabilities,
+  one also needs to specify the burn-in length and the
+  thinning parameter, which will be applied to every model
+  from which at least one sample is included in the
+  average. Alternatively, you can ask for MCMC marginal
+  likelihood estimates for all models in the list. Then at
+  least \code{nMargLikSamples} will be produced for each
+  model, whether included in the BMA sample or not.
 }
 \keyword{models}
 \keyword{regression}

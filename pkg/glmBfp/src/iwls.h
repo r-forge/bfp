@@ -88,10 +88,10 @@ public:
          const UcInfo& ucInfo,
          const GlmModelConfig& config,
          const AVector& linPredStart,
-         bool useFixedZ,
+         bool conditional,
          double epsilon,
-         bool verbose);
-
+         bool debug,
+         bool tbf);
 
     // do the Iwls algorithm for a given covariance factor g and current linear predictor
     // linPred,
@@ -121,6 +121,13 @@ public:
     // posterior density for a given parameter consisting of the coefficients vector and z
     double
     computeLogUnPosteriorDens(const Parameter& sample) const;
+
+    // compute the deviance of the current model, which in R is done by the glm.fit function
+    // This is required to compute the TBF.
+    // Note that this changes the Iwls object, because it iterates until convergence
+    // or until the maximum number of iterations has been reached.
+    double
+    computeDeviance(PosInt maxIter);
 
     // getter for results
     IwlsResults
@@ -174,6 +181,9 @@ private:
 
     // status messages??
     const bool verbose;
+
+    // use TBF methodology?
+    const bool tbf;
 };
 
 

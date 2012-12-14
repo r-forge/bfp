@@ -12,11 +12,13 @@
 #include <types.h>
 
 // construct centered design matrix including intercept for the model
+// optionally the intercept column is not included
 AMatrix
 getDesignMatrix(const ModelPar &mod,
                 const DataValues &data,
                 const FpInfo &fpInfo,
-                const UcInfo& ucInfo);
+                const UcInfo& ucInfo,
+                bool includeIntercept = true);
 
 
 

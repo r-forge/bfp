@@ -77,5 +77,6 @@ RcppExport SEXP cpp_openmptest(SEXP R_interface);
 
 RcppExport SEXP cpp_evalZdensity(SEXP R_interface);
 
+RcppExport SEXP cpp_coxfit(SEXP R_interface);
 
 #endif /* RCPPEXPORT_H_ */
