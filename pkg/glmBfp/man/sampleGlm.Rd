@@ -38,7 +38,9 @@
   conditional posterior given this z. If \code{object} was
   constructed by the empirical Bayes machinery, this will
   default to the estimated z with maximum conditional
-  marginal likelihood.}
+  marginal likelihood. If \code{object} was constructed
+  with the option \code{fixedg}, then the fixed value will
+  be used by default.}
 
   \item{marginalZApprox}{method for approximating the
   marginal density of the log covariance factor z, see

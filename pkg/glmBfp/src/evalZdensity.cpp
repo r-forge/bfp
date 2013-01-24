@@ -114,6 +114,7 @@ cpp_evalZdensity(SEXP r_interface)
 
     const Book bookkeep(as<bool>(rcpp_distribution["tbf"]),
                         as<bool>(rcpp_distribution["doGlm"]),
+                        false,
                         as<bool>(rcpp_options["conditional"]),
                         100,
                         false,
@@ -159,7 +160,7 @@ cpp_evalZdensity(SEXP r_interface)
      const UcInfo ucInfo(ucSizes, maxUcDim, ucIndices, ucColList);
 
      // search configuration:
-     const GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, rcpp_gPrior,
+     const GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, as<double>(rcpp_distribution["fixedg"]), rcpp_gPrior,
                                  data.response, bookkeep.debug);
      // config of this model:
      const ModelPar thisModelConfig(rcpp_config, fpInfo);

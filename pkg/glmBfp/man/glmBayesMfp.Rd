@@ -6,6 +6,7 @@
   glmBayesMfp(formula = formula(data), censInd = NULL,
     data = parent.frame(), weights, family = gaussian,
     phi = 1, tbf = FALSE, empiricalBayes = FALSE,
+    fixedg = NULL,
     priorSpecs = list(gPrior = HypergPrior(), modelPrior = "sparse"),
     method = c("ask", "exhaustive", "sampling"), subset,
     na.action = na.omit, verbose = TRUE, debug = FALSE,
@@ -46,6 +47,13 @@
   \code{priorSpecs} although it does not have an effect
   when \code{empiricalBayes==TRUE}.}
 
+  \item{fixedg}{If this is a number, then it is taken as a
+  fixed value of g, and as with the \code{empiricalBayes}
+  option, the models are ranked in terms of conditional
+  marginal likelihood. By default, this option is
+  \code{NULL}, which means that g is estimated in a fully
+  or empirical Bayesian way.}
+
   \item{priorSpecs}{prior specifications, see details}
 
   \item{method}{which method should be used to explore the
@@ -78,13 +86,15 @@
   Hermite quadrature for marginal likelihood approximation
   (and later in the MCMC sampler for the approximation of
   the marginal covariance factor density). If
-  \code{empiricalBayes}, this option has no effect.}
+  \code{empiricalBayes} or a fixed g is used, this option
+  has no effect.}
 
   \item{useBfgs}{Shall the BFGS algorithm be used in the
   internal maximization (not default)? Else, the default
   Brent optimize routine is used, which seems to be more
-  robust. If \code{empiricalBayes}, this option has no
-  effect and always the Brent optimize routine is used.}
+  robust. If \code{empiricalBayes} or a fixed g is used,
+  this option has no effect and always the Brent optimize
+  routine is used.}
 
   \item{largeVariance}{When should the BFGS variance
   estimate be considered \dQuote{large}, so that a

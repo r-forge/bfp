@@ -79,7 +79,8 @@ getGlmVarLogMargLik(const ModelPar &mod,
         residualDeviance = negLogUnnormZDens.getResidualDeviance();
 
         // try to ask for analytic solutions in the TBF case
-        // (they are available for the incomplete inverse gamma hyperprior)
+        // (they are available for the incomplete inverse gamma hyperprior and of course
+        // for the fixed g case)
         if(bookkeep.tbf)
         {
             if(bookkeep.debug)
@@ -87,7 +88,17 @@ getGlmVarLogMargLik(const ModelPar &mod,
                 Rprintf("\ngetGlmVarLogMargLik: TBF used, ask for analytic solution ...");
             }
 
-            if(bookkeep.empiricalBayes)
+            if(bookkeep.useFixedg)
+            {
+                zMode = log(config.fixedg);
+                ret = - negLogUnnormZDens(zMode);
+
+                if(bookkeep.debug)
+                {
+                    Rprintf("\ngetGlmVarLogMargLik: using fixed value g = %f", config.fixedg);
+                }
+            }
+            else if(bookkeep.empiricalBayes)
             {
                 ret = negLogUnnormZDens.getTBFMaxLogCondMargLik(zMode);
 
@@ -124,7 +135,20 @@ getGlmVarLogMargLik(const ModelPar &mod,
         // than necessary.
         CachedFunction<NegLogUnnormZDens> cachedNegLogUnnormZDens(negLogUnnormZDens);
 
-        if(bookkeep.empiricalBayes)
+        if(bookkeep.useFixedg)
+        {
+            zMode = log(config.fixedg);
+
+            // echo detailed progress in debug mode
+            if(bookkeep.debug)
+            {
+                Rprintf("\ngetGlmVarLogMargLik: returning conditional marginal likelihood at fixed z = %f", zMode);
+            }
+
+            // return the log conditional marginal density log f(y | zfixed)
+            ret = - cachedNegLogUnnormZDens(zMode);
+        }
+        else if(bookkeep.empiricalBayes)
         {
             // construct an appropriate object for using the optimize routine
             Brent<CachedFunction<NegLogUnnormZDens> > brent(cachedNegLogUnnormZDens,
@@ -142,7 +166,7 @@ getGlmVarLogMargLik(const ModelPar &mod,
                 Rprintf("\ngetGlmVarLogMargLik: finished optimization of conditional marginal likelihood at mode %f", zMode);
             }
 
-            // return the log conditional marginal density f(y | z_mode)
+            // return the log conditional marginal density log f(y | z_mode)
             ret = - cachedNegLogUnnormZDens(zMode);
         }
         else // start full Bayes
@@ -1123,6 +1147,7 @@ cpp_glmBayesMfp(SEXP r_interface)
     const double totalNumber = as<double>(rcpp_searchConfig["totalNumber"]);
     const PosInt nModels = as<PosInt>(rcpp_searchConfig["nModels"]);
     const bool empiricalBayes = as<bool>(rcpp_searchConfig["empiricalBayes"]);
+    const bool useFixedg = as<bool>(rcpp_searchConfig["useFixedg"]);
     const bool doSampling = as<bool>(rcpp_searchConfig["doSampling"]);
     const double chainlength = as<double>(rcpp_searchConfig["chainlength"]);
     const PosInt nCache = as<PosInt>(rcpp_searchConfig["nCache"]);
@@ -1147,6 +1172,7 @@ cpp_glmBayesMfp(SEXP r_interface)
     const bool doGlm = as<bool>(rcpp_distribution["doGlm"]);
     const bool tbf = as<bool>(rcpp_distribution["tbf"]);
     List rcpp_nullModelInfo = rcpp_distribution["nullModelInfo"];
+    const double fixedg = as<double>(rcpp_distribution["fixedg"]);
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
 
@@ -1195,6 +1221,7 @@ cpp_glmBayesMfp(SEXP r_interface)
     Book bookkeep(tbf,
                   doGlm,
                   empiricalBayes,
+                  useFixedg,
                   chainlength,
                   doSampling,
                   verbose,
@@ -1207,7 +1234,7 @@ cpp_glmBayesMfp(SEXP r_interface)
                   higherOrderCorrection);
 
     // model configuration:
-    const GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, rcpp_gPrior,
+    const GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, fixedg, rcpp_gPrior,
                                 data.response, bookkeep.debug);
 
     // use only one thread if we do not want to use openMP.

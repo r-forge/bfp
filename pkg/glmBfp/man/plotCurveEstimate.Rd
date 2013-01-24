@@ -17,11 +17,13 @@
   method}
 
   \item{plevel}{credible level for pointwise HPD, and
-  \code{NULL} means no pointwise HPD (default: 0.95)}
+  \code{NULL} means no pointwise HPD (default: 0.95). The
+  pointwise intervals are plotted in blue color.}
 
   \item{slevel}{credible level for simultaneous credible
   band (SCB), \code{NULL} means no SCB (defaults to
-  \code{plevel})}
+  \code{plevel}). The simultaneous intervals are plotted in
+  green color.}
 
   \item{plot}{if \code{FALSE}, only return values needed to
   produce the plot, but do not plot (default is

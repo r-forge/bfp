@@ -75,6 +75,7 @@ struct Book
     const bool tbf;
     const bool doGlm;
     const bool empiricalBayes;
+    const bool useFixedg;
     const bool doSampling;
     const bool verbose;
     const std::string modelPrior;
@@ -92,6 +93,7 @@ struct Book
     Book(bool tbf,
          bool doGlm,
          bool empiricalBayes,
+         bool useFixedg,
          double cl,
          bool doSampling,
          bool verbose,
@@ -392,6 +394,9 @@ struct GlmModelConfig
     // all info for the the null model
     const NullModelInfo nullModelInfo;
 
+    // fixed value of g
+    const double fixedg;
+
     // the g-prior information
     const GPrior* gPrior;
 
@@ -416,6 +421,7 @@ struct GlmModelConfig
     // constructor
     GlmModelConfig(Rcpp::List& rcpp_family,
                    Rcpp::List& rcpp_nullModelInfo,
+                   double fixedg,
                    Rcpp::S4& rcpp_gPrior,
                    const AVector& responses,
                    bool debug);

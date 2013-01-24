@@ -1,8 +1,17 @@
+2013-01-24  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Include option "fixedg" to do a model search with fixed g.
+
+2013-01-23  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/plotCurveEstimate.R: Mention colors of pointwise (blue) and
+	simultaneous (green) credible intervals in the help page.
+
 2012-12-10  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* R/glmBayesMfp.R: fix bug: order according to survival times when
 	Cox model is requested, otherwise the computed deviances are
-	wrong!! 
+	wrong!!
 
 2012-12-07  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 

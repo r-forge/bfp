@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[plotCurveEstimate.R] by DSB Mon 03/12/2012 18:21 (CET)>
+## Time-stamp: <[plotCurveEstimate.R] by DSB Mit 23/01/2013 18:14 (CET)>
 ##
 ## Description:
 ## Plot predictor curve estimates for a given samples object, produced by sampleGlm.
@@ -28,9 +28,11 @@
 ##' @param termName string denoting an FP term, as written by the
 ##' \code{\link[=as.data.frame.GlmBayesMfp]{as.data.frame}} method
 ##' @param plevel credible level for pointwise HPD, and \code{NULL} means
-##' no pointwise HPD (default: 0.95)
+##' no pointwise HPD (default: 0.95). The pointwise intervals are plotted in
+##' blue color.
 ##' @param slevel credible level for simultaneous credible band (SCB),
-##' \code{NULL} means no SCB (defaults to \code{plevel})
+##' \code{NULL} means no SCB (defaults to \code{plevel}). The simultaneous
+##' intervals are plotted in green color.
 ##' @param plot if \code{FALSE}, only return values needed to produce the
 ##' plot, but do not plot (default is \code{TRUE}, so a plot is made)
 ##' @param rug add a rug to the plot? (default: \code{FALSE})

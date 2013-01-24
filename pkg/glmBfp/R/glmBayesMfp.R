@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[glmBayesMfp.R] by DSB Mon 10/12/2012 17:27 (CET)>
+## Time-stamp: <[glmBayesMfp.R] by DSB Don 24/01/2013 11:35 (CET)>
 ##
 ## Description:
 ## Main user interface for Bayesian inference for fractional polynomials in generalized linear
@@ -113,6 +113,10 @@
 ##' marginal likelihood, using an empirical Bayes estimate of g? (not default)
 ##' Due to coding structure, the prior on g must be given in \code{priorSpecs}
 ##' although it does not have an effect when \code{empiricalBayes==TRUE}.
+##' @param fixedg If this is a number, then it is taken as a fixed value of g,
+##' and as with the \code{empiricalBayes} option, the models are ranked in terms
+##' of conditional marginal likelihood. By default, this option is \code{NULL},
+##' which means that g is estimated in a fully or empirical Bayesian way.
 ##' @param priorSpecs prior specifications, see details
 ##' @param method which method should be used to explore the  posterior model
 ##' space? (default: ask the user)
@@ -132,11 +136,11 @@
 ##' @param nGaussHermite number of quantiles used in Gauss Hermite quadrature
 ##' for marginal likelihood approximation (and later in the MCMC sampler for the
 ##' approximation of the marginal covariance factor density). If
-##' \code{empiricalBayes}, this option has no effect.
+##' \code{empiricalBayes} or a fixed g is used, this option has no effect.
 ##' @param useBfgs Shall the BFGS algorithm be used in the internal maximization
 ##' (not default)? Else, the default Brent optimize routine is used, which seems
-##' to be more robust. If \code{empiricalBayes}, this option has no effect and
-##' always the Brent optimize routine is used.
+##' to be more robust. If \code{empiricalBayes} or a fixed g is used, this
+##' option has no effect and always the Brent optimize routine is used.
 ##' @param largeVariance When should the BFGS variance estimate be considered
 ##' \dQuote{large}, so that a reestimation of it is computed? (Only has an
 ##' effect if \code{useBfgs == TRUE}, default: 100)
@@ -160,6 +164,7 @@ glmBayesMfp <-
               phi=1,
               tbf=FALSE,
               empiricalBayes=FALSE,
+              fixedg=NULL,
               priorSpecs =            
               list(gPrior=HypergPrior(), 
                    modelPrior="sparse"),
@@ -198,6 +203,20 @@ glmBayesMfp <-
 
         ## set family to Gaussian to have some pseudo values in there
         family <- gaussian
+    }
+
+    ## see whether a fixed g is requested
+    useFixedg <- ! is.null(fixedg)
+    if(useFixedg)
+    {
+        ## then check whether it is a valid g
+        ## and that there is no conflict with the empirical Bayes option 
+        stopifnot(is.numeric(fixedg),
+                  identical(length(fixedg), 1L),
+                  fixedg > 0,
+                  ! empiricalBayes)
+    } else {
+        fixedg <- 0
     }
     
     ## save call for return object
@@ -570,6 +589,7 @@ glmBayesMfp <-
                                         # models returned
                          empiricalBayes=empiricalBayes, # use EB for g and
                                         # conditional marginal likelihoods?
+                         useFixedg=useFixedg,   # use a fixed value of g?
                          doSampling=doSampling,               # shall model sampling be done? If
                                         # false, then exhaustive search.
                          chainlength=as.double(chainlength),  # how many times should a jump be
@@ -586,6 +606,8 @@ glmBayesMfp <-
                          doGlm=doGlm,   # should we do a GLM or a Cox model search?
                          tbf=tbf,       # should TBF methodology be used to
                                         # compute Bayes factors?
+                         fixedg=as.double(fixedg), # the fixed value of g
+                                        # (0 if not used)
                          gPrior=priorSpecs$gPrior, # prior on the covariance
                                         # factor g (S4 class object)
                          modelPrior=priorSpecs$modelPrior, # model prior string                         

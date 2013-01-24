@@ -32,7 +32,7 @@ NegLogUnnormZDens::NegLogUnnormZDens(const ModelPar &mod,
                               config.linPredStart,
                               // take the same original start value for each model, but then update
                               // it inside the iwls object when new calls to the functor are made.
-                              bookkeep.empiricalBayes,
+                              (bookkeep.useFixedg || bookkeep.empiricalBayes),
                               EPS, // take EPS as the convergence epsilon
                               bookkeep.debug,
                               bookkeep.tbf);
@@ -157,7 +157,7 @@ NegLogUnnormZDens::operator()(double z)
 
         // Note that the following distinction is done *inside*
         // Iwls::computeLogUnPosteriorDens for the generalized hyper-g prior approach.
-        if(bookkeep.empiricalBayes)
+        if(bookkeep.useFixedg || bookkeep.empiricalBayes)
         {
             // return the negative conditional log marginal likelihood approximation, - log(f(y | z))
             ret = - logBF;

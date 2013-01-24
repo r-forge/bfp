@@ -376,6 +376,7 @@ cpp_sampleGlm(SEXP r_interface)
     List rcpp_nullModelInfo = rcpp_distribution["nullModelInfo"];
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
+    const double fixedg = as<double>(rcpp_distribution["fixedg"]);
     const bool tbf = as<bool>(rcpp_distribution["tbf"]);
     const bool doGlm = as<bool>(rcpp_distribution["doGlm"]);
 
@@ -434,7 +435,7 @@ cpp_sampleGlm(SEXP r_interface)
      const UcInfo ucInfo(ucSizes, maxUcDim, ucIndices, ucColList);
 
      // model configuration:
-     GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, rcpp_gPrior,
+     GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, fixedg, rcpp_gPrior,
                            data.response, debug);
 
 

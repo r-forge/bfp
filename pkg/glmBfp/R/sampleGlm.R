@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[sampleGlm.R] by DSB Die 04/12/2012 09:09 (CET)>
+## Time-stamp: <[sampleGlm.R] by DSB Don 24/01/2013 11:07 (CET)>
 ##
 ## Description:
 ## Produce posterior samples from one GLM returned by glmBayesMfp, using an MCMC sampler. 
@@ -37,6 +37,7 @@
 ## 26/07/2010   Do not drop dimensions when selecting UC coefficients samples
 ## 23/11/2012   modifications to accommodate the TBF methodology
 ## 03/12/2012   modifications to accommodate the Cox models
+## 24/01/2013   adapt for fixedg option
 #####################################################################################
 
 ##' @include helpers.R
@@ -74,7 +75,8 @@
 ##' be used, in order to sample from the conditional posterior given this z.
 ##' If \code{object} was constructed by the empirical Bayes machinery,
 ##' this will default to the estimated z with maximum conditional marginal
-##' likelihood.
+##' likelihood. If \code{object} was constructed with the option \code{fixedg},
+##' then the fixed value will be used by default.
 ##' @param marginalZApprox method for approximating the marginal density of the
 ##' log covariance factor z, see \code{\link{getMarginalZ}} for the details
 ##' (default: same preference list as in \code{\link{getMarginalZ}})
@@ -176,7 +178,8 @@ sampleGlm <-
     {
         fixedZ <- 0
     }
-    else if(attrs$searchConfig$empiricalBayes &&
+    else if((attrs$searchConfig$useFixedg ||
+             attrs$searchConfig$empiricalBayes) &&
             is.null(fixedZ))
     {
         fixedZ <- info$zMode
