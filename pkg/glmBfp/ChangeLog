@@ -1,3 +1,9 @@
+2013-02-06  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/glmBayesMfp.R: Remove default value for "family" to avoid
+	erroneous fitting of Gaussian models when instead a logistic
+	regression is to be performed.
+
 2013-01-24  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Include option "fixedg" to do a model search with fixed g.

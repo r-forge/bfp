@@ -17,7 +17,7 @@ Description: The package implements the Bayesian paradigm
     for fractional polynomials in generalized linear
     models. See package "bfp" for the treatment of normal
     models.
-Version: 0.0-32
+Version: 0.0-33
 Date: 2013-01-24
 Depends:
     R (>= 2.12.0),

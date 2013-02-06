@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[glmBayesMfp.R] by DSB Don 24/01/2013 11:35 (CET)>
+## Time-stamp: <[glmBayesMfp.R] by DSB Mit 06/02/2013 10:55 (CET)>
 ##
 ## Description:
 ## Main user interface for Bayesian inference for fractional polynomials in generalized linear
@@ -51,6 +51,7 @@
 ## 03/12/2012   add Cox regression
 ## 10/12/2012   fix bug: order according to survival times when Cox model is
 ##              requested, otherwise the computed deviances are wrong!!
+## 06/02/2013   remove default for "family"
 #####################################################################################
 
 ##' @include helpers.R
@@ -105,7 +106,8 @@
 ##' frame)
 ##' @param weights optionally a vector of positive weights (if not provided, a
 ##' vector of one's)
-##' @param family distribution and link (as in the glm function)
+##' @param family distribution and link (as in the glm function). Needs to
+##' be explicitly specified for all models except the Cox model.
 ##' @param phi value of the dispersion parameter (defaults to 1)
 ##' @param tbf Use TBF methodology to compute the marginal likelihood? (not
 ##' default) Must be \code{TRUE} if Cox regression is done.
@@ -160,7 +162,7 @@ glmBayesMfp <-
               censInd = NULL,
               data = parent.frame(),   
               weights,            
-              family = gaussian,       
+              family,       
               phi=1,
               tbf=FALSE,
               empiricalBayes=FALSE,

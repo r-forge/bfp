@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanés Bové [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: BFPs for GLMs
 ##        
-## Time-stamp: <[getFamily.R] by DSB Mit 12/05/2010 11:46 (CEST)>
+## Time-stamp: <[getFamily.R] by DSB Mit 06/02/2013 10:54 (CET)>
 ##
 ## Description:
 ## Helper for glmBayesMfp which extracts an S3 family object with additional elements
@@ -13,6 +13,8 @@
 ## 12/05/2010   add cauchit link, remove inverse link from the accepted links
 ##              because we cannot deal with that in the generalized g-prior
 ##              framework.
+## 06/02/2013   check for missing family, since there is no longer a default
+##              in glmBayesMfp
 #####################################################################################
 
 
@@ -39,6 +41,11 @@
 getFamily <- function(family,          
                       phi)                
 {
+    if(missing(family))
+    {
+        stop(simpleError("Option family must be specified!"))
+    }
+    
     ## check that dispersion is positive etc.
     phi <- as.numeric(phi)
     stopifnot(identical(length(phi),

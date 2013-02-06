@@ -4,9 +4,8 @@
 \title{Bayesian model inference for fractional polynomial GLMs and Cox models}
 \usage{
   glmBayesMfp(formula = formula(data), censInd = NULL,
-    data = parent.frame(), weights, family = gaussian,
-    phi = 1, tbf = FALSE, empiricalBayes = FALSE,
-    fixedg = NULL,
+    data = parent.frame(), weights, family, phi = 1,
+    tbf = FALSE, empiricalBayes = FALSE, fixedg = NULL,
     priorSpecs = list(gPrior = HypergPrior(), modelPrior = "sparse"),
     method = c("ask", "exhaustive", "sampling"), subset,
     na.action = na.omit, verbose = TRUE, debug = FALSE,
@@ -31,7 +30,8 @@
   (if not provided, a vector of one's)}
 
   \item{family}{distribution and link (as in the glm
-  function)}
+  function). Needs to be explicitly specified for all
+  models except the Cox model.}
 
   \item{phi}{value of the dispersion parameter (defaults to
   1)}
