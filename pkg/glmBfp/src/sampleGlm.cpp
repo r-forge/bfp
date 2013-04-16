@@ -607,15 +607,42 @@ cpp_sampleGlm(SEXP r_interface)
          now.logUnPosterior = R_NaReal;
 
          // compute the Cholesky factorization of the covariance matrix
-         now.proposalInfo.qFactor = coxResults.imat;
          int info = potrf(false,
-                          now.proposalInfo.qFactor);
+                          coxResults.imat);
 
          // check that all went well
          if(info != 0)
          {
              std::ostringstream stream;
              stream << "dpotrf(coxResults.imat) got error code " << info << "in sampleGlm";
+             throw std::domain_error(stream.str().c_str());
+         }
+
+         // compute the precision matrix, using the Cholesky factorization
+         // of the covariance matrix
+         now.proposalInfo.qFactor = arma::eye(now.proposalInfo.qFactor.n_rows,
+                                              now.proposalInfo.qFactor.n_cols);
+         info = potrs(false,
+                      coxResults.imat,
+                      now.proposalInfo.qFactor);
+
+         // check that all went well
+         if(info != 0)
+         {
+             std::ostringstream stream;
+             stream << "dpotrs(coxResults.imat, now.proposalInfo.qFactor) got error code " << info << "in sampleGlm";
+             throw std::domain_error(stream.str().c_str());
+         }
+
+         // compute the Cholesky factorization of the precision matrix
+         info = potrf(false,
+                      now.proposalInfo.qFactor);
+
+         // check that all went well
+         if(info != 0)
+         {
+             std::ostringstream stream;
+             stream << "dpotrf(now.proposalInfo.qFactor) got error code " << info << "in sampleGlm";
              throw std::domain_error(stream.str().c_str());
          }
 

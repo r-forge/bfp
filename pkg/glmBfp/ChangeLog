@@ -1,3 +1,8 @@
+2013-04-16  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* src/sampleGlm.cpp: Fix sampling from Cox model. Before the
+	covariance of the coefficients was wrong.
+
 2013-02-06  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* R/glmBayesMfp.R: Remove default value for "family" to avoid
