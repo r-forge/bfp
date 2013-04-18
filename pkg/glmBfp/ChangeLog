@@ -1,3 +1,10 @@
+2013-04-17  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/sampleGlm.R: Fix computation of bfp curves and fixed form
+	covariate coefficients. Before there was a wrong extraction of the
+	coefficients samples from the grand samples matrix. However, the
+	fitted values were correct.
+
 2013-04-16  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* src/sampleGlm.cpp: Fix sampling from Cox model. Before the

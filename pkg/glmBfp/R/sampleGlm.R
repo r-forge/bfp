@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[sampleGlm.R] by DSB Don 24/01/2013 11:07 (CET)>
+## Time-stamp: <[sampleGlm.R] by DSB Mit 17/04/2013 17:53 (CEST)>
 ##
 ## Description:
 ## Produce posterior samples from one GLM returned by glmBayesMfp, using an MCMC sampler. 
@@ -438,7 +438,7 @@ sampleGlm <-
             mat <- xMat %*% simCoefs[coefCounter + seq_len (len), , drop = FALSE]
 
             ## correct invariant
-            coefCounter <- coefCounter + 1L
+            coefCounter <- coefCounter + len
             
             ## save the grid as an attribute of the samples
             attr(mat, "scaledGrid") <- g
