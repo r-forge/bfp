@@ -9,6 +9,7 @@
 \seealso{
   \code{\linkS4class{HypergPrior}},
   \code{\linkS4class{InvGammaGPrior}},
+  \code{\linkS4class{IncInvGammaGPrior}},
   \code{\linkS4class{CustomGPrior}}
 }
 \keyword{classes}

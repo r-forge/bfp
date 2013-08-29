@@ -680,6 +680,8 @@ Coxfit::computeResidualDeviance()
 
 // ***************************************************************************************************//
 
+// 03/07/2013: add offsets
+
 // just an R interface to the coxfit routine, for regression testing purposes.
 SEXP
 cpp_coxfit(SEXP R_interface)
@@ -694,6 +696,10 @@ cpp_coxfit(SEXP R_interface)
     // censoring status
     R_interface = CDR(R_interface);
     SEXP R_censInd = CAR(R_interface);
+
+    // offsets
+    R_interface = CDR(R_interface);
+    SEXP R_offsets = CAR(R_interface);
 
     // design matrix
     R_interface = CDR(R_interface);
@@ -714,6 +720,9 @@ cpp_coxfit(SEXP R_interface)
     // censoring status
     const IntVector censInd = as<IntVector>(R_censInd);
 
+    // offsets
+    const AVector offsets = as<NumericVector>(R_offsets);
+
     // design matrix
     const NumericMatrix n_X = R_X;
     const AMatrix X(n_X.begin(), n_X.nrow(),
@@ -728,8 +737,6 @@ cpp_coxfit(SEXP R_interface)
     const int nObs = survTimes.size();
 
     const AVector weights = arma::ones<AVector>(nObs);
-
-    const AVector offsets = arma::zeros<AVector>(nObs);
 
     // ---------------
 

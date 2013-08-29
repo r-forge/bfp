@@ -5,6 +5,8 @@
 #include <linalgInterface.h>
 #include <coxfit.h>
 
+// 03/07/2013: use offsets
+
 // constructor
 NegLogUnnormZDens::NegLogUnnormZDens(const ModelPar &mod,
                                      const DataValues& data,
@@ -40,7 +42,7 @@ NegLogUnnormZDens::NegLogUnnormZDens(const ModelPar &mod,
         if(bookkeep.tbf)
         {
             // compute the residual deviance for this model
-            modResidualDeviance = config.nullModelInfo.nullDeviance - iwlsObject->computeDeviance(100);
+            modResidualDeviance = config.nullModelDeviance - iwlsObject->computeDeviance(100);
 
             // echo detailed progress in debug mode
             if(bookkeep.debug)
@@ -56,7 +58,7 @@ NegLogUnnormZDens::NegLogUnnormZDens(const ModelPar &mod,
                                   data.censInd,
                                   getDesignMatrix(mod, data, fpInfo, ucInfo, false),
                                   config.weights,
-                                  arma::zeros<AVector>(data.nObs),
+                                  config.offsets,
                                   1);
 
         // compute the residual deviance for this model

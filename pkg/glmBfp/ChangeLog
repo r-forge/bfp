@@ -1,3 +1,16 @@
+2013-08-26  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* R/getMarginalZ.R: introduce verbose option
+
+2013-08-22  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Fixed a bug in sampleGlm which occurred when local empirical
+	Bayes estimation of g was used, on 64bit machines.
+
+2013-07-03  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Add offsets.
+
 2013-04-17  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* R/sampleGlm.R: Fix computation of bfp curves and fixed form

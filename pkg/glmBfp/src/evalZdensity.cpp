@@ -99,7 +99,8 @@ cpp_evalZdensity(SEXP r_interface)
 
     // distributions info:
 
-    List rcpp_nullModelInfo = rcpp_distribution["nullModelInfo"];
+    const double nullModelLogMargLik = as<double>(rcpp_distribution["nullModelLogMargLik"]);
+    const double nullModelDeviance = as<double>(rcpp_distribution["nullModelDeviance"]);
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
 
@@ -160,7 +161,7 @@ cpp_evalZdensity(SEXP r_interface)
      const UcInfo ucInfo(ucSizes, maxUcDim, ucIndices, ucColList);
 
      // search configuration:
-     const GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, as<double>(rcpp_distribution["fixedg"]), rcpp_gPrior,
+     const GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, as<double>(rcpp_distribution["fixedg"]), rcpp_gPrior,
                                  data.response, bookkeep.debug);
      // config of this model:
      const ModelPar thisModelConfig(rcpp_config, fpInfo);

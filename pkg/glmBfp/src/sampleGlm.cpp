@@ -373,10 +373,10 @@ cpp_sampleGlm(SEXP r_interface)
 
     // distributions info:
 
-    List rcpp_nullModelInfo = rcpp_distribution["nullModelInfo"];
+    const double nullModelLogMargLik = as<double>(rcpp_distribution["nullModelLogMargLik"]);
+    const double nullModelDeviance = as<double>(rcpp_distribution["nullModelDeviance"]);
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
-    const double fixedg = as<double>(rcpp_distribution["fixedg"]);
     const bool tbf = as<bool>(rcpp_distribution["tbf"]);
     const bool doGlm = as<bool>(rcpp_distribution["doGlm"]);
 
@@ -387,6 +387,7 @@ cpp_sampleGlm(SEXP r_interface)
     const bool debug = as<bool>(rcpp_options["debug"]);
     const bool isNullModel = as<bool>(rcpp_options["isNullModel"]);
     const bool useFixedZ = as<bool>(rcpp_options["useFixedZ"]);
+    const double fixedZ = as<double>(rcpp_options["fixedZ"]);
 #ifdef _OPENMP
     const bool useOpenMP = as<bool>(rcpp_options["useOpenMP"]);
 #endif
@@ -435,7 +436,7 @@ cpp_sampleGlm(SEXP r_interface)
      const UcInfo ucInfo(ucSizes, maxUcDim, ucIndices, ucColList);
 
      // model configuration:
-     GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, fixedg, rcpp_gPrior,
+     GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, exp(fixedZ), rcpp_gPrior,
                            data.response, debug);
 
 
@@ -507,7 +508,7 @@ cpp_sampleGlm(SEXP r_interface)
                                           data.censInd,
                                           design,
                                           config.weights,
-                                          arma::zeros<AVector>(data.nObs),
+                                          config.offsets,
                                           1);
 
          // the number of coefficients (here it does not include the intercept!!)
@@ -525,7 +526,7 @@ cpp_sampleGlm(SEXP r_interface)
      PosInt nAccepted(0);
 
      // at what z do we start?
-     double startZ = useFixedZ ? rcpp_options["fixedZ"] : thisModel.info.zMode;
+     double startZ = useFixedZ ? fixedZ : thisModel.info.zMode;
 
      // start container with current things
      Mcmc now(marginalZ, data.nObs, nCoefs);

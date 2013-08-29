@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanés Bové [daniel *.* sabanesbove *a*t* gmx *.* net]
 ## Project: Bayesian FPs for GLMs
 ##        
-## Time-stamp: <[GlmBayesMfpSamples-class.R] by DSB Die 17/05/2011 10:50 (CEST)>
+## Time-stamp: <[GlmBayesMfpSamples-class.R] by DSB Mon 26/08/2013 17:30 (CEST)>
 ##
 ## Description:
 ## Formal class for samples from a single GlmBayesMfp model or a model average.

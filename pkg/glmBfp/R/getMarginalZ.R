@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanés Bové [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: BFPs for GLMs
 ##        
-## Time-stamp: <[getMarginalZ.R] by DSB Die 25/05/2010 15:46 (CEST)>
+## Time-stamp: <[getMarginalZ.R] by DSB Mon 26/08/2013 17:19 (CEST)>
 ##
 ## Description:
 ## Construct a (smooth) marginal z density approximation from a model
@@ -51,6 +51,7 @@
 ##' sequence: If the first method does not work, the second is tried and so on. The normal
 ##' approximation always \dQuote{works} (but may give bad results).
 ##' }
+##' @param verbose Echo the chosen method? (not default)
 ##' @param plot produce plots of the different approximation steps? (not default)
 ##' @return a list with the log of the normalized density approximation (\dQuote{logDens}) and 
 ##' the random number generator (\dQuote{gen}).
@@ -60,7 +61,8 @@
 getMarginalZ <- function(info,
                          method=
                          c("linear", "spline", "logspline",
-                           "normalspline", "normal"), 
+                           "normalspline", "normal"),
+                         verbose=FALSE,
                          plot=FALSE)
 {   
     ## get the (ordered) z
@@ -303,7 +305,10 @@ getMarginalZ <- function(info,
         ## else break
         if(! inherits(generator, "try-error"))
         {
-            cat("\nTaking the", m, "approximation method\n")
+            if(verbose)
+            {
+                cat("\nTaking the", m, "approximation method\n")
+            }
             break
         }
     }

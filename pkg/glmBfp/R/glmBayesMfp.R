@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[glmBayesMfp.R] by DSB Mit 06/02/2013 10:55 (CET)>
+## Time-stamp: <[glmBayesMfp.R] by DSB Mit 03/07/2013 22:57 (CEST)>
 ##
 ## Description:
 ## Main user interface for Bayesian inference for fractional polynomials in generalized linear
@@ -52,6 +52,8 @@
 ## 10/12/2012   fix bug: order according to survival times when Cox model is
 ##              requested, otherwise the computed deviances are wrong!!
 ## 06/02/2013   remove default for "family"
+## 03/07/2013   - add offsets
+##              - remove getNullModelInfo
 #####################################################################################
 
 ##' @include helpers.R
@@ -59,7 +61,6 @@
 ##' @include fpScale.R
 ##' @include GPrior-classes.R
 ##' @include getFamily.R
-##' @include getNullModelInfo.R
 {}
 
 
@@ -106,6 +107,10 @@
 ##' frame)
 ##' @param weights optionally a vector of positive weights (if not provided, a
 ##' vector of one's)
+##' @param offset this can be used to specify an _a priori_ known component to
+##' be included in the linear predictor during fitting. This must be a numeric
+##' vector of length equal to the number of cases (if not provided, a vector of
+##' zeroes)
 ##' @param family distribution and link (as in the glm function). Needs to
 ##' be explicitly specified for all models except the Cox model.
 ##' @param phi value of the dispersion parameter (defaults to 1)
@@ -161,7 +166,8 @@ glmBayesMfp <-
     function (formula = formula(data),
               censInd = NULL,
               data = parent.frame(),   
-              weights,            
+              weights,
+              offset,
               family,       
               phi=1,
               tbf=FALSE,
@@ -240,7 +246,7 @@ glmBayesMfp <-
     m <- match.call(expand.dots = FALSE)
 
     ## select normal parts of the call
-    temp <- c("", "formula", "data", "weights", "subset", "na.action") # "" is the function name
+    temp <- c("", "formula", "data", "weights", "offset", "subset", "na.action") # "" is the function name
     m <- m[match(temp, names(m), nomatch = 0)]
    
     ## sort formula, so that bfp comes before uc
@@ -353,6 +359,17 @@ glmBayesMfp <-
     ## get response
     Y <- model.response(m)
 
+    ## get offsets
+    offset <- as.vector(model.offset(m))
+    if (!is.null(offset))
+    {
+        if (length(offset) != NROW(Y)) 
+            stop(gettextf("number of offsets is %d should equal %d (number of observations)", 
+                length(offset), NROW(Y)), domain = NA)
+    } else {
+        offset <- rep.int(0, nrow(X))
+    }
+    
     ## check length of censoring vector in the Cox case
     if(! doGlm)
     {
@@ -364,6 +381,7 @@ glmBayesMfp <-
 
     Y <- init$y
     family$weights <- as.double(init$weights)
+    family$offsets <- as.double(offset)
     family$dispersions <- as.double(family$phi / init$weights) # and zero weights ?!
     family$linPredStart <- as.double(init$linPredStart)
     
@@ -434,17 +452,25 @@ glmBayesMfp <-
     ## the sampling density, e.g. - 0.5 * log(2 * pi * phi) is *not*
     ## included in the Gaussian case!
 
-    ## get all information on the null model
-    nullModelInfo <- getNullModelInfo(family=family)
-
-    ## modify log marg lik of the null model for TBF methodology:
-    if(tbf)
-    {
-        nullModelInfo$logMargLik <- 0
-    }
-    ## if we use TBF, then the log marginal likelihood is the log test-based Bayes
-    ## factor of the model versus the null model. Of course the Bayes factor of the
-    ## null model versus itself is 1, so the log BF is 0.
+    ## fit the null model
+    nullModelFit <- glm(Y ~ 1,
+                        weights=family$weights,
+                        family=family$family,
+                        offset=family$offsets)
+    nullModelLogMargLik <-
+        if(tbf)
+        {
+            ## if we use TBF, then the log marginal likelihood is the log
+            ## test-based Bayes factor of the model versus the null model. Of
+            ## course the Bayes factor of the null model versus itself is 1, so
+            ## the log BF is 0.
+            0
+        } else {
+            ## compute log marginal likelihood in the null model
+            ## via the Laplace approximation:
+            - nullModelFit$deviance / 2 + 0.5 * log(2 * pi * vcov(nullModelFit))  
+        }
+    nullModelDeviance <- nullModelFit$deviance
     
     ## compute and print cardinality of the model space to guide decision
     fpSetCards <- ifelse (fpMaxs[fpMaxs != 0] <= 3, 8, 5 + fpMaxs[fpMaxs != 0])
@@ -603,8 +629,9 @@ glmBayesMfp <-
                                         # Brent's optimize)?                        
 
     ## pack prior and likelihood information:
-    distribution <- list(nullModelInfo=nullModelInfo, # all information about
-                                        # the null model.
+    distribution <- list(nullModelLogMargLik=nullModelLogMargLik, # log marg lik
+                                        # of the null model.
+                         nullModelDeviance=nullModelDeviance, # corresponding deviance
                          doGlm=doGlm,   # should we do a GLM or a Cox model search?
                          tbf=tbf,       # should TBF methodology be used to
                                         # compute Bayes factors?

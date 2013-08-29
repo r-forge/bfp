@@ -5,7 +5,7 @@ information list}
 \usage{
   getMarginalZ(info,
     method = c("linear", "spline", "logspline", "normalspline", "normal"),
-    plot = FALSE)
+    verbose = FALSE, plot = FALSE)
 }
 \arguments{
   \item{info}{the model information list}
@@ -30,6 +30,8 @@ information list}
   sequence: If the first method does not work, the second
   is tried and so on. The normal approximation always
   \dQuote{works} (but may give bad results). }}
+
+  \item{verbose}{Echo the chosen method? (not default)}
 
   \item{plot}{produce plots of the different approximation
   steps? (not default)}

@@ -61,7 +61,7 @@ struct IwlsResults
         {
         }
 
-    // the linear predictor
+    // the linear predictor (including offsets!)
     AVector linPred;
 
     // the corresponding coefficient vector,
@@ -75,7 +75,7 @@ struct IwlsResults
 };
 
 
-
+// 03/07/2013: add offsets
 
 class Iwls {
 
@@ -97,6 +97,7 @@ public:
     // linPred,
     // until convergence or until the maximum number of iterations is reached.
     // so also only one iwls step can be performed with this function.
+    // Note that the linear predictor is the sum of X^T * beta and the vector of offsets.
     // returns the number of iterations.
     PosInt
     startWithLastLinPred(PosInt maxIter,

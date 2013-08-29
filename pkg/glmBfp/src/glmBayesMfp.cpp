@@ -423,7 +423,7 @@ computeGlm(const ModelPar &mod,
     // be careful: if this is the null model, then just input the data computed in R.
     if(mod.size(ucInfo) == 0)
     {
-        thisVarLogMargLik = config.nullModelInfo.logMargLik;
+        thisVarLogMargLik = config.nullModelLogMargLik;
     }
     else // not the null model, so at least one other coefficient than the intercept present in the model
     {
@@ -689,7 +689,7 @@ glmSampling(const DataValues& data,
     ModelMcmc old(fpInfo,
                   ucInfo,
                   maxDim,
-                  config.nullModelInfo.logMargLik);
+                  config.nullModelLogMargLik);
 
     // insert this model into the cache
     double logPrior = getVarLogPrior(old.modPar,
@@ -1061,6 +1061,7 @@ glmExhaustive(const DataValues& data,
 
 // 21/11/2012: add tbf option
 // 03/12/2012: add Cox regression with tbfs
+// 03/07/2013: remove nullModelInfo and only get nullModelLogMargLik
 
 // R call is:
 //
@@ -1171,7 +1172,8 @@ cpp_glmBayesMfp(SEXP r_interface)
     const std::string modelPrior = as<std::string>(rcpp_distribution["modelPrior"]);
     const bool doGlm = as<bool>(rcpp_distribution["doGlm"]);
     const bool tbf = as<bool>(rcpp_distribution["tbf"]);
-    List rcpp_nullModelInfo = rcpp_distribution["nullModelInfo"];
+    const double nullModelLogMargLik = as<double>(rcpp_distribution["nullModelLogMargLik"]);
+    const double nullModelDeviance = as<double>(rcpp_distribution["nullModelDeviance"]);
     const double fixedg = as<double>(rcpp_distribution["fixedg"]);
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
@@ -1234,7 +1236,7 @@ cpp_glmBayesMfp(SEXP r_interface)
                   higherOrderCorrection);
 
     // model configuration:
-    const GlmModelConfig config(rcpp_family, rcpp_nullModelInfo, fixedg, rcpp_gPrior,
+    const GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, fixedg, rcpp_gPrior,
                                 data.response, bookkeep.debug);
 
     // use only one thread if we do not want to use openMP.

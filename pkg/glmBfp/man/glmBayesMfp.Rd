@@ -4,8 +4,9 @@
 \title{Bayesian model inference for fractional polynomial GLMs and Cox models}
 \usage{
   glmBayesMfp(formula = formula(data), censInd = NULL,
-    data = parent.frame(), weights, family, phi = 1,
-    tbf = FALSE, empiricalBayes = FALSE, fixedg = NULL,
+    data = parent.frame(), weights, offset, family,
+    phi = 1, tbf = FALSE, empiricalBayes = FALSE,
+    fixedg = NULL,
     priorSpecs = list(gPrior = HypergPrior(), modelPrior = "sparse"),
     method = c("ask", "exhaustive", "sampling"), subset,
     na.action = na.omit, verbose = TRUE, debug = FALSE,
@@ -28,6 +29,12 @@
 
   \item{weights}{optionally a vector of positive weights
   (if not provided, a vector of one's)}
+
+  \item{offset}{this can be used to specify an _a priori_
+  known component to be included in the linear predictor
+  during fitting. This must be a numeric vector of length
+  equal to the number of cases (if not provided, a vector
+  of zeroes)}
 
   \item{family}{distribution and link (as in the glm
   function). Needs to be explicitly specified for all

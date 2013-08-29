@@ -31,7 +31,10 @@
 
   \item{newdata}{new covariate data.frame with exactly the
   names (and preferably ranges) as before (default: no new
-  covariate data)}
+  covariate data) Note that there is no option for offsets
+  for new data at the moment. Just add the offsets to the
+  \code{predictions} slot of \code{samples} in the return
+  list yourself.}
 
   \item{fixedZ}{either \code{NULL} (default) or a (single)
   fixed z value to be used, in order to sample from the

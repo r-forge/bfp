@@ -2,7 +2,9 @@
 \alias{testCox}
 \title{Test the Cox model computation for the TBF approach}
 \usage{
-  testCox(survTimes, censInd, X, useCppCode = FALSE)
+  testCox(survTimes, censInd,
+    offsets = rep.int(0, length(survTimes)), X,
+    useCppCode = FALSE)
 }
 \arguments{
   \item{survTimes}{the survival times}
@@ -10,6 +12,11 @@
   \item{censInd}{the logical censoring indicator
   (\code{TRUE} = observed, \code{FALSE} = censored survival
   times)}
+
+  \item{offsets}{known component to be included in the
+  linear predictor during fitting. This must be a numeric
+  vector of length equal to the number of cases (if not
+  provided, a vector of zeroes)}
 
   \item{X}{the design matrix, *without* the intercept 1's!,
   with at least one column}

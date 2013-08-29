@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanés Bové [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: BFPs for GLMs.
 ##        
-## Time-stamp: <[GPrior-classes.R] by DSB Don 22/11/2012 11:59 (CET)>
+## Time-stamp: <[GPrior-classes.R] by DSB Mon 26/08/2013 11:34 (CEST)>
 ##
 ## Description:
 ## Hopefully a clean class system for the different priors on g.
@@ -12,6 +12,7 @@
 ## 23/07/2010   we now only warn instead of producing an error when the integral
 ##              is not equal to 1.
 ## 22/11/2012   add incomplete inverse gamma prior class
+## 26/08/2013   link IncInvGammaGPrior from the virtual g-prior class
 #####################################################################################
 
 ## ----------------------------------------------------------------------------
@@ -25,7 +26,7 @@
 ##' }
 ##'
 ##' @seealso \code{\linkS4class{HypergPrior}}, \code{\linkS4class{InvGammaGPrior}},
-##' \code{\linkS4class{CustomGPrior}}
+##' \code{\linkS4class{IncInvGammaGPrior}}, \code{\linkS4class{CustomGPrior}} 
 ##' 
 ##' @name GPrior-class
 ##' @keywords classes internal

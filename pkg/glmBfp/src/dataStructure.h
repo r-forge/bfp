@@ -359,24 +359,6 @@ private:
 
 // ***************************************************************************************************//
 
-// 21/11/2012: add nullDeviance
-
-struct NullModelInfo
-{
-    NullModelInfo(Rcpp::List& rcpp_nullModelInfo) :
-        logMargLik(Rcpp::as<double>(rcpp_nullModelInfo["logMargLik"])),
-        nullDeviance(Rcpp::as<double>(rcpp_nullModelInfo["nullDeviance"]))
-    {
-    }
-
-    // log marginal likelihood of the null model
-    const double logMargLik;
-    const double nullDeviance;
-};
-
-
-// ***************************************************************************************************//
-
 
 
 struct GlmModelConfig
@@ -391,8 +373,14 @@ struct GlmModelConfig
     // constant, because for each model we will initially start from that.
     const AVector linPredStart;
 
-    // all info for the the null model
-    const NullModelInfo nullModelInfo;
+    // the vector of offsets
+    const AVector offsets;
+
+    // log marg lik of the the null model
+    const double nullModelLogMargLik;
+
+    // deviance of the the null model
+    const double nullModelDeviance;
 
     // fixed value of g
     const double fixedg;
@@ -420,7 +408,8 @@ struct GlmModelConfig
 
     // constructor
     GlmModelConfig(Rcpp::List& rcpp_family,
-                   Rcpp::List& rcpp_nullModelInfo,
+                   double nullModelLogMargLik,
+                   double nullModelDeviance,
                    double fixedg,
                    Rcpp::S4& rcpp_gPrior,
                    const AVector& responses,

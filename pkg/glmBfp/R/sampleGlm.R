@@ -2,7 +2,7 @@
 ## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs for GLMs
 ## 
-## Time-stamp: <[sampleGlm.R] by DSB Mit 17/04/2013 17:53 (CEST)>
+## Time-stamp: <[sampleGlm.R] by DSB Mon 26/08/2013 15:43 (CEST)>
 ##
 ## Description:
 ## Produce posterior samples from one GLM returned by glmBayesMfp, using an MCMC sampler. 
@@ -38,6 +38,7 @@
 ## 23/11/2012   modifications to accommodate the TBF methodology
 ## 03/12/2012   modifications to accommodate the Cox models
 ## 24/01/2013   adapt for fixedg option
+## 03/07/2013   comment on offsets
 #####################################################################################
 
 ##' @include helpers.R
@@ -70,7 +71,10 @@
 ##' additional to the observed values (two are at the endpoints) 
 ##' @param gridSize see above (default: 203)
 ##' @param newdata new covariate data.frame with exactly the names (and
-##' preferably ranges) as before (default: no new covariate data)
+##' preferably ranges) as before (default: no new covariate data) Note that
+##' there is no option for offsets for new data at the moment. Just add the
+##' offsets to the \code{predictions} slot of \code{samples} in the return list 
+##' yourself.
 ##' @param fixedZ either \code{NULL} (default) or a (single) fixed z value to
 ##' be used, in order to sample from the conditional posterior given this z.
 ##' If \code{object} was constructed by the empirical Bayes machinery,
@@ -190,6 +194,9 @@ sampleGlm <-
         stopifnot(is.numeric(fixedZ),
                   is.finite(fixedZ),
                   identical(length(fixedZ), 1L))
+    } else {
+        ## give some value to fixedZ for the C++ code side...
+        fixedZ <- 0
     }
 
     ## extract TBF and g-prior info
@@ -249,7 +256,8 @@ sampleGlm <-
             } else {
                 ## the usual way:
                 getMarginalZ(info,
-                             method=marginalZApprox)
+                             method=marginalZApprox,
+                             verbose=verbose)
             }
         }
     
@@ -262,7 +270,7 @@ sampleGlm <-
                     debug=debug,
                     isNullModel=isNullModel,
                     useFixedZ=useFixedZ,
-                    fixedZ=fixedZ,
+                    fixedZ=as.double(fixedZ),
                     useOpenMP=useOpenMP)
 
     ## start the progress bar (is continued in the C++ code)

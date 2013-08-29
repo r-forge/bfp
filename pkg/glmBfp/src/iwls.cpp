@@ -109,10 +109,12 @@ Iwls::Iwls(const ModelPar &mod,
     }
 }
 
+// 03/07/2013: add offsets
 
 // do the Iwls algorithm for a given covariance factor g and start linear predictor linPred,
 // until convergence or until the maximum number of iterations is reached.
 // so also only one iwls step can be performed with this function.
+// Note that the linear predictor is the sum of X^T * beta and the vector of offsets.
 // returns the number of iterations.
 PosInt
 Iwls::startWithLastLinPred(PosInt maxIter,
@@ -135,7 +137,7 @@ Iwls::startWithLastLinPred(PosInt maxIter,
             double mu = config.link->linkinv(results.linPred(i));
             double dmudEta = config.link->mu_eta(results.linPred(i));
 
-            pseudoObs(i) = results.linPred(i) + (response(i) - mu) / dmudEta;
+            pseudoObs(i) = results.linPred(i) - config.offsets(i) + (response(i) - mu) / dmudEta;
             sqrtWeights(i) *= dmudEta / sqrt(config.distribution->variance(mu));
         }
 
@@ -200,7 +202,7 @@ Iwls::startWithLastLinPred(PosInt maxIter,
         }
 
         // the new linear predictor is
-        results.linPred = design * results.coefs;
+        results.linPred = design * results.coefs + config.offsets;
 
         // compare on the coefficients scale, but not in the first iteration where
         // it is not clear from where coefs_old came. Be safe and always
@@ -233,6 +235,7 @@ Iwls::startWithNewLinPred(PosInt maxIter,
     return startWithLastLinPred(maxIter, g);
 }
 
+// 03/07/2013: add offsets
 
 // do the Iwls algorithm for a given covariance factor g and new start coefficients vector
 // coefsStart.
@@ -242,9 +245,10 @@ Iwls::startWithNewCoefs(PosInt maxIter,
                   const AVector& coefsStart)
 {
     // start with new linpred deriving from the coefs
-    return startWithNewLinPred(maxIter, g, design * coefsStart);
+    return startWithNewLinPred(maxIter, g, design * coefsStart + config.offsets);
 }
 
+// 03/07/2013: add offsets
 
 // compute the log of the (unnormalized)
 // posterior density for a given parameter consisting of the coefficients vector and z.
@@ -259,7 +263,7 @@ double
 Iwls::computeLogUnPosteriorDens(const Parameter& sample) const
 {
     // compute the sample of the linear predictor:
-    AVector linPredSample = design * sample.coefs;
+    AVector linPredSample = design * sample.coefs + config.offsets;
 
     // compute the resulting mean vector from the linear predictor via the response function
     AVector meansSample(linPredSample.n_elem);
