@@ -108,7 +108,7 @@ cpp_evalZdensity(SEXP r_interface)
 
     // options:
 
-    const DoubleVector zValues = rcpp_options["zValues"];
+    const MyDoubleVector zValues = rcpp_options["zValues"];
 //    const bool conditional = as<bool>(rcpp_options["conditional"]);
 //    const bool debug = as<bool>(rcpp_options["debug"]);
 //    const bool higherOrderCorrection = as<bool>(rcpp_options["higherOrderCorrection"]);
@@ -182,7 +182,7 @@ cpp_evalZdensity(SEXP r_interface)
      // evaluate it at the given z values.
      NumericVector results;
 
-     for (DoubleVector::const_iterator z = zValues.begin(); z != zValues.end(); ++z)
+     for (MyDoubleVector::const_iterator z = zValues.begin(); z != zValues.end(); ++z)
      {
          results.push_back(negLogUnnormZDens(* z));
      }

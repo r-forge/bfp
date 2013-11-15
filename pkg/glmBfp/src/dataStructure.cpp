@@ -225,8 +225,8 @@ ModelPar::print(const FpInfo& fpInfo) const
                 stream << "\nFor " << *n << ": ";
 
                 // and all powers
-                DoubleVector thesePowers = fpInfo.inds2powers(*i);
-                for(DoubleVector::const_iterator
+                MyDoubleVector thesePowers = fpInfo.inds2powers(*i);
+                for(MyDoubleVector::const_iterator
                         p = thesePowers.begin();
                         p != thesePowers.end();
                         ++p)
@@ -282,7 +282,7 @@ ModelPar::ModelPar(List rcpp_configuration,
         // get the list element with this name,
         // a double vector,
         // and get the Powers object from that (that is, convert double vector to indexes)
-        Powers powers(fpInfo.vec2inds(as<DoubleVector>(rcpp_powers[*s])));
+        Powers powers(fpInfo.vec2inds(as<MyDoubleVector>(rcpp_powers[*s])));
 
         // we have started with fpSize = 0, so we can just add the number of powers now
         fpSize += powers.size();
@@ -480,13 +480,13 @@ Model::convert2list(const FpInfo& currFp,
 // compute nodes and log weights for given mode and var of target unnormalized density
 void
 GaussHermite::getNodesAndLogWeights(double mode, double var,
-                                    DoubleVector& nodes, DoubleVector& logWeights) const // output
+                                    MyDoubleVector& nodes, MyDoubleVector& logWeights) const // output
 {
     // logarithm of square root of (2 * var).
     double logSqrt2Var = 0.5 * (M_LN2 + log(var));
 
-    DoubleVector::const_iterator t = tVec.begin();
-    for(DoubleVector::const_iterator
+    MyDoubleVector::const_iterator t = tVec.begin();
+    for(MyDoubleVector::const_iterator
             w = wVec.begin();
             w != wVec.end();
             ++w, ++t)
@@ -761,7 +761,7 @@ ModelCache::getLogNormConstant() const
 
 // compute the inclusion probabilities from all cached models,
 // taking the log normalising constant, the number of FPs and the number of UC groups
-DoubleVector
+MyDoubleVector
 ModelCache::getInclusionProbs(long double logNormConstant, PosInt nFps, PosInt nUcs) const
 {
     // abbreviation
@@ -815,7 +815,7 @@ ModelCache::getInclusionProbs(long double logNormConstant, PosInt nFps, PosInt n
     } // end processing all models in the cache
 
     // so now we can sum up safesum-wise to the return double vector
-    DoubleVector ret;
+    MyDoubleVector ret;
 
     for(SafeSumVector::iterator
             s = fps.begin();

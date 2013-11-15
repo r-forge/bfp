@@ -342,18 +342,18 @@ public:
     // compute nodes and log weights for given mode and sd of target unnormalized density
     void
     getNodesAndLogWeights(double mode, double var,
-                       DoubleVector& nodes, DoubleVector& logWeights) const; // output
+                       MyDoubleVector& nodes, MyDoubleVector& logWeights) const; // output
 
     // constructor
     GaussHermite(Rcpp::List rcpp_gaussHermite) :
-        tVec(Rcpp::as<DoubleVector>(rcpp_gaussHermite["nodes"])),
-        wVec(Rcpp::as<DoubleVector>(rcpp_gaussHermite["weights"]))
+        tVec(Rcpp::as<MyDoubleVector>(rcpp_gaussHermite["nodes"])),
+        wVec(Rcpp::as<MyDoubleVector>(rcpp_gaussHermite["weights"]))
         {
         }
 
 private:
-    const DoubleVector tVec; // nodes
-    const DoubleVector wVec; // weights (not log!)
+    const MyDoubleVector tVec; // nodes
+    const MyDoubleVector wVec; // weights (not log!)
 };
 
 
@@ -509,7 +509,7 @@ public:
 
     // compute the inclusion probabilities from all cached models,
     // taking the log normalising constant and the total number of FPs / UC groups
-    DoubleVector
+    MyDoubleVector
     getInclusionProbs(long double logNormConstant, PosInt nFps, PosInt nUcs) const;
 
     // convert the best nModels from the cache into an R list

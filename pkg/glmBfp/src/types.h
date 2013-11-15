@@ -36,7 +36,7 @@ typedef std::set<PosInt> PosIntSet;
 // (1) Double vectors:
 
 // here is a double vector
-typedef std::vector<double> DoubleVector;
+typedef std::vector<double> MyDoubleVector;
 // and a long double vector
 typedef std::vector<long double> LongDoubleVector;
 // and a string vector

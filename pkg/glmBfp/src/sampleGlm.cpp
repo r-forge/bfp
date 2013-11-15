@@ -208,12 +208,12 @@ private:
     PosInt nSaved;
 
     // is gradually extended:
-    DoubleVector zSamples;
+    MyDoubleVector zSamples;
 
     // possibly stays empty if not required by the user:
     // the numerator and denominator terms for the marginal likelihood estimate
-    DoubleVector numerator;
-    DoubleVector denominator;
+    MyDoubleVector numerator;
+    MyDoubleVector denominator;
 };
 
 List

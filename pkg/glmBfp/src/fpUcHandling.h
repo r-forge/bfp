@@ -16,7 +16,7 @@
 
 // small helper function to structure code:
 // get the maximum power set for a range of FP maximum degrees
-DoubleVector
+MyDoubleVector
 getMaxPowerSet(const PosIntVector& fpmaxs);
 
 // ***************************************************************************************************//
@@ -37,7 +37,7 @@ getTransformedCols(const PosIntVector& fpcards,
 struct FpInfo
 { // collects all information on fractional polynomials needed to be passed down
     PosInt nFps;
-    DoubleVector powerset;
+    MyDoubleVector powerset;
     PosIntVector fpcards;
     PosIntVector fppos;
     PosIntVector fpmaxs;
@@ -81,12 +81,12 @@ struct FpInfo
     }
 
     // convert inds m into powers vector
-    DoubleVector
+    MyDoubleVector
     inds2powers(const Powers& m) const;
 
     // convert std::vector of powers into Powers object (i.e. a multiset)
     Powers
-    vec2inds(const DoubleVector& p) const;
+    vec2inds(const MyDoubleVector& p) const;
 
 };
 

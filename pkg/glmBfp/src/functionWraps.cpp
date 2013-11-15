@@ -14,77 +14,77 @@ using namespace Rcpp;
 
 // first R functions taking only a scalar
 
-// constructor
-RFunction::RFunction(SEXP R_fun)
-{
-    // allocate double scalar as function argument
-    Rf_protect(R_functionArgument = Rf_allocVector(REALSXP, 1));
+//// constructor
+//RFunction::RFunction(SEXP R_fun)
+//{
+//    // allocate double scalar as function argument
+//    Rf_protect(R_functionArgument = Rf_allocVector(REALSXP, 1));
+//
+//    // construct the function call
+//    Rf_protect(R_functionCall = Rf_lcons(R_fun,
+//                                  Rf_lcons(R_functionArgument,
+//                                     R_NilValue)));
+//
+//    // get the function frame (is connected to the R function, so is already protected)
+//    R_functionFrame = FRAME(R_fun);
+//}
 
-    // construct the function call
-    Rf_protect(R_functionCall = Rf_lcons(R_fun,
-                                  Rf_lcons(R_functionArgument,
-                                     R_NilValue)));
-
-    // get the function frame (is connected to the R function, so is already protected)
-    R_functionFrame = FRAME(R_fun);
-}
-
-// copy constructor
-RFunction::RFunction(const RFunction& old)
-{
-    // double scalar as function argument:
-    // take the same one as the old object.
-    Rf_protect(R_functionArgument = old.R_functionArgument);
-
-    // so also for the function call we must take the same one
-    Rf_protect(R_functionCall = old.R_functionCall);
-
-    // and then finally get the function frame
-    R_functionFrame = old.R_functionFrame;
-}
-
-
-// assignment operator
-RFunction& RFunction::operator=(const RFunction& rhs)
-{
-    if(&rhs != this)
-    {
-        // first unprotect the current members
-        Rf_unprotect(3);
-
-        // then assign the new members:
-
-        // double scalar as function argument:
-        // take the same one as the old object.
-        Rf_protect(R_functionArgument = rhs.R_functionArgument);
-
-        // so also for the function call we must take the same one
-        Rf_protect(R_functionCall = rhs.R_functionCall);
-
-        // and then finally get the function frame
-        R_functionFrame = rhs.R_functionFrame;
-    }
-
-    // return ourself
-    return *this;
-}
+//// copy constructor
+//RFunction::RFunction(const RFunction& old)
+//{
+//    // double scalar as function argument:
+//    // take the same one as the old object.
+//    Rf_protect(R_functionArgument = old.R_functionArgument);
+//
+//    // so also for the function call we must take the same one
+//    Rf_protect(R_functionCall = old.R_functionCall);
+//
+//    // and then finally get the function frame
+//    R_functionFrame = old.R_functionFrame;
+//}
 
 
-// destructor
-RFunction::~RFunction()
-{
-    // unprotect the the function argument and the call
-    Rf_unprotect(2);
+//// assignment operator
+//RFunction& RFunction::operator=(const RFunction& rhs)
+//{
+//    if(&rhs != this)
+//    {
+//        // first unprotect the current members
+//        Rf_unprotect(3);
+//
+//        // then assign the new members:
+//
+//        // double scalar as function argument:
+//        // take the same one as the old object.
+//        Rf_protect(R_functionArgument = rhs.R_functionArgument);
+//
+//        // so also for the function call we must take the same one
+//        Rf_protect(R_functionCall = rhs.R_functionCall);
+//
+//        // and then finally get the function frame
+//        R_functionFrame = rhs.R_functionFrame;
+//    }
+//
+//    // return ourself
+//    return *this;
+//}
+//
 
-    // everything else is automatically destroyed.
-}
+//// destructor
+//RFunction::~RFunction()
+//{
+//    // unprotect the the function argument and the call
+//    Rf_unprotect(2);
+//
+//    // everything else is automatically destroyed.
+//}
 
 // for use as a function
 double
 RFunction::operator()(double x) const
 {
-    // input the argument
-    REAL(R_functionArgument)[0] = x;
+//    // input the argument
+//    REAL(R_functionArgument)[0] = x;
 
 //    // get the result
 //    SEXP R_pars;
@@ -101,9 +101,17 @@ RFunction::operator()(double x) const
 //    return ret;
 
     // shorter:
-    return Rf_asReal(Rf_coerceVector(Rf_eval(R_functionCall,
-                                             R_functionFrame),
-                                     REALSXP));
+    // 8/11/2013: debug error
+    // "'rho' must be an environment not pairlist: detected in C-level eval"
+    // In gdb I find the following "classes" for the arguments:
+    // (see Rinternals.h, line 98 ff.)
+
+    double ret = as<double>(fun(x));
+    return ret;
+
+//    return Rf_asReal(Rf_coerceVector(Rf_eval(R_functionCall, // SEXP type 6: language constructs
+//                                             R_functionFrame), // SEXP type 2: lists of dotted pairs
+//                                     REALSXP));
 }
 
 // ***************************************************************************************************//
@@ -112,43 +120,43 @@ RFunction::operator()(double x) const
 // now R functions taking a fixed length vector
 
 
-// constructor
-VectorRFunction::VectorRFunction(SEXP R_function, R_len_t argsize) :
-        argsize(argsize)
-{
-    // allocate vector as function argument
-    Rf_protect(R_functionArgument = Rf_allocVector(REALSXP, argsize));
-
-    // construct the function call
-    Rf_protect(R_functionCall = Rf_lcons(R_function,
-                                  Rf_lcons(R_functionArgument,
-                                     R_NilValue)));
-
-    // get the function frame (is connected to the R function, so is already protected)
-    R_functionFrame = FRAME(R_function);
-}
-
-
-// destructor
-VectorRFunction::~VectorRFunction()
-{
-    // unprotect the function argument and call
-    Rf_unprotect(2);
-
-    // everything else is automatically destroyed.
-}
+//// constructor
+//VectorRFunction::VectorRFunction(SEXP R_function, R_len_t argsize) :
+//        argsize(argsize)
+//{
+//    // allocate vector as function argument
+//    Rf_protect(R_functionArgument = Rf_allocVector(REALSXP, argsize));
+//
+//    // construct the function call
+//    Rf_protect(R_functionCall = Rf_lcons(R_function,
+//                                  Rf_lcons(R_functionArgument,
+//                                     R_NilValue)));
+//
+//    // get the function frame (is connected to the R function, so is already protected)
+//    R_functionFrame = FRAME(R_function);
+//}
+//
+//
+//// destructor
+//VectorRFunction::~VectorRFunction()
+//{
+//    // unprotect the function argument and call
+//    Rf_unprotect(2);
+//
+//    // everything else is automatically destroyed.
+//}
 
 // for use as a function
 double
 VectorRFunction::operator()(const double* vector) const
 {
     // copy the vector
-    std::copy(vector, vector + argsize, REAL(R_functionArgument));
+    NumericVector arg(argsize);
+    std::copy(vector, vector + argsize, arg.begin());
 
     // and then evaluate the function call.
-    return Rf_asReal(Rf_coerceVector(Rf_eval(R_functionCall,
-                                             R_functionFrame),
-                                     REALSXP));
+    double ret = as<double>(fun(arg));
+    return ret;
 }
 
 
@@ -175,8 +183,8 @@ double
 Cache::getValue(double arg) const
 {
     // search for the argument
-    DoubleVector::const_iterator iterVals = vals.begin();
-    for(DoubleVector::const_iterator
+    MyDoubleVector::const_iterator iterVals = vals.begin();
+    for(MyDoubleVector::const_iterator
             iterArgs = args.begin();
             iterArgs != args.end();
             ++iterArgs, ++iterVals)
@@ -194,8 +202,8 @@ Cache::getValue(double arg) const
 
 // initialize from an R list
 Cache::Cache(List& rcpp_list) :
-        args(as<DoubleVector>(rcpp_list["args"])),
-        vals(as<DoubleVector>(rcpp_list["vals"]))
+        args(as<MyDoubleVector>(rcpp_list["args"])),
+        vals(as<MyDoubleVector>(rcpp_list["vals"]))
 {
     if(args.size() != vals.size())
     {

@@ -1,3 +1,7 @@
+2013-11-07  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* start adaptations for R version 3.0.2
+
 2013-08-26  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* R/getMarginalZ.R: introduce verbose option

@@ -110,7 +110,7 @@ struct CoxfitResults
 
     // the log likelihoods of the initial coef vector and
     // the final one
-    DoubleVector loglik;
+    MyDoubleVector loglik;
 
     // convergence flag
     int flag;

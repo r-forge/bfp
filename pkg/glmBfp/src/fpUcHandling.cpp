@@ -16,7 +16,7 @@
 
 // small helper function to structure code:
 // get the maximum power set for a range of FP maximum degrees
-DoubleVector
+MyDoubleVector
 getMaxPowerSet(const PosIntVector& fpmaxs)
 {
     // always in the power set:
@@ -24,7 +24,7 @@ getMaxPowerSet(const PosIntVector& fpmaxs)
     //        corresponding indices        0   1     2  3    4  5  6  7
 
     // convert to double vector
-    DoubleVector maxPowerset(fixedpowers, fixedpowers + 8);
+    MyDoubleVector maxPowerset(fixedpowers, fixedpowers + 8);
 
     if (! fpmaxs.empty())
     {
@@ -46,10 +46,10 @@ getMaxPowerSet(const PosIntVector& fpmaxs)
 
 // fpInfo //
 
-DoubleVector
-FpInfo::inds2powers(const Powers& m) const // convert inds m (a "Powers" object) into powers vector p (a DoubleVector)
+MyDoubleVector
+FpInfo::inds2powers(const Powers& m) const // convert inds m (a "Powers" object) into powers vector p (a MyDoubleVector)
 {
-    DoubleVector ret;
+    MyDoubleVector ret;
 
     for (Powers::const_iterator j = m.begin();
             j != m.end();
@@ -64,11 +64,11 @@ FpInfo::inds2powers(const Powers& m) const // convert inds m (a "Powers" object)
 
 // convert std::vector of powers into Powers object (i.e. a multiset) of ints of the power indexes.
 Powers
-FpInfo::vec2inds(const DoubleVector& p) const
+FpInfo::vec2inds(const MyDoubleVector& p) const
 {
     Powers ret;
 
-    for(DoubleVector::const_iterator j = p.begin();
+    for(MyDoubleVector::const_iterator j = p.begin();
             j != p.end();
             j++)
     {
@@ -106,7 +106,7 @@ getTransformedCols(const PosIntVector& fpcards,
     AVectorArray transformedCols;
 
     // get maximum powerset
-    DoubleVector maxPowerset = getMaxPowerSet(fpmaxs);
+    MyDoubleVector maxPowerset = getMaxPowerSet(fpmaxs);
 
     // process each FP term
     PosIntVector::const_iterator card = fpcards.begin();

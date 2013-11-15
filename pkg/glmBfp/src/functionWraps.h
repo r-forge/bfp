@@ -19,25 +19,25 @@ class RFunction
 {
 public:
     // constructor
-    RFunction(SEXP R_fun);
+    RFunction(SEXP R_fun) :
+        fun(R_fun)
+        {}
 
-    // copy constructor
-    RFunction(const RFunction& old);
-
-    // destructor
-    ~RFunction();
-
-    // assignment operator
-    RFunction& operator=(const RFunction& rhs);
+//    // copy constructor
+//    RFunction(const RFunction& old);
+//
+//    // destructor
+//    ~RFunction();
+//
+//    // assignment operator
+//    RFunction& operator=(const RFunction& rhs);
 
     // for use as a function (function object)
     double
     operator()(double x) const;
 
 private:
-    SEXP R_functionCall;
-    SEXP R_functionArgument;
-    SEXP R_functionFrame;
+    Rcpp::Function fun;
 };
 
 // ***************************************************************************************************//
@@ -47,20 +47,18 @@ class VectorRFunction
 {
 public:
     // constructor
-    VectorRFunction(SEXP R_function, R_len_t argsize);
-
-    // destructor
-    ~VectorRFunction();
+    VectorRFunction(SEXP R_function, R_len_t argsize) :
+        fun(R_function),
+        argsize(argsize)
+        {}
 
     // for use as a function (function object)
     double
     operator()(const double* vector) const;
 
 private:
-    R_len_t argsize;
-    SEXP R_functionCall;
-    SEXP R_functionArgument;
-    SEXP R_functionFrame;
+    Rcpp::Function fun;
+    PosInt argsize;
 };
 
 // ***************************************************************************************************//
@@ -74,14 +72,14 @@ public:
     save(double arg, double val);
 
     // extract the arguments
-    DoubleVector
+    MyDoubleVector
     getArgs() const
     {
         return args;
     }
 
     // extract the function values
-    DoubleVector
+    MyDoubleVector
     getVals() const
     {
         return vals;
@@ -106,8 +104,8 @@ public:
     convert2list() const;
 
 private:
-    DoubleVector args;
-    DoubleVector vals;
+    MyDoubleVector args;
+    MyDoubleVector vals;
 };
 
 // ***************************************************************************************************//
