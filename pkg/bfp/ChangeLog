@@ -1,3 +1,8 @@
+2013-11-22  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* Very minor internal change to avoid possibly invalid coercions
+	in C++ code (thanks to Brian Ripley for pointing this out).
+
 2012-05-30  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Minor changes in hope to pass R CMD check on R-Forge.

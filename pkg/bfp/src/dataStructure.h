@@ -110,7 +110,7 @@ struct modelInfo{ // contents: must be assignable
 	modelInfo() : // default
 		logMargLik(0), logPrior(0), logPost(0), postExpectedg(0), postExpectedShrinkage(0), R2(0), hits(0) {}
 	modelInfo(const double &v, const double &w, const double &x, const double &y, const double &z) : // initialize without hits
-		logMargLik(v), logPrior(w), logPost(v + w), postExpectedg(x), postExpectedShrinkage(y), R2(z), hits(R_NaReal) {}
+		logMargLik(v), logPrior(w), logPost(v + w), postExpectedg(x), postExpectedShrinkage(y), R2(z), hits(R_NaInt) {}
 	modelInfo(const double &v, const double &w, const double &x, const double &x2, const double &y, const unsigned long int &z) : 
 		logMargLik(v), logPrior(w), logPost(v + w), postExpectedg(x), postExpectedShrinkage(x2), R2(y), hits(z) {}	// initialize with hits
 
