@@ -1,3 +1,8 @@
+2013-12-05  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
+
+	* move examples directory with simulation to inst directory to
+	comply with CRAN standards, plus linewrap in man file.
+
 2013-11-22  Daniel Sabanés Bové  <daniel.sabanesbove@ifspm.uzh.ch>
 
 	* Very minor internal change to avoid possibly invalid coercions

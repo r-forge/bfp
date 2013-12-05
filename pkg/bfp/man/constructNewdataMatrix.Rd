@@ -48,8 +48,9 @@ stopifnot(identical(newmatrix,
 				1.2, 1.1, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 				10,  2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
 				.Dim = c(10L, 4L),
-				.Dimnames = list(c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
-				                 c("(Intercept)", "x2", "x1", "x3")),
+				.Dimnames =
+                                 list(c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
+				      c("(Intercept)", "x2", "x1", "x3")),
 				assign = 0:3)))
 }
 \keyword{internal}
