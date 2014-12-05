@@ -123,7 +123,8 @@ sampleGlm <-
              marginalZApprox=NULL,
              verbose=TRUE,
              debug=FALSE,
-             useOpenMP=TRUE)
+             useOpenMP=TRUE,
+             correctedCenter=FALSE)
 {
     ## check the object
     if(! inherits(object, "GlmBayesMfp"))
@@ -286,6 +287,7 @@ sampleGlm <-
                             attrs$fpInfos,
                             attrs$ucInfos,
                             attrs$distribution,
+                            attrs$searchConfig,
                             options,
                             marginalz)
 
@@ -360,15 +362,41 @@ sampleGlm <-
             attr(tempObj, "data") <-
                 list(x=tempX,
                      xCentered=scale(tempX, center=TRUE, scale=FALSE)) 
+           
+            if(correctedCenter==FALSE){
+              ## so we can get the design matrix
+              newDesign <- getDesignMatrix(modelConfig=config,
+                                           object=tempObj,
+                                           fixedColumns=doGlm)
+              
+              ## so the linear predictor samples are
+              linPredSamples <- newDesign %*% simCoefs
+              
+            } else if(correctedCenter==TRUE){
+              
+              newDesignUC <- getDesignMatrix(modelConfig=config,
+                                             object=tempObj,
+                                             fixedColumns=doGlm,
+                                             center=FALSE)
+              
+              oldDesignUC <- getDesignMatrix(modelConfig=config,
+                                             object=object,
+                                             fixedColumns=doGlm,
+                                             center=FALSE)
+              
+              oldMeans <- colMeans(oldDesignUC)
+              
+              start <- ifelse(doGlm, 2,1) #If there is an intercept we don't want to subtract mean
+              for(k in start:length(oldMeans)){
+                newDesignUC[,k] <- newDesignUC[,k] - oldMeans[k]
+              }
+              
+              ## so the linear predictor samples are
+              linPredSamples <- newDesignUC %*% simCoefs
+            }
             
-            ## so we can get the design matrix
-            newDesign <- getDesignMatrix(modelConfig=config,
-                                         object=tempObj,
-                                         fixedColumns=doGlm)
-
-            ## so the linear predictor samples are
-            linPredSamples <- newDesign %*% simCoefs
-            linPredSamples
+              linPredSamples
+            
             
         } else {
             ## no prediction required.

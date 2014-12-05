@@ -76,6 +76,7 @@ struct Book
     const bool doGlm;
     const bool empiricalBayes;
     const bool useFixedg;
+    const bool useFixedc;
     const bool doSampling;
     const bool verbose;
     const std::string modelPrior;
@@ -94,6 +95,7 @@ struct Book
          bool doGlm,
          bool empiricalBayes,
          bool useFixedg,
+         bool useFixedc,
          double cl,
          bool doSampling,
          bool verbose,
@@ -413,7 +415,9 @@ struct GlmModelConfig
                    double fixedg,
                    Rcpp::S4& rcpp_gPrior,
                    const AVector& responses,
-                   bool debug);
+                   bool debug,
+                   bool useFixedc,
+                   double empiricalMean);
 
     // destructor
     ~GlmModelConfig()

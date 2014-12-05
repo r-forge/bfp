@@ -323,6 +323,9 @@ cpp_sampleGlm(SEXP r_interface)
     List rcpp_distribution(CAR(r_interface));
 
     r_interface = CDR(r_interface);
+    List rcpp_searchConfig(CAR(r_interface));
+
+    r_interface = CDR(r_interface);
     List rcpp_options(CAR(r_interface));
 
     r_interface = CDR(r_interface);
@@ -379,7 +382,12 @@ cpp_sampleGlm(SEXP r_interface)
     List rcpp_family = rcpp_distribution["family"];
     const bool tbf = as<bool>(rcpp_distribution["tbf"]);
     const bool doGlm = as<bool>(rcpp_distribution["doGlm"]);
-
+    
+    const double empiricalMean = as<double>(rcpp_distribution["yMean"]);
+    
+    // model search configuration:
+    const bool useFixedc = as<bool>(rcpp_searchConfig["useFixedc"]);
+    
     // options:
 
     const bool estimateMargLik = as<bool>(rcpp_options["estimateMargLik"]);
@@ -437,7 +445,7 @@ cpp_sampleGlm(SEXP r_interface)
 
      // model configuration:
      GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, exp(fixedZ), rcpp_gPrior,
-                           data.response, debug);
+                           data.response, debug, useFixedc, empiricalMean);
 
 
      // model config/info:

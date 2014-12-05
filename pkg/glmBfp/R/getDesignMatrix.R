@@ -31,7 +31,8 @@
 ##' @keywords internal utilities
 getDesignMatrix <- function (modelConfig=object[[1]]$configuration, 
                              object, 
-                             fixedColumns=TRUE)
+                             fixedColumns=TRUE,
+                             center = TRUE)
 {
     ## checks
     stopifnot(is.bool(fixedColumns))
@@ -91,7 +92,7 @@ getDesignMatrix <- function (modelConfig=object[[1]]$configuration,
     for (i in seq_along (inds$bfp)){
         pi <- powers[[i]]
         if (len <- length (pi)) {       # if there is at least one power
-            new <- getFpTransforms (full[, inds$bfp[i], drop = FALSE], pi, center=TRUE)
+            new <- getFpTransforms (full[, inds$bfp[i], drop = FALSE], pi, center=center)
             newInds <- col + seq_along (pi)
 
             ret[, newInds] <- new
@@ -103,7 +104,11 @@ getDesignMatrix <- function (modelConfig=object[[1]]$configuration,
 
     ## uc part
     if (length (ucSet)){
-        new <- fullCentered[, ucColInds, drop = FALSE]
+        if(center) {
+			new <- fullCentered[, ucColInds, drop = FALSE]
+        } else if (!center) {
+			new <- full[, ucColInds, drop = FALSE]
+		}
         newInds <- col + seq_len (nUc)
 
         ret[, newInds] <- new

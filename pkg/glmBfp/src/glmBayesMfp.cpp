@@ -516,6 +516,8 @@ glmModelsInList(const DataValues& data,
 
     for(R_len_t i = 0; i < rcpp_modelConfigs.size(); ++i)
     {
+    as<List>(rcpp_modelConfigs[i]);
+    
         // this is the current model config:
         ModelPar modelConfig(as<List>(rcpp_modelConfigs[i]),
                              fpInfo);
@@ -1154,7 +1156,7 @@ cpp_glmBayesMfp(SEXP r_interface)
     const PosInt nCache = as<PosInt>(rcpp_searchConfig["nCache"]);
     const double largeVariance = as<double>(rcpp_searchConfig["largeVariance"]);
     const bool useBfgs = as<bool>(rcpp_searchConfig["useBfgs"]);
-
+    const bool useFixedc = as<bool>(rcpp_searchConfig["useFixedc"]);
 
     // there might be a single model configuration saved in the searchConfig:
     bool onlyComputeModelsInList;
@@ -1175,6 +1177,8 @@ cpp_glmBayesMfp(SEXP r_interface)
     const double nullModelLogMargLik = as<double>(rcpp_distribution["nullModelLogMargLik"]);
     const double nullModelDeviance = as<double>(rcpp_distribution["nullModelDeviance"]);
     const double fixedg = as<double>(rcpp_distribution["fixedg"]);
+    const double empiricalMean = as<double>(rcpp_distribution["yMean"]);
+
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
 
@@ -1224,6 +1228,7 @@ cpp_glmBayesMfp(SEXP r_interface)
                   doGlm,
                   empiricalBayes,
                   useFixedg,
+                  useFixedc,
                   chainlength,
                   doSampling,
                   verbose,
@@ -1237,7 +1242,7 @@ cpp_glmBayesMfp(SEXP r_interface)
 
     // model configuration:
     const GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, fixedg, rcpp_gPrior,
-                                data.response, bookkeep.debug);
+                                data.response, bookkeep.debug, bookkeep.useFixedc, empiricalMean);
 
     // use only one thread if we do not want to use openMP.
 #ifdef _OPENMP
