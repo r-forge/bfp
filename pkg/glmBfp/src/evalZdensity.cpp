@@ -101,6 +101,7 @@ cpp_evalZdensity(SEXP r_interface)
 
     const double nullModelLogMargLik = as<double>(rcpp_distribution["nullModelLogMargLik"]);
     const double nullModelDeviance = as<double>(rcpp_distribution["nullModelDeviance"]);
+    const double empiricalMean = as<double>(rcpp_distribution["yMean"]);
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
 
@@ -117,6 +118,7 @@ cpp_evalZdensity(SEXP r_interface)
                         as<bool>(rcpp_distribution["doGlm"]),
                         false,
                         as<bool>(rcpp_options["conditional"]),
+                        false, //useFixedc
                         100,
                         false,
                         as<bool>(rcpp_options["debug"]),
@@ -162,7 +164,7 @@ cpp_evalZdensity(SEXP r_interface)
 
      // search configuration:
      const GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, as<double>(rcpp_distribution["fixedg"]), rcpp_gPrior,
-                                 data.response, bookkeep.debug);
+                                 data.response, bookkeep.debug, bookkeep.useFixedc, empiricalMean);
      // config of this model:
      const ModelPar thisModelConfig(rcpp_config, fpInfo);
 

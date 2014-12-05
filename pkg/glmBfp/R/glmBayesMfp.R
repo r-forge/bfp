@@ -54,6 +54,8 @@
 ## 06/02/2013   remove default for "family"
 ## 03/07/2013   - add offsets
 ##              - remove getNullModelInfo
+## 26/05/2014   Added option (useFixedc) to calculate (or not) c factor using
+##              mean of observations as in null model instead of alpha=0.
 #####################################################################################
 
 ##' @include helpers.R
@@ -156,6 +158,8 @@
 ##' @param higherOrderCorrection should a higher-order correction of the
 ##' Laplace approximation be used, which works only for canonical GLMs? (not
 ##' default) 
+##' @param fixedcfactor If TRUE sets the c factor assuming alpha is set to 0. Otherwise take alpha=mean(y)
+##' 
 ##'
 ##' @aliases glmBayesMfp GlmBayesMfp
 ##' @return An object of S3 class \code{GlmBayesMfp}.
@@ -188,7 +192,8 @@ glmBayesMfp <-
               useBfgs=FALSE,
               largeVariance=100,
               useOpenMP=TRUE,
-              higherOrderCorrection=FALSE)
+              higherOrderCorrection=FALSE,
+              fixedcfactor=FALSE)
 {
     ## checks
     stopifnot(is.bool(tbf),
@@ -618,6 +623,7 @@ glmBayesMfp <-
                          empiricalBayes=empiricalBayes, # use EB for g and
                                         # conditional marginal likelihoods?
                          useFixedg=useFixedg,   # use a fixed value of g?
+                         useFixedc = fixedcfactor,
                          doSampling=doSampling,               # shall model sampling be done? If
                                         # false, then exhaustive search.
                          chainlength=as.double(chainlength),  # how many times should a jump be
@@ -640,7 +646,8 @@ glmBayesMfp <-
                          gPrior=priorSpecs$gPrior, # prior on the covariance
                                         # factor g (S4 class object)
                          modelPrior=priorSpecs$modelPrior, # model prior string                         
-                         family=family)    # GLM family and link                                 
+                         family=family,    # GLM family and link,
+                         yMean=mean(Y))   #  
 
     ## pack other options
     options <- list(verbose=verbose,           # should progress be displayed?

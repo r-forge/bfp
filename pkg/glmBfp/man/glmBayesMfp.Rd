@@ -13,7 +13,8 @@
     nModels, nCache = 1e+09, chainlength = 10000,
     nGaussHermite = 20, useBfgs = FALSE,
     largeVariance = 100, useOpenMP = TRUE,
-    higherOrderCorrection = FALSE)
+    higherOrderCorrection = FALSE,
+    fixedcfactor=FALSE)
 }
 \arguments{
   \item{formula}{model formula}
@@ -114,6 +115,8 @@
   \item{higherOrderCorrection}{should a higher-order
   correction of the Laplace approximation be used, which
   works only for canonical GLMs? (not default)}
+  
+  \item{fixedcfactor}{Use alpha = 0 or y mean to calculate alpha.}
 }
 \value{
   An object of S3 class \code{GlmBayesMfp}.

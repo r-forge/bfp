@@ -112,6 +112,7 @@ Book::Book(bool tbf,
            bool doGlm,
            bool empiricalBayes,
            bool useFixedg,
+           bool useFixedc,
            double cl,
            bool doSampling,
            bool verbose,
@@ -128,6 +129,7 @@ Book::Book(bool tbf,
                 doGlm(doGlm),
                 empiricalBayes(empiricalBayes),
                 useFixedg(useFixedg),
+                useFixedc(useFixedc),
                 doSampling(doSampling),
                 verbose(verbose),
                 modelPrior(modelPrior),
@@ -507,7 +509,9 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
                                double fixedg,
                                S4& rcpp_gPrior,
                                const AVector& responses,
-                               bool debug) :
+                               bool debug,
+                               bool useFixedc,
+                               double empiricalMean) :
     dispersions(as<NumericVector>(rcpp_family["dispersions"])),
     weights(as<NumericVector>(rcpp_family["weights"])),
     linPredStart(as<NumericVector>(rcpp_family["linPredStart"])),
@@ -574,14 +578,23 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
     }
 
 
-    // from the link and the distribution we can derive the constant factor
-    // c = v(h(0)) / h'(0)^2
-    double deriv = link->mu_eta(0);
-    cfactor = distribution->variance(link->linkinv(0)) / (deriv * deriv);
+    if (useFixedc) {
+        
+         // from the link and the distribution we can derive the constant factor
+         // c = v(h(0)) / h'(0)^2
+        double deriv = link->mu_eta(0);
+        cfactor = distribution->variance(link->linkinv(0)) / (deriv * deriv);
+    }
+    else if (!useFixedc) {
+      	//Rprintf("used y mean of %f\n", empiricalMean);
+        double deriv = link->mu_eta(link->linkfun(empiricalMean));
+        cfactor = distribution->variance(link->linkinv(link->linkfun(empiricalMean))) / (deriv * deriv);
+        
+    }
 
     if(debug)
     {
-        Rprintf("Factor c is %f\n", cfactor);
+       Rprintf("Factor c is %f\n", cfactor);
     }
 
     // ensure that this is positive
