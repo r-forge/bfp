@@ -5,12 +5,14 @@
  *      Author: daniel
  */
 
-#include <linalgInterface.h>
 
 #include <cassert>
+#define ARMA_BLAS_CAPITALS
+#define ARMA_LAPACK_CAPITALS
+#include <linalgInterface.h>
 
-#include <R_ext/BLAS.h>
 #include <R_ext/Lapack.h>
+#include <R_ext/BLAS.h>
 
 
 // constants:
