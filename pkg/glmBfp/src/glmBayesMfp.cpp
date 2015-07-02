@@ -501,9 +501,16 @@ glmModelsInList(const DataValues& data,
 
     // for computation of inclusion probs:
     // array of IndexSafeSum objects.
-    IndexSafeSum cgwp[fpInfo.nFps + ucInfo.nUcGroups];
-    bookkeep.covGroupWisePosteriors = cgwp;
+//     const int cgwp_length = fpInfo.nFps + ucInfo.nUcGroups;
+//     //IndexSafeSum cgwp[fpInfo.nFps + ucInfo.nUcGroups];
+//     IndexSafeSum cgwp[cgwp_length];
+//     bookkeep.covGroupWisePosteriors = cgwp;
 
+    std::vector<IndexSafeSum> cgwp(fpInfo.nFps + ucInfo.nUcGroups);
+    bookkeep.covGroupWisePosteriors = cgwp;
+    
+    
+    
     // start the set of ordered models:
     set<Model> orderedModels;
 
@@ -1003,9 +1010,17 @@ glmExhaustive(const DataValues& data,
 
     // for computation of inclusion probs:
     // array of IndexSafeSum objects.
-    IndexSafeSum cgwp[fpInfo.nFps + ucInfo.nUcGroups];
-    bookkeep.covGroupWisePosteriors = cgwp;
+    //const int cgwp_length = fpInfo.nFps + ucInfo.nUcGroups;
+    
+    //IndexSafeSum cgwp[cgwp_length];
+    //IndexSafeSum cgwp[fpInfo.nFps + ucInfo.nUcGroups];
+    //bookkeep.covGroupWisePosteriors = cgwp;
 
+    // now with vectors instead of arrays
+    std::vector<IndexSafeSum> cgwp(fpInfo.nFps + ucInfo.nUcGroups);
+    bookkeep.covGroupWisePosteriors = cgwp;
+    
+    
     // start computation
     glmPermPars(0, startModel, orderedModels,
                 data, fpInfo, ucInfo, bookkeep, config, gaussHermite);
@@ -1109,15 +1124,14 @@ cpp_glmBayesMfp(SEXP r_interface)
     // data:
     const NumericMatrix n_x = rcpp_data["x"];
     const AMatrix x(n_x.begin(), n_x.nrow(),
-                   n_x.ncol(), false);
+                   n_x.ncol());
 
     const NumericMatrix n_xCentered = rcpp_data["xCentered"];
     const AMatrix xCentered(n_xCentered.begin(), n_xCentered.nrow(),
-                           n_xCentered.ncol(), false);
+                           n_xCentered.ncol());
 
     const NumericVector n_y = rcpp_data["y"];
-    const AVector y(n_y.begin(), n_y.size(),
-                   false);
+    const AVector y(n_y.begin(), n_y.size());
 
     const IntVector censInd = as<IntVector>(rcpp_data["censInd"]);
 
@@ -1144,7 +1158,7 @@ cpp_glmBayesMfp(SEXP r_interface)
         ucColList.push_back(as<PosIntVector>(rcpp_ucColList[i]));
     }
 
-
+    Rprintf("glmBayesMfp.cpp:1161\n");
     // model search configuration:
 
     const double totalNumber = as<double>(rcpp_searchConfig["totalNumber"]);

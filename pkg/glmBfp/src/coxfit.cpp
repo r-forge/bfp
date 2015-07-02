@@ -714,8 +714,11 @@ cpp_coxfit(SEXP R_interface)
 
     // survival times
     const NumericVector n_survTimes = R_survTimes;
-    const AVector survTimes(n_survTimes.begin(), n_survTimes.size(),
-                          false);
+    //const AVector survTimes(n_survTimes.begin(), n_survTimes.size(),
+    //                      false);
+    
+    // errors with const and stuff... what if we copy into new memory?
+    const AVector survTimes(n_survTimes.begin(), n_survTimes.size());
 
     // censoring status
     const IntVector censInd = as<IntVector>(R_censInd);
@@ -725,8 +728,13 @@ cpp_coxfit(SEXP R_interface)
 
     // design matrix
     const NumericMatrix n_X = R_X;
+    //const AMatrix X(n_X.begin(), n_X.nrow(),
+    //                n_X.ncol(), false);
+    
+    //Same issue as above L717:721
     const AMatrix X(n_X.begin(), n_X.nrow(),
-                    n_X.ncol(), false);
+                    n_X.ncol());
+    
 
     // tie method
     const int method = as<int>(R_method);

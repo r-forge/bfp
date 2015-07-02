@@ -70,7 +70,8 @@ struct Book
     PosLargeInt nanCounter;
 
     SafeSum modelLogPosteriors;
-    IndexSafeSum *covGroupWisePosteriors; // for computation of covariate inclusion probs: array (bfp, uc)
+    //IndexSafeSum *covGroupWisePosteriors; // for computation of covariate inclusion probs: array (bfp, uc)
+    std::vector<IndexSafeSum> covGroupWisePosteriors; // for computation of covariate inclusion probs: array (bfp, uc)
 
     const bool tbf;
     const bool doGlm;

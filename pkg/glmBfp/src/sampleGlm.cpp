@@ -338,15 +338,14 @@ cpp_sampleGlm(SEXP r_interface)
     // data:
     const NumericMatrix n_x = rcpp_data["x"];
     const AMatrix x(n_x.begin(), n_x.nrow(),
-                   n_x.ncol(), false);
+                   n_x.ncol());
 
     const NumericMatrix n_xCentered = rcpp_data["xCentered"];
     const AMatrix xCentered(n_xCentered.begin(), n_xCentered.nrow(),
-                           n_xCentered.ncol(), false);
+                           n_xCentered.ncol());
 
     const NumericVector n_y = rcpp_data["y"];
-    const AVector y(n_y.begin(), n_y.size(),
-                   false);
+    const AVector y(n_y.begin(), n_y.size());
 
     const IntVector censInd = as<IntVector>(rcpp_data["censInd"]);
 
