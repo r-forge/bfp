@@ -25,6 +25,7 @@
 ##' @param object the \code{GlmBayesMfp} object, which is needed because it contains
 ##' the covariates matrix and indices vector
 ##' @param fixedColumns return the fixed columns inside the matrix (default) or not?
+##' @param center should the data be centered or not?
 ##' @return The design matrix, where the non-fixed part is columnwise centered (that is, the
 ##' colmeans are zero). 
 ##'

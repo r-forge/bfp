@@ -93,6 +93,8 @@
 ##' @param debug print debugging information? (not default)
 ##' @param useOpenMP shall OpenMP be used to accelerate the computations?
 ##' (default)
+##' @param correctedCenter If TRUE predict new data based on the centering 
+##' of the original data.
 ##' 
 ##' @return Returns a list with the following elements:
 ##' \describe{
