@@ -5,8 +5,7 @@ Imports:
     methods,
     coda,
     Runuran (>= 0.12)
-Maintainer: Daniel Sabanes Bove
-    <daniel.sabanesbove@ifspm.uzh.ch>
+Maintainer: Isaac Gravestock <isaac.gravestock@uzh.ch>
 License: GPL (>= 2)
 Title: Bayesian Fractional Polynomials for GLMs
 LinkingTo: Rcpp, RcppArmadillo
