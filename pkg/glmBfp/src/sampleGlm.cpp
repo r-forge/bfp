@@ -3,6 +3,8 @@
  *
  *  Created on: 10.12.2009
  *      Author: daniel
+ *      
+ *      13/07/2015 Replace assert() with Rccp:Stop()
  */
 
 #include <rcppExport.h>
@@ -16,7 +18,7 @@
 #include <optimize.h>
 #include <fpUcHandling.h>
 #include <linalgInterface.h>
-#include <cassert>
+//#include <cassert>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -506,7 +508,10 @@ cpp_sampleGlm(SEXP r_interface)
          nCoefs = fitter.iwlsObject->nCoefs;
 
          // check that we have the same answer about the null model as R
-         assert(fitter.iwlsObject->isNullModel == options.isNullModel);
+         //assert(fitter.iwlsObject->isNullModel == options.isNullModel);
+         if(fitter.iwlsObject->isNullModel != options.isNullModel){
+           Rcpp::stop("sampleGlm.cpp:cpp_sampleGlm: isNullModel != options.isNullModel");
+         } 
      }
      else
      {
@@ -522,7 +527,10 @@ cpp_sampleGlm(SEXP r_interface)
          nCoefs = design.n_cols;
 
          // check that we do not have a null model here:
-         assert(nCoefs > 0);
+         // assert(nCoefs > 0);
+         if(nCoefs <= 0){
+           Rcpp::stop("sampleGlm.cpp:cpp_sampleGlm: nCoefs <= 0");
+         } 
      }
 
 
@@ -705,7 +713,10 @@ cpp_sampleGlm(SEXP r_interface)
              if(options.isNullModel)
              {
                  // note that we do not encounter this in the Cox case
-                 assert(options.doGlm);
+                 // assert(options.doGlm);
+                 if(!options.doGlm){
+                   Rcpp::stop("sampleGlm.cpp:cpp_sampleGlm: options.doGlm should be TRUE");
+                 } 
 
                  // draw the proposal coefs, which is here just the intercept
                  now.sample.coefs = drawNormalVector(now.proposalInfo.coefs,

@@ -3,11 +3,13 @@
  *
  *  Created on: 09.11.2009
  *      Author: daniel
+ *      
+ *  13/07/2015 Replace assert() with Rccp:Stop()
  */
 
 #include <fpUcHandling.h>
 
-#include <cassert>
+//#include <cassert>
 #include <algorithm>
 
 #include <rcppExport.h>
@@ -127,12 +129,14 @@ getTransformedCols(const PosIntVector& fpcards,
             // then transform it according to the power:
             for (PosInt k = 0; k < thisTransform.n_rows; ++k)
             {
-                assert(thisTransform(k) > 0);
+                // assert(thisTransform(k) > 0);
+              if(!(thisTransform(k) > 0)) Rcpp::stop("fpUcHandling.cpp:getTransformedCols: thisTransform(k) not greater than 0");
 
                 thisTransform(k) = boxtidwell(thisTransform(k),
                                               maxPowerset[j]);
 
-                assert(! ISNAN(thisTransform(k)));
+                // assert(! ISNAN(thisTransform(k)));
+                if(ISNAN(thisTransform(k))) Rcpp::stop("fpUcHandling.cpp:getTransformedCols: thisTransform(k) is NAN");
             }
 
             // and put it into vector of columns
