@@ -1,8 +1,16 @@
+// Modified by Isaac Gravestock (isaac.gravestock@uzh.ch)
+// 
+// 13/07/2015: Update code to be compatible with CRAN
+//             Replace cout and exit
+//
+
 #include <combinatorics.h>
 #include <iostream>
 #include <cstdlib>
+#include <Rcpp.h>
 
-using std::cout;
+//using std::cout;
+using namespace Rcpp;
 
 void ksub_next ( int n, int k, int a[], bool *more, int &m, int &m2)
 
@@ -41,17 +49,20 @@ void ksub_next ( int n, int k, int a[], bool *more, int &m, int &m2)
 //    final one.  When the final subset is computed, MORE is set to
 //    FALSE as a signal that the computation is done.
 //
+//    
+//   
 {
   int j;
 
   if ( k < 0 || n < k )
   {
-    cout << "\n";
-    cout << "KSUB_NEXT - Fatal error!\n";
-    cout << "N = " << n << "\n";
-    cout << "K = " << k << "\n";
-    cout << "but 0 <= K <= N is required!\n";
-    exit ( 1 );
+    Rcout << "\n";
+    Rcout << "KSUB_NEXT - Fatal error!\n";
+    Rcout << "N = " << n << "\n";
+    Rcout << "K = " << k << "\n";
+    Rcout << "but 0 <= K <= N is required!\n";
+    //exit ( 1 );
+    stop("Invalid parameters");
   }
 
   if ( !( *more ) )

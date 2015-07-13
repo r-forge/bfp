@@ -1,7 +1,10 @@
+// *      13/07/2015 Replace assert() with Rccp:Stop()
+
+
 #include <iwls.h>
 #include <types.h>
 #include <rcppExport.h>
-#include <cassert>
+//#include <cassert>
 #include <design.h>
 #include <stdexcept>
 #include <sstream>
@@ -16,8 +19,9 @@ double
 criterion(const AVector& a, const AVector& b)
 {
     // check lengths
-    assert(a.n_elem == b.n_elem);
-
+    //assert(a.n_elem == b.n_elem);
+    if(a.n_elem != b.n_elem) Rcpp::stop("iwls.cpp:criterion: a.n_elem != b.n_elem");
+    
     // this will be the returned value
     double ret = 0.0;
 
