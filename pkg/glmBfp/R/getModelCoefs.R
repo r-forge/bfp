@@ -16,7 +16,7 @@
 ##' Estimate shrunken coefficients from GlmBayesMfp object for Cox model
 ##'
 ##' This is an internal function to estimate shrunken coefficients from GlmBayesMfp object
-##' for Cox models. It calls \code{\link{SampleBma}} and then calculates coefficents based
+##' for Cox models. It calls \code{\link{sampleBma}} and then calculates coefficents based
 ##' on a linear fit.
 ##'
 ##' @param models.listpart the glmBfp object for which to construct the survival formula

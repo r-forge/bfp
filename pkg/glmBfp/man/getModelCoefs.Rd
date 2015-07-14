@@ -16,7 +16,7 @@ A named vector of coefficients.
 }
 \description{
 This is an internal function to estimate shrunken coefficients from GlmBayesMfp object
-for Cox models. It calls \code{\link{SampleBma}} and then calculates coefficents based
+for Cox models. It calls \code{\link{sampleBma}} and then calculates coefficents based
 on a linear fit.
 }
 \keyword{internal}
