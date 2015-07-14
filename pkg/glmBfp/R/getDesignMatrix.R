@@ -9,6 +9,7 @@
 ##
 ## History:
 ## 06/01/2010   copy from package bfp, slightly modify signature and add Roxygen comments 
+## 07/07/2015   add center argument if we want the uncentered design matrix.
 #####################################################################################
 
 ##' @include helpers.R
@@ -25,7 +26,7 @@
 ##' @param object the \code{GlmBayesMfp} object, which is needed because it contains
 ##' the covariates matrix and indices vector
 ##' @param fixedColumns return the fixed columns inside the matrix (default) or not?
-##' @param center should the data be centered or not?
+##' @param center should the data be centered (default) or not?
 ##' @return The design matrix, where the non-fixed part is columnwise centered (that is, the
 ##' colmeans are zero). 
 ##'
