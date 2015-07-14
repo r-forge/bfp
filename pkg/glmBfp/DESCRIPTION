@@ -1,6 +1,7 @@
 Package: glmBfp
 Imports:
     survival,
+    rms,
     statmod,
     methods,
     coda,
@@ -35,21 +36,25 @@ Collate:
     'helpers.R'
     'computeModels.R'
     'constructNewdataMatrix.R'
+    'getFpTransforms.R'
+    'getDesignMatrix.R'
+    'coxTBF.R'
     'evalZdensity.R'
     'formula.R'
     'fpScale.R'
-    'getFpTransforms.R'
-    'getDesignMatrix.R'
+    'fpTrans.R'
     'getFamily.R'
     'getLogGPrior.R'
     'getLogMargLikEstimate.R'
     'getMarginalZ.R'
+    'sampleGlm.R'
+    'sampleBma.R'
+    'getModelCoefs.R'
     'glmBayesMfp.R'
     'glmBfp-package.R'
     'hpds.R'
     'inclusionProbs.R'
     'optimize.R'
     'plotCurveEstimate.R'
-    'sampleGlm.R'
-    'sampleBma.R'
     'testCox.R'
+    'writeFormula.R'

@@ -16,7 +16,7 @@ the covariates matrix and indices vector}
 
 \item{fixedColumns}{return the fixed columns inside the matrix (default) or not?}
 
-\item{center}{should the data be centered or not?}
+\item{center}{should the data be centered (default) or not?}
 }
 \value{
 The design matrix, where the non-fixed part is columnwise centered (that is, the
