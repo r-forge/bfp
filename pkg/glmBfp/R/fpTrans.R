@@ -14,7 +14,7 @@
 ##'
 ##' Simple function to apply the Box Tidwell transformation to a variables in a formula.
 ##' Variable is first shifted and scaled
-##' NewVar = \frac{Var+shift}{scale}
+##' NewVar = (Var+shift)/scale
 ##' then transformed and optionally centered.
 ##' Can be used in formulas as poly() is.
 ##'
