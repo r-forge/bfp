@@ -60,9 +60,8 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
   #Handle Global Empirical Bayes
   #First we need to fit the model, then we can hand a fixed g to the normal search procedure
   if(globalEB==TRUE){
-    #     temp.formula <- formula(paste("Surv(",time.var,", ",status.var,") ~."))
-    #     full.df <- ncol(model.matrix(temp.formula,model.frame(temp.formula,data)))-3 #hack because we don't have the normal formula
-    full.model.space <- 2^length(labels(terms(selection.formula)))
+   
+     full.model.space <- 2^length(labels(terms(selection.formula)))
     
     gEB.models <- glmBayesMfp(selection.formula,
                               censInd = data[[status.var]],
