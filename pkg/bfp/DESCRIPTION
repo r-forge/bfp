@@ -12,5 +12,5 @@ Description: The package implements the Bayesian paradigm for fractional
  polynomial models under the assumption of normally distributed error terms.
 License: GPL (>= 2) 
 Copyright: hyp2f1 taken from Cephes Math Library Release 2.3, 
-Copyright 1984, 1987, 1989, 1995 by Stephen L. Moshier.
+    Copyright 1995 by Stephen L. Moshier
 
