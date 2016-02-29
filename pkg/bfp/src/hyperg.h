@@ -9,16 +9,18 @@
 extern "C" {
 #endif 		
 
-	#include "mconf.h"
-	#include <math.h> 
-	#include <string.h>
-	#include <float.h>
+// 	#include "mconf.h"
+// 	#include <math.h> 
+// 	#include <string.h>
+// 	#include <float.h>
 
-	double hyp2f1(double a, double b, double c, double x);
+double hyp2f1(double a, double b, double c, double x);
 	
 #ifdef __cplusplus
 }
 #endif
+
+
 
 double logPsi(double b, double c, int n, int p, double R2);
 double logBF_hyperg(double R2, int n, int p, double alpha);

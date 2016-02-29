@@ -61,12 +61,6 @@ Cephes Math Library Release 2.3:  June, 1995
 Copyright 1984, 1987, 1989, 1995 by Stephen L. Moshier
 */
 
-#define gamma gammafn
-#define lgamma lgammafn
-#define psi digamma
-#define pow R_pow
-#define powi R_pow_di
-
 
 /* Define if the `long double' type works.  */
 /* #define HAVE_LONG_DOUBLE 1 */

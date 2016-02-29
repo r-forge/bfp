@@ -71,6 +71,12 @@ Copyright 1984, 1987, 1992, 2000 by Stephen L. Moshier
 #include <R.h>
 #include <Rmath.h>
 
+#define gamma gammafn
+#define lgamma lgammafn
+#define psi digamma
+#define pow R_pow
+#define powi R_pow_di
+
 #ifdef DEC
 #define EPS 1.0e-14
 #define EPS2 1.0e-11
