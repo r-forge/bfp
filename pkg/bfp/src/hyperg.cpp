@@ -1,5 +1,5 @@
 #include <hyperg.h>
-
+#include <cmath>
 
 // 22/02/2012: corrected Laplace approximation formula
 // compute the log of the psi function,
