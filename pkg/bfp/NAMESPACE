@@ -58,3 +58,15 @@ S3method(print, predict.BmaSamples)
 useDynLib(bfp,                                  # package
           samplingGaussian, exhaustiveGaussian, # functions
           logMargLik, postExpectedg, postExpectedShrinkage) 
+
+## need one import statement for Rcpp:
+importFrom(Rcpp, evalCpp)
+
+## other required imports:
+importFrom("graphics", "legend", "matplot")
+importFrom("stats", "as.formula", "fitted", "gaussian", "median",
+         "model.matrix", "model.response", "na.omit", "pbeta",
+         "pgamma", "qbeta", "qgamma", "qt", "quantile", "rchisq",
+         "residuals", "rgamma", "rnorm", "rt", "runif", "terms",
+         "uniroot", "update")
+

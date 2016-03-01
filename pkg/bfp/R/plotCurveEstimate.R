@@ -1,5 +1,5 @@
 #####################################################################################
-## Author: Daniel Sabanés Bové [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
+## Author: Daniel Sabanes Bove [daniel *.* sabanesbove *a*t* ifspm *.* uzh *.* ch]
 ## Project: Bayesian FPs
 ##        
 ## Time-stamp: <[plotCurveEstimate.R] by DSB Mit 26/01/2011 14:19 (CET)>
