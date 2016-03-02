@@ -28,6 +28,7 @@ modelInfo& modelInfo::operator=(const modelInfo& m)
 	if (this != &m){
 		logMargLik = m.logMargLik;
 		logPrior = m.logPrior;
+		logPost = m.logPost;
 		postExpectedg = m.postExpectedg;
 		postExpectedShrinkage = m.postExpectedShrinkage;		
 		hits = m.hits;
