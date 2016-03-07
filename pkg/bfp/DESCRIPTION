@@ -11,6 +11,6 @@ Suggests: doBy, SoDA, Hmisc, mfp
 Description: Implements the Bayesian paradigm for fractional
  polynomial models under the assumption of normally distributed error terms.
 License: GPL (>= 2) 
-Copyright: hyp2f1 taken from Cephes Math Library Release 2.3, 
+Copyright: hyp2f1 is from Cephes Math Library Release 2.3, 
     Copyright 1995 by Stephen L. Moshier
 
