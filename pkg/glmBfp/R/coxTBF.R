@@ -35,8 +35,8 @@
 ##' @keywords models regression
 ##' @export
 
-coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FALSE, ...){
-  #   attach(data)
+coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FALSE, sep=FALSE, ...){
+ 
   formula <- as.formula(formula)
   
   LHS <- formula[[2]][[2]]
@@ -60,8 +60,8 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
   #Handle Global Empirical Bayes
   #First we need to fit the model, then we can hand a fixed g to the normal search procedure
   if(globalEB==TRUE){
-   
-     full.model.space <- 2^length(labels(terms(selection.formula)))
+    
+    full.model.space <- 2^length(labels(terms(selection.formula)))
     
     gEB.models <- glmBayesMfp(selection.formula,
                               censInd = data[[status.var]],
@@ -70,14 +70,12 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
                               empiricalBayes=TRUE,
                               priorSpecs = list(gPrior = prior.hypergn, modelPrior = "dependent"),
                               nModels = full.model.space,
-                              chainlength = full.model.space,
                               method = "exhaustive",
                               verbose = FALSE)
-    #     return(gEB.models)
+    
     k <- length(gEB.models)
     deviances <- sapply(1:k, function(i) gEB.models[[i]]$information$residualDeviance)
     log.prior.prob <- sapply(1:k, function(i) gEB.models[[i]]$information$logPrior)
-    #     degrees <- sapply(1:k, function(i) length(gEB.models[[i]]$configuration$ucTerms))
     
     ucList <- attr(gEB.models, "indices")$ucList
     degrees <- sapply(1:k, function(i)
@@ -129,7 +127,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
     this.call[geb] <- bestg
   }
   
-  # If we are doing AIC/BIC we need to fit models, calculate IC values and new posterior probabilities.
+  # If we are doing AIC/BIC we need to fit models, calculate IC values and new probabilities.
   if(IC != FALSE & type != "BMAfull"){ 
     IC.values <- numeric(length(models))
     nullModel <- NA
@@ -406,7 +404,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
     rm(models)
     
     new.design.matrix <- getDesignMatrix(object=model.listpart)[,-1,drop=FALSE]
-    #   new.data <- data.frame(cbind(status.var=data[[status.var]], time.var=data[[time.var]], new.design.matrix))
+  
     new.data <- data.frame(cbind(status.var=attributes(model.listpart)$data$censInd,
                                  time.var=attributes(model.listpart)$data$y,
                                  new.design.matrix))
@@ -414,42 +412,83 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
     colnames(new.data)[1:2] <- c(status.var,time.var)
     model.formula <- paste("Surv(",time.var,",",status.var,")~.")
     
-    #model.formula <- writeFormula(model.listpart, time.var, status.var)
-    model.coefs <- getModelCoefs(model.listpart)
-    model.cph <- rms::cph(formula(model.formula), data=new.data, surv=TRUE, se.fit = FALSE, y=TRUE, x=TRUE)
+    #Do the original shortcut way, using E(beta) in the exp.
+    if(sep==FALSE){
+       model.coefs <- getModelCoefs(model.listpart, sep=FALSE)
+       model.cph <- rms::cph(formula(model.formula), data=new.data, surv=TRUE, se.fit = FALSE, y=TRUE, x=TRUE)
     
-    #unlist gives the factor levels the wrong names, so take the better ones
-    #from cph to avoid confusion!
-    #   names(model.coefs) <- names(model.cph$coefs)
+       ret <- list()
     
-    ret <- list()
+       ret$formula <- writeFormula(model.listpart, time.var, status.var) #model.formula
+       ret$coefs <- model.coefs
+       ret$data <- data
+       ret$call <- this.call
+       ret$survival <- function(){}
+       ret$model.object <- model.listpart
     
-    ret$formula <- writeFormula(model.listpart, time.var, status.var) #model.formula
-    ret$coefs <- model.coefs
-    ret$data <- data
-    ret$call <- this.call
-    ret$survival <- function(){}
-    ret$model.object <- model.listpart
-    
-    if(baseline=="shrunk"){
-      # Take cox model object, put in shrunken coefficients, re-estimate baseline hazard
-      shrunk.cph <- model.cph
-      shrunk.mm <- new.design.matrix  #model.matrix(model.formula, data=data)[,-1] 
-      #     shrunk.mm <-scale(shrunk.mm)
-      shrunk.cph$linear.predictors <- shrunk.mm %*% model.coefs
-      shrunk.survfit <- survival::survfit(shrunk.cph)
-      shrunk.surv <- c(1,shrunk.survfit$surv)
-      if(length(shrunk.surv) < length(model.cph$surv)) shrunk.surv<- c(shrunk.surv, shrunk.surv[length(shrunk.surv)])
-      shrunk.cph$surv <- shrunk.surv
+      if(baseline=="shrunk"){
+        # Take cox model object, put in shrunken coefficients, re-estimate baseline hazard
+        shrunk.cph <- model.cph
+        shrunk.mm <- new.design.matrix  #model.matrix(model.formula, data=data)[,-1] 
+
+        shrunk.cph$linear.predictors <- shrunk.mm %*% model.coefs
+        shrunk.survfit <- survival::survfit(shrunk.cph)
+        shrunk.surv <- c(1,shrunk.survfit$surv)
+        if(length(shrunk.surv) < length(model.cph$surv)) shrunk.surv<- c(shrunk.surv, shrunk.surv[length(shrunk.surv)])
+        shrunk.cph$surv <- shrunk.surv
       
-      ret$survival <- rms::Survival(shrunk.cph)
+        ret$survival <- rms::Survival(shrunk.cph)
       
-    } else if(baseline=="cox"){
-      ret$survival <- rms::Survival(model.cph)
+      } else if(baseline=="cox"){
+        ret$survival <- rms::Survival(model.cph)
+      }
+      
+      class(ret) <- "TBFcox"
+      return(ret)
     }
     
-    class(ret) <- "TBFcox"
-    return(ret)
-  }
+    #Do the full way with E(h_i(t)exp(beta))
+    if(sep==TRUE){
+      model.coefs <- getModelCoefs(model.listpart, sep=TRUE)
+      model.cph <- rms::cph(formula(model.formula), data=new.data, surv=TRUE, se.fit = FALSE, y=TRUE, x=TRUE)
+            
+      ret <- list()
+      
+      ret$formula <- writeFormula(model.listpart, time.var, status.var) #model.formula
+     
+      ret$data <- data
+      ret$call <- this.call
+      
+      ret$model.object <- model.listpart
+     
+      ret$survival <- vector(mode="list", length=length(model.coefs))
+      ret$coefs <- model.coefs
+       
+              
+        if(baseline=="shrunk"){
+          # Take cox model object, put in shrunken coefficients, re-estimate baseline hazard
+          shrunk.cph <- model.cph
+          shrunk.mm <- new.design.matrix  #model.matrix(model.formula, data=data)[,-1] 
+          
+          for(k in 1:length(model.coefs)){
+            shrunk.cph$linear.predictors <- shrunk.mm %*% model.coefs[[k]]
+            shrunk.survfit <- survfit(shrunk.cph)
+            shrunk.surv <- c(1,shrunk.survfit$surv)
+            if(length(shrunk.surv) < length(model.cph$surv)) shrunk.surv <- c(shrunk.surv, shrunk.surv[length(shrunk.surv)])
+            shrunk.cph$surv <- shrunk.surv
+            
+            ret$survival[[k]] <- rms::Survival(shrunk.cph)
+          }
+          
+        } else if(baseline=="cox"){
+          for(k in 1:length(model.coefs)){
+            ret$survival[[k]] <- rms::Survival(model.cph)
+          }
+      }
+      
+      class(ret) <- "TBFcox.sep"
+      return(ret)
+    }
+    
   
 }
