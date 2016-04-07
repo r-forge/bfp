@@ -28,9 +28,10 @@
 ##' coefficients. "shrunk" refits baseline with shrunken coefficients (default).
 ##' @param globalEB use global empirical bayes estimate of g (default=FALSE)
 ##' @param IC use information criteria based model selection (default=FALSE). Either "AIC" or "BIC".
+##' @param sep estimate baseline hazard for each estimate of model coefficients (default=FALSE)
 ##' @param ... additional arguments to pass to \code{\link{glmBayesMfp}}
 ##'
-##' @return An object of S3 class \code{TBFcox}.
+##' @return An object of S3 class \code{TBFcox} or \code{TBFcox.sep} if sep=TRUE.
 ##' 
 ##' @keywords models regression
 ##' @export
