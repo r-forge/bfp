@@ -377,7 +377,10 @@ glmBayesMfp <-
     
     ## check length of censoring vector in the Cox case
     if(! doGlm)
-    {
+    {   
+      if(class(attr(m,"na.action"))=="omit"){
+        censInd <- censInd[-attr(m,"na.action")]
+      }
         stopifnot(identical(length(censInd), length(Y)))
     }
 
