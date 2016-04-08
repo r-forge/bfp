@@ -56,5 +56,7 @@ Collate:
     'inclusionProbs.R'
     'optimize.R'
     'plotCurveEstimate.R'
+    'predictCoxTBF.R'
     'testCox.R'
+    'uncenteredDesignMatrix.R'
     'writeFormula.R'

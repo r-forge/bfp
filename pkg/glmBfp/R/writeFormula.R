@@ -59,9 +59,10 @@ writeFormula <- function(models.listpart, time.var, status.var){
       
     }
     v <- paste(c(uc.names[uc.parts], bfp.trans), collapse=" + ")
-    return(formula(paste(surv.part,v)))} else {
-      #when there are no transformed variables
-      v <- paste(c(uc.names[uc.parts]), collapse=" + ")
-      return(formula(paste(surv.part,v)))
-    }
+    return(formula(paste(surv.part,v)))
+  } 
+  
+  #when there are no transformed variables
+  v <- paste(c(uc.names[uc.parts]), collapse=" + ")
+  return(formula(paste(surv.part,v)))
 }

@@ -473,7 +473,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
           
           for(k in 1:length(model.coefs)){
             shrunk.cph$linear.predictors <- shrunk.mm %*% model.coefs[[k]]
-            shrunk.survfit <- survfit(shrunk.cph)
+            shrunk.survfit <- survival::survfit(shrunk.cph)
             shrunk.surv <- c(1,shrunk.survfit$surv)
             if(length(shrunk.surv) < length(model.cph$surv)) shrunk.surv <- c(shrunk.surv, shrunk.surv[length(shrunk.surv)])
             shrunk.cph$surv <- shrunk.surv
@@ -492,4 +492,5 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
     }
     
   
-}
+  }#end MAP/MPM
+}#end function
