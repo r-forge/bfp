@@ -2,6 +2,9 @@
 
 S3method("[",GlmBayesMfp)
 S3method(as.data.frame,GlmBayesMfp)
+S3method(predict,TBFcox)
+S3method(predict,TBFcox.BMA)
+S3method(predict,TBFcox.sep)
 S3method(print,GlmBayesMfp)
 export(CustomGPrior)
 export(HypergPrior)

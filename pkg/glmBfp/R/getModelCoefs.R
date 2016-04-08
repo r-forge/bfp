@@ -26,7 +26,7 @@
 ##'
 ##' @keywords internal utilities
 
-getModelCoefs <- function(model.listpart,...sep=FALSE){
+getModelCoefs <- function(model.listpart,..., sep=FALSE){
   
   DM <- getDesignMatrix(object=model.listpart)[,-1,drop=FALSE]
   n.coefs <- dim(DM)[2]

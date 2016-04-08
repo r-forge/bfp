@@ -4,10 +4,12 @@
 \alias{getModelCoefs}
 \title{Estimate shrunken coefficients from GlmBayesMfp object for Cox model}
 \usage{
-getModelCoefs(model.listpart, ...)
+getModelCoefs(model.listpart, ..., sep = FALSE)
 }
 \arguments{
 \item{...}{additional arguments to pass to \code{\link{sampleBma}}}
+
+\item{sep}{should coefficients be returned separately (default=FALSE)}
 
 \item{models.listpart}{the glmBfp object for which to construct the survival formula}
 }

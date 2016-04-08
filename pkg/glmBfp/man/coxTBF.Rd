@@ -5,7 +5,7 @@
 \title{Fit Cox models using glmBayesMfp}
 \usage{
 coxTBF(formula, data, type, baseline = "shrunk", globalEB = FALSE,
-  IC = FALSE, ...)
+  IC = FALSE, sep = FALSE, ...)
 }
 \arguments{
 \item{formula}{model formula with Surv object as LHS and \code{\link{uc}} or \code{\link{bfp}}
@@ -22,10 +22,12 @@ coefficients. "shrunk" refits baseline with shrunken coefficients (default).}
 
 \item{IC}{use information criteria based model selection (default=FALSE). Either "AIC" or "BIC".}
 
+\item{sep}{estimate baseline hazard for each estimate of model coefficients (default=FALSE)}
+
 \item{...}{additional arguments to pass to \code{\link{glmBayesMfp}}}
 }
 \value{
-An object of S3 class \code{TBFcox}.
+An object of S3 class \code{TBFcox} or \code{TBFcox.sep} if sep=TRUE.
 }
 \description{
 A simplified formula based interface to \code{\link{glmBayesMfp}} to fit Cox models. Can return
