@@ -1158,7 +1158,7 @@ cpp_glmBayesMfp(SEXP r_interface)
         ucColList.push_back(as<PosIntVector>(rcpp_ucColList[i]));
     }
 
-    Rprintf("glmBayesMfp.cpp:1161\n");
+    
     // model search configuration:
 
     const double totalNumber = as<double>(rcpp_searchConfig["totalNumber"]);
