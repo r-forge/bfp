@@ -26,7 +26,7 @@
 ##'
 ##' @keywords internal utilities
 
-getModelCoefs <- function(model.listpart,...,mcmc, sep=FALSE){
+getModelCoefs <- function(model.listpart,mcmc, sep=FALSE){
   
   DM <- getDesignMatrix(object=model.listpart)[,-1,drop=FALSE]
   n.coefs <- dim(DM)[2]
@@ -35,9 +35,9 @@ getModelCoefs <- function(model.listpart,...,mcmc, sep=FALSE){
   
   if(sep==FALSE) {mcmc.obj <-McmcOptions()} else {mcmc.obj <- McmcOptions(samples = 200)}
   
-  if(hasArg(mcmc)) mcmc.obj <- mcmc.obj
+  if(hasArg(mcmc)) mcmc.obj <- mcmc
   
-  model.bma <- sampleBma(model.listpart, mcmc=mcmc.obj,verbose=FALSE, ...)
+  model.bma <- sampleBma(model.listpart, mcmc=mcmc.obj,verbose=FALSE)
   
   
   #  print("break!")
