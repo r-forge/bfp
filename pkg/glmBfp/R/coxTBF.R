@@ -30,13 +30,14 @@
 ##' @param IC use information criteria based model selection (default=FALSE). Either "AIC" or "BIC".
 ##' @param sep estimate baseline hazard for each estimate of model coefficients (default=FALSE)
 ##' @param ... additional arguments to pass to \code{\link{glmBayesMfp}}
+##' @param overrideConfig replaces the the MAP model with the given configuration, which is passed to \code{\link{computeModels}}
 ##'
 ##' @return An object of S3 class \code{TBFcox} or \code{TBFcox.sep} if sep=TRUE.
 ##' 
 ##' @keywords models regression
 ##' @export
 
-coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FALSE, sep=FALSE, ...){
+coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FALSE, sep=FALSE, ..., overrideConfig){
  
   formula <- as.formula(formula)
   
@@ -180,9 +181,20 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
   }
   #End AIC/BIC
   
+
   
+  
+    
   if(type=="MAP"){
     model.listpart <- models[1]
+
+    #if overrideConfig exists, we use it instead of MPM to fit the desired model.
+    if(!missing(overrideConfig)) {
+      print("Using overrideConfig model")
+      
+      new.models <- computeModels(list(overrideConfig), models)
+      model.listpart <- new.models[1]
+    }
     
   } else if(type=="MPM"){
     #what are the covariates with inclusion probability >0.5?
@@ -195,6 +207,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
       print("MPM model wasn't fitted so we construct it.")
       mpm.model.config <- models[[1]]$configuration
       mpm.model.config$ucTerms <- which(mpm.vars)
+
       new.models <- computeModels(list(mpm.model.config), models)
       model.listpart <- new.models[1]
       print("Success.s")
