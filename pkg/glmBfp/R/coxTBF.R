@@ -105,7 +105,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
   
   inargs <- list(...)
   
-  if(IC !=FALSE) inarges <- c(inargs,fixedg=10*nrow(data))
+  if(IC !=FALSE) inargs <- c(inargs,fixedg=10*nrow(data))
   
   if(globalEB && exists("bestg")){
     inargs <- c(inargs,fixedg=bestg)
@@ -141,7 +141,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
                                    new.design.matrix))
       
       colnames(new.data)[1:2] <- c(status.var,time.var)
-      model.formula <- paste("Surv(",time.var,",",status.var,")~.")
+      model.formula <- paste("survival::Surv(",time.var,",",status.var,")~.")
       
       model.cph <- rms::cph(formula(model.formula), data=new.data, surv=TRUE, se.fit = FALSE, y=TRUE, x=TRUE)
       
@@ -174,6 +174,8 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
     
     if(type=="MAP"){
       models[1] <- models[which.max(IC.posteriors)]
+      #also include inclusion probs for *IC methods
+      attr(models, "inclusionProbs") <- apply(models.df[,-(1:3)], 2, function(x) sum(x*IC.posteriors))
     }
   }
   #End AIC/BIC
@@ -224,7 +226,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
                                    new.design.matrix))
       
       colnames(new.data)[1:2] <- c(status.var,time.var)
-      model.formula <- paste("Surv(",time.var,",",status.var,")~.")
+      model.formula <- paste("survival::Surv(",time.var,",",status.var,")~.")
       
       #calculate values for each model
       bma.coefs[[j]] <- getModelCoefs(models[j], 
@@ -360,7 +362,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
                                  new.design.matrix))
     
     colnames(new.data)[1:2] <- c(status.var,time.var)
-    model.formula <- paste("Surv(",time.var,",",status.var,")~.")
+    model.formula <- paste("survival::Surv(",time.var,",",status.var,")~.")
     
     model.cph <- rms::cph(formula(model.formula), data=new.data, surv=TRUE, se.fit = FALSE, y=TRUE, x=TRUE)
     
@@ -388,7 +390,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
     ret <- list()
     
     #ret$formula <- writeFormula(models[1], time.var, status.var) #model.formula
-    ret$formula <- formula(paste("Surv(",time.var,",", status.var,") ~", paste(paste(names(sbma$samples@ucCoefs)),collapse=" + ")))
+    ret$formula <- formula(paste("survival::Surv(",time.var,",", status.var,") ~", paste(paste(names(sbma$samples@ucCoefs)),collapse=" + ")))
     ret$coefs <- bma.coefs
     ret$data <- data
     ret$call <- this.call
@@ -411,7 +413,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
                                  new.design.matrix))
     
     colnames(new.data)[1:2] <- c(status.var,time.var)
-    model.formula <- paste("Surv(",time.var,",",status.var,")~.")
+    model.formula <- paste("survival::Surv(",time.var,",",status.var,")~.")
     
     #Do the original shortcut way, using E(beta) in the exp.
     if(sep==FALSE){
