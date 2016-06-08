@@ -24,7 +24,7 @@
 ##' @keywords internal utilities
 
 writeFormula <- function(models.listpart, time.var, status.var){
-  surv.part <- paste("Surv(", time.var, ", ", status.var, ") ~ ",sep="")
+  surv.part <- paste("survival::Surv(", time.var, ", ", status.var, ") ~ ",sep="")
   #extract linear terms
   uc.parts <- models.listpart[[1]]$configuration$ucTerms
   uc.names <- attributes(models.listpart)$termNames$uc
