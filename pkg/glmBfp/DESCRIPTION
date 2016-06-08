@@ -60,3 +60,4 @@ Collate:
     'testCox.R'
     'uncenteredDesignMatrix.R'
     'writeFormula.R'
+RoxygenNote: 5.0.1
