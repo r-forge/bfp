@@ -28,7 +28,8 @@
 ##' coefficients. "shrunk" refits baseline with shrunken coefficients (default).
 ##' @param globalEB use global empirical bayes estimate of g (default=FALSE)
 ##' @param IC use information criteria based model selection (default=FALSE). Either "AIC" or "BIC".
-##' @param sep estimate baseline hazard for each estimate of model coefficients (default=FALSE)
+##' @param sep estimate baseline hazard for each estimate of model coefficients (default=FALSE).
+##' @param keepModelList keep the model list returned by glmBayesMfp for MAP and MPM models (default=FALSE).
 ##' @param ... additional arguments to pass to \code{\link{glmBayesMfp}}
 ##' @param overrideConfig replaces the the MAP model with the given configuration, which is passed to \code{\link{computeModels}}
 ##'
@@ -37,7 +38,7 @@
 ##' @keywords models regression
 ##' @export
 
-coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FALSE, sep=FALSE, ..., overrideConfig){
+coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FALSE, sep=FALSE, keepModelList = FALSE, ..., overrideConfig){
  
   formula <- as.formula(formula)
   
@@ -435,7 +436,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
   #############################################################################################################
   
   if(type %in% c("MAP","MPM")){
-    rm(models)
+    if(!keepModelList) rm(models)
     
     new.design.matrix <- getDesignMatrix(object=model.listpart)[,-1,drop=FALSE]
   
@@ -459,6 +460,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
        ret$call <- this.call
        ret$survival <- function(){}
        ret$model.object <- model.listpart
+       ret$model.list <- models
     
       if(baseline=="shrunk"){
         # Take cox model object, put in shrunken coefficients, re-estimate baseline hazard
@@ -494,7 +496,8 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
       ret$call <- this.call
       
       ret$model.object <- model.listpart
-     
+      ret$model.list <- models
+      
       ret$survival <- vector(mode="list", length=length(model.coefs))
       ret$coefs <- model.coefs
        
