@@ -5,7 +5,8 @@ Imports:
     statmod,
     methods,
     coda,
-    Runuran (>= 0.12)
+    Runuran (>= 0.12),
+    Rcpp (>= 0.11.6)
 Maintainer: Isaac Gravestock <isaac.gravestock@uzh.ch>
 License: GPL (>= 2)
 Title: Bayesian Fractional Polynomials for GLMs
@@ -13,16 +14,15 @@ LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
 Author: Daniel Sabanes Bove
     <daniel.sabanesbove@ifspm.uzh.ch>
-Description: The package implements the Bayesian paradigm
+Description: Implements the Bayesian paradigm
     for fractional polynomials in generalized linear
     models. See package "bfp" for the treatment of normal
     models.
 Version: 0.0-46
 Date: 2016-06-08
 Depends:
-    R (>= 2.12.0),
-    Rcpp (>= 0.11.6),
-    RcppArmadillo (>= 0.2.9)
+    R (>= 2.12.0)
+Encoding: UTF-8
 Suggests:
     MASS
 Collate:
@@ -33,6 +33,7 @@ Collate:
     'GlmBayesMfpSamples-methods.R'
     'McmcOptions-class.R'
     'McmcOptions-methods.R'
+    'RcppExports.R'
     'helpers.R'
     'computeModels.R'
     'constructNewdataMatrix.R'

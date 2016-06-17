@@ -11,9 +11,9 @@ citEntry(entry="article",
 	 volume=6,
 	 number=3,
 	 pages="387--410",
-	 url="http://ba.stat.cmu.edu/abstracts/Sabanes.php",
+	 url="http://projecteuclid.org/euclid.ba/1339616469",
 	 textVersion=paste("Sabanes Bove, D. and Held, L. (2011):",
 	                   "Hyper-g priors for generalized linear models.",
 			   "Bayesian Analysis, 6(3):387-410.",
-	 	    	   "URL: http://ba.stat.cmu.edu/abstracts/Sabanes.php")) 
+	 	    	   "URL: http://projecteuclid.org/euclid.ba/1339616469")) 
 
