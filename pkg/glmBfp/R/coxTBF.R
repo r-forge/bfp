@@ -99,7 +99,6 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
                 data = data,
                 tbf = TRUE,
                 priorSpecs = list(gPrior = prior.hypergn, modelPrior = "dependent"),
-                nModels = 10, 
                 chainlength = 5000,
                 method = "sampling",
                 verbose = FALSE)
@@ -134,29 +133,48 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
     IC.values <- numeric(length(models))
     nullModel <- NA
     
+    
+    design.names <- colnames(attr(models,"data")$xCentered)
+    
+    new.data <- data.frame(cbind(status.var=attr(models,"data")$censInd,
+                                 time.var=attr(models,"data")$y,
+                                 attr(models,"data")$xCentered[,-1]))
+    
+    colnames(new.data)[1:2] <- c(status.var,time.var)
+    
+    
+    
     for(j in 1:length(models)){
-      new.design.matrix <- getDesignMatrix(object=models[j])[,-1,drop=FALSE]
+      # new.design.matrix <- getDesignMatrix(object=models[j])[,-1,drop=FALSE]
+      # 
+      # new.data <- data.frame(cbind(status.var=attributes(models[j])$data$censInd,
+      #                              time.var=attributes(models[j])$data$y,
+      #                              new.design.matrix))
+      # 
+      # colnames(new.data)[1:2] <- c(status.var,time.var)
       
-      new.data <- data.frame(cbind(status.var=attributes(models[j])$data$censInd,
-                                   time.var=attributes(models[j])$data$y,
-                                   new.design.matrix))
+      #covariate indices corresponding to data frame
+      ind <- unlist(attr(models,"indices")$ucList[models[[j]]$configuration$ucTerms])
       
-      colnames(new.data)[1:2] <- c(status.var,time.var)
-      model.formula <- paste("survival::Surv(",time.var,",",status.var,")~.")
       
-      model.cph <- rms::cph(formula(model.formula), data=new.data, surv=TRUE, se.fit = FALSE, y=TRUE, x=TRUE)
+      
+      model.formula <- paste("survival::Surv(",time.var,",",status.var,")~1",paste(c(" ", design.names[ind]), collapse = " + "))
+      
+      model.cph <- rms::cph(formula(model.formula), data=new.data, surv=FALSE, se.fit = FALSE, y=FALSE, x=FALSE)
+      
+      # if(j%%10==0) print(j)
+     
       
       if(IC=='AIC') IC.values[j] <- -AIC(model.cph)/2
       
       if(IC=='BIC') IC.values[j] <- -AIC(model.cph, k = log(sum(new.data[status.var])))/2
       
       #save this model so we can delete it
-      if(is.na(IC.values[j])) {
+      if(is.na(IC.values[j])| length(models[[j]]$configuration$ucTerms)==0) {
         nullModel <- j
       }
       
     }
-    
     
     #delete null model since it is can't be used later
     if(!is.na(nullModel)){
