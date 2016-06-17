@@ -460,7 +460,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
        ret$call <- this.call
        ret$survival <- function(){}
        ret$model.object <- model.listpart
-       ret$model.list <- models
+       if(exists("models")) ret$model.list <- models
     
       if(baseline=="shrunk"){
         # Take cox model object, put in shrunken coefficients, re-estimate baseline hazard
@@ -496,7 +496,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
       ret$call <- this.call
       
       ret$model.object <- model.listpart
-      ret$model.list <- models
+      if(exists("models")) ret$model.list <- models
       
       ret$survival <- vector(mode="list", length=length(model.coefs))
       ret$coefs <- model.coefs
