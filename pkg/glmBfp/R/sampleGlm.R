@@ -112,6 +112,8 @@
 ##' \code{standardError}.}
 ##' }
 ##'
+##' @importFrom Rcpp evalCpp
+##'
 ##' @export
 ##' @keywords models regression
 sampleGlm <-
