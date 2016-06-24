@@ -56,6 +56,10 @@
 ##' \item{transform}{vector of shift and scale parameter}
 ##'
 ##' @keywords regression
+##' 
+##' @importFrom graphics abline curve matplot par
+##' @importFrom methods is
+##' 
 ##' @export
 plotCurveEstimate <-
     function (samples,                    

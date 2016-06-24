@@ -35,7 +35,7 @@ getModelCoefs <- function(model.listpart,mcmc, sep=FALSE){
   
   if(sep==FALSE) {mcmc.obj <-McmcOptions()} else {mcmc.obj <- McmcOptions(samples = 200)}
   
-  if(hasArg(mcmc)) mcmc.obj <- mcmc
+  if(methods::hasArg(mcmc)) mcmc.obj <- mcmc
   
   model.bma <- sampleBma(model.listpart, mcmc=mcmc.obj,verbose=FALSE)
   

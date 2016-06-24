@@ -36,6 +36,8 @@
 ##' @return An object of S3 class \code{TBFcox} or \code{TBFcox.sep} if sep=TRUE.
 ##' 
 ##' @keywords models regression
+##' 
+##' @import stats
 ##' @export
 
 coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FALSE, sep=FALSE, keepModelList = FALSE, ..., overrideConfig){
