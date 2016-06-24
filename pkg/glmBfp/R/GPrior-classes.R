@@ -105,6 +105,9 @@ setClass(Class="HypergPrior",
 ##' 
 ##' @keywords methods internal
 ##' @author Daniel Sabanes Bove \email{daniel.sabanesbove@@ifspm.uzh.ch}
+##' 
+##' @importFrom methods callNextMethod
+##' 
 setMethod("initialize",
     signature(.Object = "HypergPrior"),
     function (.Object, a, ...) 

@@ -20,12 +20,13 @@
 ##'
 ##' Extract a subset of models from a \code{\link{GlmBayesMfp}} object.
 ##'
-##' @S3method "[" GlmBayesMfp
+##' 
 ##' @method [ GlmBayesMfp
 ##' @param x valid \code{\link{GlmBayesMfp}} object
 ##' @param \dots transports the indexes of the models
 ##' @return The subsetted object.
-##'
+##' @export 
+##' 
 ##' @name Extract.GlmBayesMfp
 ##' @aliases Extract.GlmBayesMfp [.GlmBayesMfp
 ##' @keywords methods
@@ -44,11 +45,13 @@
 
 ##' Print a GlmBayesMfp object.
 ##'
-##' @S3method print GlmBayesMfp
+##'  
 ##' @method print GlmBayesMfp
 ##' @param x valid \code{\link{GlmBayesMfp}} object
 ##' @param \dots unused
 ##' @return Only used for its side effect
+##' 
+##' @export
 ##' 
 ##' @keywords methods
 ##' @seealso \code{\link{glmBayesMfp}} 
@@ -70,7 +73,7 @@ print.GlmBayesMfp <- function (x, ...)
 
 ##' Convert a GlmBayesMfp object into a data frame
 ##'
-##' @S3method as.data.frame GlmBayesMfp
+##' 
 ##' @method as.data.frame GlmBayesMfp
 ##' @param x valid \code{\link{GlmBayesMfp}} object
 ##' @param row.names optional rownames (default is to keep the names of the
@@ -89,6 +92,8 @@ print.GlmBayesMfp <- function (x, ...)
 ##' @seealso \code{\link{glmBayesMfp}} 
 ##' @keywords methods
 ##' @author Daniel Sabanes Bove \email{daniel.sabanesbove@@ifspm.uzh.ch}
+##' 
+##' @export 
 as.data.frame.GlmBayesMfp <- function (x, 
                                        row.names = NULL,
                                        ...,        

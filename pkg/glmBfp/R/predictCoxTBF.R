@@ -117,7 +117,7 @@ predict.TBFcox.sep <- function(object, newdata, times, ...){
   k <- length(linPredSamples)
   
   ret.survival <- lapply(1:k, function(i) object$survival[[i]](times, linPredSamples[[i]]) )
-  print(str(ret.survival[[1]]))
+  
   ret.surv2 <- matrix(0, nrow = nrow(as.data.frame(ret.survival[[1]])), ncol =  length(times))
   for(i in 1:k){
     ret.surv2 <- ret.surv2 + ret.survival[[i]]/k

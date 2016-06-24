@@ -27,6 +27,8 @@
 ##' @return list with resulting \dQuote{estimate} and \dQuote{standardError}.
 ##'
 ##' @keywords internal
+##' 
+##' @importFrom utils head tail
 getLogMargLikEstimate <- function(numeratorTerms,
                                   denominatorTerms,
                                   highDensityPointLogUnPosterior,
