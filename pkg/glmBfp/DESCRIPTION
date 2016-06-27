@@ -7,13 +7,16 @@ Imports:
     coda,
     Runuran (>= 0.12),
     Rcpp (>= 0.11.6)
-Maintainer: Isaac Gravestock <isaac.gravestock@uzh.ch>
 License: GPL (>= 2)
 Title: Bayesian Fractional Polynomials for GLMs
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
-Author: Daniel Sabanes Bove
-    <daniel.sabanesbove@ifspm.uzh.ch>
+Authors@R: c(person("Isaac","Gravestock", role=c("aut","cre"), email="isaac.gravestock@uzh.ch"),
+            person("Daniel","Sabanes Bove", role="aut"),
+            person("David","Maisonave", role="ctb"),
+            person("Terry","Therneau", role="ctb"),
+            person("R Core Team", role="ctb")
+            )
 Description: Implements the Bayesian paradigm
     for fractional polynomials in generalized linear
     models. See package "bfp" for the treatment of normal
