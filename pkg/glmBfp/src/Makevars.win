@@ -1,12 +1,11 @@
 # Time-stamp: <[Makevars.win] by DSB Mit 15/12/2010 13:38 (CET)>
 
 # set windows flags
-RCPP_FLAGS=`${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe -e "Rcpp:::LdFlags()"`
 OPENMP_CFLAGS=
 LIBS=
 
 # they are used here:
-PKG_LIBS = $(RCPP_FLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) $(OPENMP_CFLAGS) $(LIBS)  
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) $(OPENMP_CFLAGS) $(LIBS)  
 PKG_CXXFLAGS = -I. $(OPENMP_CFLAGS)
 
 # Local Variables:
