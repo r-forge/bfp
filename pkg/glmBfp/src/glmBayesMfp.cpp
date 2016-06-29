@@ -621,7 +621,7 @@ glmPermPars(PosInt pos, // current position in parameter vector, starting from 0
             mod.fpSize++;
 
             // partition of deg into card parts
-            int part[card];
+            IntVector part (card);
 
             // internal variables for comp_next
             bool more1 = false;
@@ -652,7 +652,7 @@ glmPermPars(PosInt pos, // current position in parameter vector, starting from 0
         for (PosInt deg = 1; deg <= ucInfo.nUcGroups; deg++)
         {
             // partition of deg into card parts
-            int subset[deg];
+          IntVector subset (deg);
 
             // internal variables for ksub_next
             bool more2 = false;
@@ -664,7 +664,7 @@ glmPermPars(PosInt pos, // current position in parameter vector, starting from 0
                 ksub_next(ucInfo.nUcGroups, deg, subset, &more2, m, m2);
 
                 // convert into set
-                mod.ucPars = IntSet(subset, subset + deg);
+                mod.ucPars = IntSet(subset.data(), subset.data() + deg);
 
                 // and compute this model
                 computeGlm(mod, space,

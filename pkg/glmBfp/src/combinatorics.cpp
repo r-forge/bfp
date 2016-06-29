@@ -6,13 +6,14 @@
 
 #include <combinatorics.h>
 #include <iostream>
+#include <types.h>
 #include <cstdlib>
 #include <Rcpp.h>
 
 //using std::cout;
 using namespace Rcpp;
 
-void ksub_next ( int n, int k, int a[], bool *more, int &m, int &m2)
+void ksub_next ( int n, int k, IntVector& a, bool *more, int &m, int &m2)
 
 //****************************************************************************80
 //
@@ -92,7 +93,7 @@ void ksub_next ( int n, int k, int a[], bool *more, int &m, int &m2)
 
 // ****************************************************************************************//
 
-void comp_next ( int n, int k, int a[], bool *more, int &h, int &t)
+void comp_next ( int n, int k, IntVector& a, bool *more, int &h, int &t)
 
 //****************************************************************************80
 //

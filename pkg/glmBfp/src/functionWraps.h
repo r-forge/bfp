@@ -297,11 +297,11 @@ AccurateNumericDerivative<Fun>::operator()(double x) const
     double hh = h;
     double err = big;
 
-    double a[ntab][ntab];
+    std::vector<MyDoubleVector> a (ntab, MyDoubleVector (ntab, 0));
 
     a[0][0] = (function(x + hh) - function(x - hh)) / (2.0 * hh);
 
-    double answer;
+    double answer = a[0][0];
 
     for (int i = 1; i < ntab; i++)
     {
