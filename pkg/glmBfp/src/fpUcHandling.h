@@ -209,7 +209,7 @@ template<class T>
 
 // convert frequency vector into multiset
 Powers
-freqvec2Powers(int* const &vec, const int &vecLength);
+freqvec2Powers(IntVector& vec, const int &vecLength);
 
 // ***************************************************************************************************//
 

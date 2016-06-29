@@ -156,7 +156,7 @@ getTransformedCols(const PosIntVector& fpcards,
 
 // convert frequency vector into multiset
 Powers
-freqvec2Powers(int* const &vec, const int &vecLength)
+freqvec2Powers(IntVector& vec, const int &vecLength)
 {
     Powers ret;
     for (int power = 0; power != vecLength; power++)
