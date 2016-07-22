@@ -71,6 +71,7 @@ computeModels <- function(configurations,
                    attrs$data,
                    attrs$fpInfos,
                    attrs$ucInfos,
+                   attrs$fixInfos,
                    attrs$searchConfig,
                    attrs$distribution,
                    attrs$options)
