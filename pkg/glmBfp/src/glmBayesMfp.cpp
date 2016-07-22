@@ -45,6 +45,7 @@ getGlmVarLogMargLik(const ModelPar &mod,
                     const DataValues& data,
                     const FpInfo& fpInfo,
                     const UcInfo& ucInfo,
+                    const FixInfo& fixInfo,
                     const Book& bookkeep,
                     const GlmModelConfig& config,
                     const GaussHermite& gaussHermite,
@@ -74,6 +75,7 @@ getGlmVarLogMargLik(const ModelPar &mod,
                                             data,
                                             fpInfo,
                                             ucInfo,
+                                            fixInfo,
                                             config,
                                             bookkeep);
         residualDeviance = negLogUnnormZDens.getResidualDeviance();
@@ -319,6 +321,7 @@ getVarLogPrior(
                const ModelPar &mod,
                const FpInfo &fpInfo,
                const UcInfo &ucInfo,
+               const FixInfo& fixInfo,
                const Book &bookkeep)
 {
     if (bookkeep.modelPrior == "sparse")
@@ -331,12 +334,12 @@ getVarLogPrior(
                     - log1p(fpInfo.fpmaxs[i]);
             thisVarLogPrior.add(thisVal);
         }
-        return thisVarLogPrior.sum() - (ucInfo.nUcGroups * M_LN2);
+        return thisVarLogPrior.sum() - ((ucInfo.nUcGroups + fixInfo.nFixGroups) * M_LN2); //TODO Is this correct?
     }
     else if (bookkeep.modelPrior == "dependent")
     {
         // determine number of all covariates (covariate groups):
-        int nCovs = ucInfo.nUcGroups + fpInfo.nFps;
+        int nCovs = ucInfo.nUcGroups + fixInfo.nFixGroups + fpInfo.nFps; //TODO Is this correct?
 
         // determine number of included FPs and which are nonlinear:
         int nInclContinuous = 0;
@@ -357,7 +360,7 @@ getVarLogPrior(
         }
 
         // determine number of included discrete covariates:
-        int nInclDiscrete = mod.ucPars.size();
+        int nInclDiscrete = mod.ucPars.size() + fixInfo.nFixGroups;
 
         // so altogether there are
         int nIncluded = nInclContinuous + nInclDiscrete;
@@ -398,6 +401,7 @@ computeGlm(const ModelPar &mod,
            const DataValues& data,
            const FpInfo& fpInfo,
            const UcInfo& ucInfo,
+           const FixInfo& fixInfo,
            Book& bookkeep,
            const GlmModelConfig& config,
            const GaussHermite& gaussHermite)
@@ -406,6 +410,7 @@ computeGlm(const ModelPar &mod,
     const double thisLogPrior = getVarLogPrior(mod,
                                                fpInfo,
                                                ucInfo,
+                                               fixInfo,
                                                bookkeep);
 
     // initialize variables which will definitely be overwritten below
@@ -421,13 +426,13 @@ computeGlm(const ModelPar &mod,
     // compute log marginal likelihood, and also as byproducts unnormalized z density information.
 
     // be careful: if this is the null model, then just input the data computed in R.
-    if(mod.size(ucInfo) == 0)
+    if(mod.size(ucInfo, fixInfo) == 0)
     {
         thisVarLogMargLik = config.nullModelLogMargLik;
     }
     else // not the null model, so at least one other coefficient than the intercept present in the model
     {
-        thisVarLogMargLik = getGlmVarLogMargLik(mod, data, fpInfo, ucInfo, bookkeep, config, gaussHermite,
+        thisVarLogMargLik = getGlmVarLogMargLik(mod, data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite,
                                                 cache, zMode, zVar, laplaceApprox, residualDeviance);
     }
 
@@ -466,7 +471,7 @@ computeGlm(const ModelPar &mod,
         bookkeep.modelLogPosteriors.add(thisVarLogMargLik + thisLogPrior);
 
         // update inclusion probabilities for covariate (groups)
-        mod.pushInclusionProbs(fpInfo, ucInfo, bookkeep);
+        mod.pushInclusionProbs(fpInfo, ucInfo, bookkeep); //TODO
 
         // increment distinct models counter
         bookkeep.modelCounter++;
@@ -486,11 +491,15 @@ computeGlm(const ModelPar &mod,
 
 // ***************************************************************************************************//
 
+
+//TODO FINISH THIS FUNCTION
+
 // compute only the models in the list R-list "R_modelConfigs"
 List
 glmModelsInList(const DataValues& data,
                 const FpInfo& fpInfo,
                 const UcInfo& ucInfo,
+                const FixInfo& fixInfo,
                 Book& bookkeep,
                 const GlmModelConfig& config,
                 const GaussHermite& gaussHermite,
@@ -531,7 +540,7 @@ glmModelsInList(const DataValues& data,
 
         // compute this one
         computeGlm(modelConfig, orderedModels,
-                   data, fpInfo, ucInfo, bookkeep, config, gaussHermite);
+                   data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite);
 
     }
 
@@ -598,6 +607,7 @@ glmPermPars(PosInt pos, // current position in parameter vector, starting from 0
             const DataValues& data,
             const FpInfo& fpInfo,
             const UcInfo& ucInfo,
+            const FixInfo& fixInfo,
             Book& bookkeep,
             const GlmModelConfig& config,
             const GaussHermite& gaussHermite)
@@ -611,7 +621,7 @@ glmPermPars(PosInt pos, // current position in parameter vector, starting from 0
 
         // degree 0:
         glmPermPars(pos + 1, mod, space,
-                    data, fpInfo, ucInfo, bookkeep, config, gaussHermite);
+                    data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite);
 
         // different degrees for fp at pos:
         // degrees 1, ..., fpmax
@@ -637,7 +647,7 @@ glmPermPars(PosInt pos, // current position in parameter vector, starting from 0
 
                 // and go on
                 glmPermPars(pos + 1, mod, space,
-                            data, fpInfo, ucInfo, bookkeep, config, gaussHermite);
+                            data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite);
             }
             while (more1);
         }
@@ -646,7 +656,7 @@ glmPermPars(PosInt pos, // current position in parameter vector, starting from 0
     {
         // no uc group
         computeGlm(mod, space,
-                   data, fpInfo, ucInfo, bookkeep, config, gaussHermite);
+                   data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite); //TODO IS THIS THE NULL  MODEL? IF SO ADD NULL+FIXED NEXT
 
         // different positive number (deg) of uc groups
         for (PosInt deg = 1; deg <= ucInfo.nUcGroups; deg++)
@@ -668,7 +678,7 @@ glmPermPars(PosInt pos, // current position in parameter vector, starting from 0
 
                 // and compute this model
                 computeGlm(mod, space,
-                           data, fpInfo, ucInfo, bookkeep, config, gaussHermite);
+                           data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite);
             }
             while (more2);
         }
@@ -681,6 +691,7 @@ List
 glmSampling(const DataValues& data,
             const FpInfo& fpInfo,
             const UcInfo& ucInfo,
+            const FixInfo& fixInfo,
             Book& bookkeep,
             const GlmModelConfig& config,
             const GaussHermite& gaussHermite)
@@ -704,6 +715,7 @@ glmSampling(const DataValues& data,
     double logPrior = getVarLogPrior(old.modPar,
                                      fpInfo,
                                      ucInfo,
+                                     fixInfo,
                                      bookkeep);
     old.logPrior = logPrior;
 
@@ -715,6 +727,54 @@ glmSampling(const DataValues& data,
     // start with this model config
     ModelMcmc now(old);
 
+    if(fixInfo.nFixGroups > 0){
+      // move to the null model + fixed covariates **********************************************//
+      
+      // add the fixed covariates to the model configuration
+      IntSet s;
+      for (int i = 0; i < fixInfo.nFixGroups; ++i) 
+        s.insert(s.end(), i+1);
+      now.modPar.fixPars = s;
+      
+      //get log prior for null+fixed model
+     double logPrior2 = getVarLogPrior(now.modPar,
+                                fpInfo,
+                                ucInfo,
+                                fixInfo,
+                                bookkeep);
+      
+      // and marginal log like
+      double zMode = 0.0;
+      double zVar = 0.0;
+      double laplaceApprox = 0.0;
+      double residualDeviance = R_NaReal;
+      Cache cache;
+      
+      now.logMargLik = getGlmVarLogMargLik(now.modPar,
+                                           data,
+                                           fpInfo,
+                                           ucInfo,
+                                           fixInfo,
+                                           bookkeep,
+                                           config,
+                                           gaussHermite,
+                                           cache,
+                                           zMode,
+                                           zVar,
+                                           laplaceApprox,
+                                           residualDeviance);
+      
+      // put all into the modelInfo
+      GlmModelInfo start2Info(now.logMargLik, logPrior2, Cache(), R_NaReal, R_NaReal, R_NaReal, 0.0);
+      
+      modelCache.insert(now.modPar, start2Info);
+      
+      // start with this model config
+      ModelMcmc now2(now);
+      
+      now = now2;
+    }
+    
     // Start MCMC sampler***********************************************************//
 
     GetRNGstate(); // use R's random number generator
@@ -889,6 +949,7 @@ glmSampling(const DataValues& data,
                                                  data,
                                                  fpInfo,
                                                  ucInfo,
+                                                 fixInfo,
                                                  bookkeep,
                                                  config,
                                                  gaussHermite,
@@ -910,6 +971,7 @@ glmSampling(const DataValues& data,
                     now.logPrior = getVarLogPrior(now.modPar,
                                               fpInfo,
                                               ucInfo,
+                                              fixInfo,
                                               bookkeep);
 
                     // insert the model parameter/info into the model cache
@@ -992,6 +1054,7 @@ List
 glmExhaustive(const DataValues& data,
               const FpInfo& fpInfo,
               const UcInfo& ucInfo,
+              const FixInfo& fixInfo,
               Book& bookkeep,
               const GlmModelConfig& config,
               const GaussHermite& gaussHermite)
@@ -1021,9 +1084,22 @@ glmExhaustive(const DataValues& data,
     bookkeep.covGroupWisePosteriors = cgwp;
     
     
+    // calculate the true null model if we have any fixed covariates,
+    // otherwise it comes later
+    if(fixInfo.nFixGroups != 0)
+      computeGlm(startModel, orderedModels,
+               data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite);
+    
+    // add the fixed covariates to the model configuration
+    IntSet s;
+    for (int i = 0; i < fixInfo.nFixGroups; ++i) 
+      s.insert(s.end(), i+1);
+    startModel.fixPars = s;
+      
+    
     // start computation
     glmPermPars(0, startModel, orderedModels,
-                data, fpInfo, ucInfo, bookkeep, config, gaussHermite);
+                data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite);
 
     // we have finished.
 
@@ -1061,7 +1137,7 @@ glmExhaustive(const DataValues& data,
 
     // then some attributes:
 
-    NumericVector inc(fpInfo.nFps + ucInfo.nUcGroups);
+    NumericVector inc(fpInfo.nFps + ucInfo.nUcGroups); // TODO should I add fix here
     for (R_len_t i = 0; i != inc.size(); ++i)
     {
         inc[i] = bookkeep.covGroupWisePosteriors[i].sumNormalizedExp(bookkeep.modelLogPosteriors, logNormConst);
@@ -1087,6 +1163,7 @@ glmExhaustive(const DataValues& data,
 //               data,
 //               fpInfos,
 //               ucInfos,
+//               fixInfos,
 //               searchConfig,
 //               distribution,
 //               options)
@@ -1106,6 +1183,9 @@ cpp_glmBayesMfp(SEXP r_interface)
 
     r_interface = CDR(r_interface);
     List rcpp_ucInfos(CAR(r_interface));
+
+	  r_interface = CDR(r_interface);
+	  List rcpp_fixInfos(CAR(r_interface));
 
     r_interface = CDR(r_interface);
     List rcpp_searchConfig(CAR(r_interface));
@@ -1157,6 +1237,19 @@ cpp_glmBayesMfp(SEXP r_interface)
     {
         ucColList.push_back(as<PosIntVector>(rcpp_ucColList[i]));
     }
+
+
+	// Fixed Covariate configuration:
+
+	const PosIntVector fixIndices = rcpp_fixInfos["fixIndices"];
+	List rcpp_fixColList = rcpp_fixInfos["fixColList"];
+
+	std::vector<PosIntVector> fixColList;
+	for (R_len_t i = 0; i != rcpp_fixColList.length(); ++i)
+	{
+		fixColList.push_back(as<PosIntVector>(rcpp_fixColList[i]));
+	}
+
 
     
     // model search configuration:
@@ -1215,7 +1308,7 @@ cpp_glmBayesMfp(SEXP r_interface)
 
     // only the intercept is always included, that is fixed, in the model
     IntSet fixedCols;
-    fixedCols.insert(1);
+    fixedCols.insert(1); //vestigial code that isn't part of the new support for fixed vars
 
     const DataValues data(x, xCentered, y, censInd, totalNumber, fixedCols);
 
@@ -1236,6 +1329,25 @@ cpp_glmBayesMfp(SEXP r_interface)
         ucSizes.push_back(thisSize);
     }
     const UcInfo ucInfo(ucSizes, maxUcDim, ucIndices, ucColList);
+
+
+	// Fix configuration:
+
+	// determine sizes of the fixed covariate groups, and the total size == maximum size reached together by all
+	// fix groups.
+	PosIntVector fixSizes;
+	PosInt maxFixDim = 0;
+	for (vector<PosIntVector>::const_iterator cols = fixColList.begin(); cols != fixColList.end(); ++cols)
+	{
+		PosInt thisSize = cols->size();
+
+		maxFixDim += thisSize;
+		fixSizes.push_back(thisSize);
+	}
+	const FixInfo fixInfo(fixSizes, maxFixDim, fixIndices, fixColList);
+
+
+
 
     // model search configuration:
     Book bookkeep(tbf,
@@ -1275,15 +1387,15 @@ cpp_glmBayesMfp(SEXP r_interface)
 
     if(onlyComputeModelsInList)
     {
-        return glmModelsInList(data, fpInfo, ucInfo, bookkeep, config, gaussHermite, as<List>(rcpp_searchConfig["modelConfigs"]));
+        return glmModelsInList(data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite, as<List>(rcpp_searchConfig["modelConfigs"]));
     }
     else if(doSampling)
     {
-        return glmSampling(data, fpInfo, ucInfo, bookkeep, config, gaussHermite);
+        return glmSampling(data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite);
     }
     else
     {
-        return glmExhaustive(data, fpInfo, ucInfo, bookkeep, config, gaussHermite);
+        return glmExhaustive(data, fpInfo, ucInfo, fixInfo, bookkeep, config, gaussHermite);
     }
 }
 
