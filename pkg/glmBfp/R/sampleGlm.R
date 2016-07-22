@@ -171,7 +171,7 @@ sampleGlm <-
     ## get the (centered) design matrix of the model for the original data
     design <- getDesignMatrix(modelConfig=config,
                               object=object,
-                              fixedColumns=doGlm)
+                              intercept=doGlm) 
     ## the model dimension (including the intercept for GLMs)
     modelDim <- ncol(design)
     
@@ -372,7 +372,7 @@ sampleGlm <-
               ## so we can get the design matrix
               newDesign <- getDesignMatrix(modelConfig=config,
                                            object=tempObj,
-                                           fixedColumns=doGlm)
+                                           intercept=doGlm)
               
               ## so the linear predictor samples are
               linPredSamples <- newDesign %*% simCoefs
@@ -381,12 +381,12 @@ sampleGlm <-
               
               newDesignUC <- getDesignMatrix(modelConfig=config,
                                              object=tempObj,
-                                             fixedColumns=doGlm,
+                                             intercept=doGlm,
                                              center=FALSE)
               
               oldDesignUC <- getDesignMatrix(modelConfig=config,
                                              object=object,
-                                             fixedColumns=doGlm,
+                                             intercept=doGlm,
                                              center=FALSE)
               
               oldMeans <- colMeans(oldDesignUC)
@@ -447,12 +447,6 @@ sampleGlm <-
       }
     }
             
-            simCoefs[1L, ]
-        } else {
-            ## There is no intercept in the Cox model, so we return an empty
-            ## vector because that is expected by the GlmBayesMfpSamples class!
-            numeric(0L)
-        }                
    
     ## samples of fractional polynomial function values evaluated at grids will
     ## be elements of this list:
@@ -522,8 +516,6 @@ sampleGlm <-
     ## Note that only those UC terms are included which also appear in the model
     ## configuration.
     
-    ## now we need the colnames of the design matrix:
-    colNames <- colnames(object$x)
 
     ## start processing all UC terms
     for (i in seq_along(ucList <- attrs$indices$ucList))

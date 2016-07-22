@@ -284,7 +284,6 @@ glmBayesMfp <-
     sortedFormula <- as.formula (sortedFormula)
 
     ## filter special parts in formula: uncertain covariates (uc) and (Bayesian) fractional polynomials (bfp)
-    special <- c("uc", "bfp")
     Terms <- if (missing(data))
         terms(sortedFormula, special)
     else
