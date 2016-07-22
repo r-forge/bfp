@@ -86,6 +86,7 @@ public:
          const DataValues& data,
          const FpInfo& fpInfo,
          const UcInfo& ucInfo,
+         const FixInfo& fixInfo,
          const GlmModelConfig& config,
          const AVector& linPredStart,
          bool conditional,

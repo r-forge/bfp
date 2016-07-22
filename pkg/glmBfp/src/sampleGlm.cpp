@@ -297,6 +297,7 @@ unif()
 //                         attrs$data,
 //                         attrs$fpInfos,
 //                         attrs$ucInfos,
+//                         attrs$fixInfos,
 //                         attrs$distribution,
 //                         newdata,
 //                         options,
@@ -320,7 +321,10 @@ cpp_sampleGlm(SEXP r_interface)
 
     r_interface = CDR(r_interface);
     List rcpp_ucInfos(CAR(r_interface));
-
+    
+    r_interface = CDR(r_interface);
+    List rcpp_fixInfos(CAR(r_interface));
+    
     r_interface = CDR(r_interface);
     List rcpp_distribution(CAR(r_interface));
 
@@ -373,7 +377,20 @@ cpp_sampleGlm(SEXP r_interface)
     {
         ucColList.push_back(as<PosIntVector>(rcpp_ucColList[i]));
     }
-
+    
+    // fixed covariate configuration:
+    
+    const PosIntVector fixIndices = rcpp_fixInfos["fixIndices"];
+    List rcpp_fixColList = rcpp_fixInfos["fixColList"];
+    
+    std::vector<PosIntVector> fixColList;
+    for (R_len_t i = 0; i != rcpp_fixColList.length(); ++i)
+    {
+      fixColList.push_back(as<PosIntVector>(rcpp_fixColList[i]));
+    }
+    
+    
+    
 
     // distributions info:
 
@@ -444,6 +461,26 @@ cpp_sampleGlm(SEXP r_interface)
      }
      const UcInfo ucInfo(ucSizes, maxUcDim, ucIndices, ucColList);
 
+  
+     // fix configuration:  
+     
+     // determine sizes of the fix groups, and the total size == maximum size reached together by all
+     // UC groups.
+     PosIntVector fixSizes;
+     PosInt maxFixDim = 0;
+     for (std::vector<PosIntVector>::const_iterator cols = fixColList.begin(); cols != fixColList.end(); ++cols)
+     {
+       PosInt thisSize = cols->size();
+       
+       maxFixDim += thisSize;
+       fixSizes.push_back(thisSize);
+     }
+     const FixInfo fixInfo(fixSizes, maxFixDim, fixIndices, fixColList);
+     
+     
+     
+     
+     
      // model configuration:
      GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, exp(fixedZ), rcpp_gPrior,
                            data.response, debug, useFixedc, empiricalMean);
@@ -498,6 +535,7 @@ cpp_sampleGlm(SEXP r_interface)
                                       data,
                                       fpInfo,
                                       ucInfo,
+                                      fixInfo,
                                       config,
                                       config.linPredStart,
                                       options.useFixedZ,
@@ -515,7 +553,7 @@ cpp_sampleGlm(SEXP r_interface)
      }
      else
      {
-         AMatrix design = getDesignMatrix(thisModel.par, data, fpInfo, ucInfo, false);
+         AMatrix design = getDesignMatrix(thisModel.par, data, fpInfo, ucInfo, fixInfo, false);
          fitter.coxfitObject = new Coxfit(data.response,
                                           data.censInd,
                                           design,

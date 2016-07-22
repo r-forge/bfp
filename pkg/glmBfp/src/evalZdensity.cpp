@@ -25,6 +25,7 @@ using namespace Rcpp;
 //                         attrs$data,
 //                         attrs$fpInfos,
 //                         attrs$ucInfos,
+//                         attrs$fixInfos,
 //                         attrs$distribution,
 //                         options)
 
@@ -47,6 +48,9 @@ cpp_evalZdensity(SEXP r_interface)
     r_interface = CDR(r_interface);
     List rcpp_ucInfos(CAR(r_interface));
 
+    r_interface = CDR(r_interface);
+    List rcpp_fixInfos(CAR(r_interface));
+    
     r_interface = CDR(r_interface);
     List rcpp_distribution(CAR(r_interface));
 
@@ -95,6 +99,17 @@ cpp_evalZdensity(SEXP r_interface)
         ucColList.push_back(as<PosIntVector>(rcpp_ucColList[i]));
     }
 
+    // fixed covariate configuration:
+    
+    const PosIntVector fixIndices = rcpp_fixInfos["fixIndices"];
+    List rcpp_fixColList = rcpp_fixInfos["fixColList"];
+    
+    std::vector<PosIntVector> fixColList;
+    for (R_len_t i = 0; i != rcpp_fixColList.length(); ++i)
+    {
+      fixColList.push_back(as<PosIntVector>(rcpp_fixColList[i]));
+    }
+    
 
     // distributions info:
 
@@ -161,6 +176,25 @@ cpp_evalZdensity(SEXP r_interface)
      }
      const UcInfo ucInfo(ucSizes, maxUcDim, ucIndices, ucColList);
 
+     
+     
+     
+     // fix configuration:   //TODO THIS SECTION
+     
+     // determine sizes of the fix groups, and the total size == maximum size reached together by all
+     // fix groups.
+     PosIntVector fixSizes;
+     PosInt maxFixDim = 0;
+     for (std::vector<PosIntVector>::const_iterator cols = fixColList.begin(); cols != fixColList.end(); ++cols)
+     {
+       PosInt thisSize = cols->size();
+       
+       maxFixDim += thisSize;
+       fixSizes.push_back(thisSize);
+     }
+     const FixInfo fixInfo(fixSizes, maxFixDim, fixIndices, fixColList);
+     
+     
      // search configuration:
      const GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, as<double>(rcpp_distribution["fixedg"]), rcpp_gPrior,
                                  data.response, bookkeep.debug, bookkeep.useFixedc, empiricalMean);
@@ -177,6 +211,7 @@ cpp_evalZdensity(SEXP r_interface)
                                          data,
                                          fpInfo,
                                          ucInfo,
+                                         fixInfo,
                                          config,
                                          bookkeep);
 
