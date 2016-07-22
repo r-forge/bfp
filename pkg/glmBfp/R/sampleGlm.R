@@ -290,6 +290,7 @@ sampleGlm <-
                             attrs$data,
                             attrs$fpInfos,
                             attrs$ucInfos,
+                            attrs$fixInfos,
                             attrs$distribution,
                             attrs$searchConfig,
                             options,
@@ -412,15 +413,39 @@ sampleGlm <-
 
     ## process all coefficients samples: fixed, FP, UC in this order.
     
+    ## now we need the colnames of the design matrix:
+    colNames <- colnames(attr(object,"data")$x)
+    
     ## invariant: already coefCounter coefficients samples (rows of simCoefs) processed    
     coefCounter <- 0L
 
-    ## the intercept samples
-    fixed <-
-        if(doGlm)
-        {
-            ## increment coefCounter because we process the intercept!
-            coefCounter <- coefCounter + 1L
+    ## the fixed covariate (and intercept samples)
+    fixCoefs <- list ()
+        
+    ## start processing all fixed terms
+    for (i in seq_along(fixList <- attrs$indices$fixed))
+    {
+      ## get the name of the fixed term
+      fixName <- attrs$termNames$fixed[i]
+      
+      ## check if this fixed covariate is included in the model
+      if (i %in% config$fixTerms)
+      {
+        ## then we get the corresponding samples
+        mat <- simCoefs[coefCounter +
+                          seq_len (len <- length(fixList[[i]])), ,
+                        drop=FALSE]   
+        
+        ## correct invariant
+        coefCounter <- coefCounter + len
+        
+        ## and also get the names
+        rownames(mat) <- colNames[fixList[[i]]]
+        
+        ## and this is located in the list
+        fixCoefs[[fixName]] <- mat
+      }
+    }
             
             simCoefs[1L, ]
         } else {
@@ -529,7 +554,7 @@ sampleGlm <-
     results$samples <- new("GlmBayesMfpSamples",
                            fitted=fitted,
                            predictions=predictions,
-                           fixed=fixed,
+                           fixCoefs=fixCoefs,
                            z=cppResults$samples$z,
                            bfpCurves=bfpCurves,
                            ucCoefs=ucCoefs,
