@@ -138,6 +138,18 @@ public:
         return results;
     }
 
+    // Get the fisher information for the desired model
+    AMatrix getInformation(PosInt maxIter,
+                           PosInt nObs,
+                           AVector invSqrtDispersions,
+                           IwlsResults results,
+                           const GlmModelConfig& config,
+                           const AVector& response,
+                           const AMatrix design,
+                           double epsilon,
+                           AMatrix unscaledPriorPrec
+    );
+    
     // this can be public:
 
     // design matrix for this model
