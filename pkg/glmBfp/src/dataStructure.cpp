@@ -539,7 +539,8 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
                                const AVector& responses,
                                bool debug,
                                bool useFixedc,
-                               double empiricalMean) :
+                               double empiricalMean,
+                               bool empiricalgPrior) :
     dispersions(as<NumericVector>(rcpp_family["dispersions"])),
     weights(as<NumericVector>(rcpp_family["weights"])),
     linPredStart(as<NumericVector>(rcpp_family["linPredStart"])),
@@ -550,7 +551,8 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
     familyString(as<std::string>(rcpp_family["family"])),
     linkString(as<std::string>(rcpp_family["link"])),
     canonicalLink((familyString == "binomial" && linkString == "logit") ||
-                      (familyString == "poisson" && linkString == "log"))
+                      (familyString == "poisson" && linkString == "log")),
+    empiricalgPrior(empiricalgPrior)
 {
     // and the phi from the R family object
     const double phi = rcpp_family["phi"];
@@ -630,6 +632,9 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
     {
         Rf_error("cfactor equal to %f, so not positive", cfactor);
     }
+    
+    //we don't need c if we use the empirical prior
+    if(empiricalgPrior) cfactor = 1;
 
     // finally the g-prior stuff:
 
