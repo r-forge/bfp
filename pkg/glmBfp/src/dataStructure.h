@@ -409,7 +409,10 @@ struct GlmModelConfig
     // does this model use the canonical link?
     const bool canonicalLink;
 
-
+    // should we use the empirical g prior which uses 
+    // the information matrix ( J(B)^-1 ) for the covariance instead of (X'X)^-1
+    const bool empiricalgPrior;
+    
     // constructor
     GlmModelConfig(Rcpp::List& rcpp_family,
                    double nullModelLogMargLik,
@@ -419,7 +422,8 @@ struct GlmModelConfig
                    const AVector& responses,
                    bool debug,
                    bool useFixedc,
-                   double empiricalMean);
+                   double empiricalMean,
+                   bool empiricalgPrior);
 
     // destructor
     ~GlmModelConfig()
