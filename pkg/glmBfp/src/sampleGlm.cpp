@@ -402,6 +402,7 @@ cpp_sampleGlm(SEXP r_interface)
     const bool doGlm = as<bool>(rcpp_distribution["doGlm"]);
     
     const double empiricalMean = as<double>(rcpp_distribution["yMean"]);
+    const bool empiricalgPrior = as<bool>(rcpp_distribution["empiricalgPrior"]);
     
     // model search configuration:
     const bool useFixedc = as<bool>(rcpp_searchConfig["useFixedc"]);
@@ -483,7 +484,7 @@ cpp_sampleGlm(SEXP r_interface)
      
      // model configuration:
      GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, exp(fixedZ), rcpp_gPrior,
-                           data.response, debug, useFixedc, empiricalMean);
+                           data.response, debug, useFixedc, empiricalMean, empiricalgPrior);
 
 
      // model config/info:

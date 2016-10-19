@@ -1285,7 +1285,8 @@ cpp_glmBayesMfp(SEXP r_interface)
     const double nullModelDeviance = as<double>(rcpp_distribution["nullModelDeviance"]);
     const double fixedg = as<double>(rcpp_distribution["fixedg"]);
     const double empiricalMean = as<double>(rcpp_distribution["yMean"]);
-
+    const bool empiricalgPrior = as<bool>(rcpp_distribution["empiricalgPrior"]);
+    
     S4 rcpp_gPrior = rcpp_distribution["gPrior"];
     List rcpp_family = rcpp_distribution["family"];
 
@@ -1368,7 +1369,8 @@ cpp_glmBayesMfp(SEXP r_interface)
 
     // model configuration:
     const GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, fixedg, rcpp_gPrior,
-                                data.response, bookkeep.debug, bookkeep.useFixedc, empiricalMean);
+                                data.response, bookkeep.debug, bookkeep.useFixedc, empiricalMean,
+                                empiricalgPrior);
 
     // use only one thread if we do not want to use openMP.
 #ifdef _OPENMP
