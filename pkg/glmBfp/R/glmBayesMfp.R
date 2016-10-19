@@ -159,7 +159,7 @@
 ##' Laplace approximation be used, which works only for canonical GLMs? (not
 ##' default) 
 ##' @param fixedcfactor If TRUE sets the c factor assuming alpha is set to 0. Otherwise take alpha=mean(y)
-##' 
+##' @param  empiricalgPrior If TRUE uses the the Information matrix instead of X'X in the g prior.
 ##'
 ##' @aliases glmBayesMfp GlmBayesMfp
 ##' @return An object of S3 class \code{GlmBayesMfp}.
@@ -193,7 +193,9 @@ glmBayesMfp <-
               largeVariance=100,
               useOpenMP=TRUE,
               higherOrderCorrection=FALSE,
-              fixedcfactor=FALSE)
+              fixedcfactor=FALSE,
+              empiricalgPrior=FALSE,
+              centerX=TRUE)
 {
     ## checks
     stopifnot(is.bool(tbf),
@@ -203,7 +205,8 @@ glmBayesMfp <-
               is.bool(empiricalBayes),
               is(priorSpecs$gPrior, "GPrior"),
               is.bool(useOpenMP),
-              is.bool(higherOrderCorrection))
+              is.bool(higherOrderCorrection),
+              is.bool(empiricalgPrior))
 
     ## see whether GLM or Cox is requested
     doGlm <- is.null(censInd)
@@ -385,7 +388,7 @@ glmBayesMfp <-
 
     ## build design matrix
     X <- model.matrix (newTerms, m)
-    Xcentered <- scale(X, center=TRUE, scale=FALSE)
+    Xcentered <- scale(X, center=centerX, scale=FALSE)
 
     ## get and check weights
     weights <- as.vector(model.weights(m))
@@ -711,7 +714,8 @@ glmBayesMfp <-
                                         # factor g (S4 class object)
                          modelPrior=priorSpecs$modelPrior, # model prior string                         
                          family=family,    # GLM family and link,
-                         yMean=mean(Y))   #  
+                         yMean=mean(Y),   #  pass the mean, which we use when fixedc=TRUE
+                         empiricalgPrior=empiricalgPrior) # should we use empirical g prior
 
     ## pack other options
     options <- list(verbose=verbose,           # should progress be displayed?
