@@ -159,7 +159,7 @@
 ##' Laplace approximation be used, which works only for canonical GLMs? (not
 ##' default) 
 ##' @param fixedcfactor If TRUE sets the c factor assuming alpha is set to 0. Otherwise take alpha=mean(y)
-##' @param  empiricalgPrior If TRUE uses the the Information matrix instead of X'X in the g prior.
+##' @param  empiricalgPrior If TRUE uses the the observed isnformation matrix instead of X'X in the g prior.
 ##'
 ##' @aliases glmBayesMfp GlmBayesMfp
 ##' @return An object of S3 class \code{GlmBayesMfp}.
