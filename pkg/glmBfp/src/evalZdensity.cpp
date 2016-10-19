@@ -197,7 +197,8 @@ cpp_evalZdensity(SEXP r_interface)
      
      // search configuration:
      const GlmModelConfig config(rcpp_family, nullModelLogMargLik, nullModelDeviance, as<double>(rcpp_distribution["fixedg"]), rcpp_gPrior,
-                                 data.response, bookkeep.debug, bookkeep.useFixedc, empiricalMean);
+                                 data.response, bookkeep.debug, bookkeep.useFixedc, empiricalMean, 
+                                 as<bool>(rcpp_distribution["empiricalgPrior"]));
      // config of this model:
      const ModelPar thisModelConfig(rcpp_config, fpInfo);
 
