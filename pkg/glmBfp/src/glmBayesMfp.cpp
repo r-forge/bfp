@@ -154,12 +154,18 @@ getGlmVarLogMargLik(const ModelPar &mod,
         {
             // construct an appropriate object for using the optimize routine
             Brent<CachedFunction<NegLogUnnormZDens> > brent(cachedNegLogUnnormZDens,
-                                                            -100.0, // log(DBL_MIN) + 40.0,
-                                                            +200.0, // log(DBL_MAX) - 40.0,
+                                                            -20,//-100.0, // log(DBL_MIN) + 40.0,
+                                                            20,//+200.0, // log(DBL_MAX) - 40.0,
                                                             sqrt(EPS));
+          
+          // for(int zz = -55; zz < 40; zz=zz+2){
+          //   Rcpp::Rcout << zz<< " : "<< cachedNegLogUnnormZDens(zz) << std::endl;
+          // }
             // and get the mode from that.
             zMode = brent.minimize();
 
+          // Rcpp::Rcout <<  "Zmode is : "<< zMode << std::endl;
+          
             // zVar and laplaceApprox are not touched, as they are not needed!
 
             // echo detailed progress in debug mode
