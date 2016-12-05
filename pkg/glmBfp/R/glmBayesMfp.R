@@ -160,6 +160,7 @@
 ##' default) 
 ##' @param fixedcfactor If TRUE sets the c factor assuming alpha is set to 0. Otherwise take alpha=mean(y)
 ##' @param  empiricalgPrior If TRUE uses the the observed isnformation matrix instead of X'X in the g prior.
+##' @param centerX Center the data before fitting (FALSE)
 ##'
 ##' @aliases glmBayesMfp GlmBayesMfp
 ##' @return An object of S3 class \code{GlmBayesMfp}.
