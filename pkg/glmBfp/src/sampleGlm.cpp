@@ -778,8 +778,11 @@ cpp_sampleGlm(SEXP r_interface)
 
                  // compute the shrinkage factor t = g / (g + 1)
                  const double g = exp(now.sample.z);
-                 const double shrinkFactor = g / (g + 1.0);
-
+                
+                //Previously used g directly, but if g=inf we need to use the limit
+                 // const double shrinkFactor = g / (g + 1.0);
+                const double shrinkFactor = isinf(g) ? 1 : g / (g + 1.0);
+                 
                  // scale the variance of the non-intercept coefficients
                  // with this factor.
                  // In the Cox case: no intercept present, so scale everything
