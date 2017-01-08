@@ -8,7 +8,7 @@
 \references{J. Besag, P. Green, D. Higdon, K. Mengersen (1995):
 Bayesian Methods for Nonlinear Classification and Regression,
 \emph{Statistical Science} \bold{10}/1, 3--66,
-\url{http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.27.8854}}
+\doi{10.1214/ss/1177010123}}
 \author{Thomas Kneib}
 \keyword{htest}
 \arguments{\item{samples}{m by n matrix where m is the number of parameters,
