@@ -738,7 +738,7 @@ glmSampling(const DataValues& data,
       
       // add the fixed covariates to the model configuration
       IntSet s;
-      for (int i = 0; i < fixInfo.nFixGroups; ++i) 
+      for (unsigned int i = 0; i < fixInfo.nFixGroups; ++i) 
         s.insert(s.end(), i+1);
       now.modPar.fixPars = s;
       
@@ -1098,7 +1098,7 @@ glmExhaustive(const DataValues& data,
     
     // add the fixed covariates to the model configuration
     IntSet s;
-    for (int i = 0; i < fixInfo.nFixGroups; ++i) 
+    for (unsigned int i = 0; i < fixInfo.nFixGroups; ++i) 
       s.insert(s.end(), i+1);
     startModel.fixPars = s;
       

@@ -146,7 +146,7 @@ Book::Book(bool tbf,
         if (ULLONG_MAX < cl)
         {
             Rf_warning("\nchainlength too high - reducing to %d \n", ULLONG_MAX);
-            chainlength = ULLONG_MAX;
+            chainlength = ULONG_MAX;
         }
         else
         {
