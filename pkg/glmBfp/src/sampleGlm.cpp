@@ -781,7 +781,7 @@ cpp_sampleGlm(SEXP r_interface)
                 
                 //Previously used g directly, but if g=inf we need to use the limit
                  // const double shrinkFactor = g / (g + 1.0);
-                const double shrinkFactor = isinf(g) ? 1 : g / (g + 1.0);
+                const double shrinkFactor = std::isinf(g) ? 1 : g / (g + 1.0);
                  
                  // scale the variance of the non-intercept coefficients
                  // with this factor.
