@@ -310,6 +310,8 @@ exhaustiveGaussian(// definition
 	Rf_protect(ret = Rf_allocVector(VECSXP, orderedModels.size()));
 	nProtect++;
 
+	bookkeep.chainlength = 1; // prevent calculation with uninitialised variable in covert2list
+	
 	unsigned int i = 0;
 	for(set<model>::reverse_iterator j = orderedModels.rbegin(); j != orderedModels.rend(); j++)
 	{
