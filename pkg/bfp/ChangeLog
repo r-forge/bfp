@@ -1,3 +1,7 @@
+2017-03-04  Daniel Sabanes Bove  <sabanesd@roche.com>
+    
+    * Fix valgrind problem, thanks to Isaac!
+
 2017-01-08  Daniel Sabanes Bove  <sabanesd@roche.com>
     
     * Fix citation problem
