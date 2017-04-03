@@ -1,8 +1,8 @@
 Package: bfp
-Version: 0.0-33
-Date: 2017-01-08
+Version: 0.0-34
+Date: 2017-03-04
 Title: Bayesian Fractional Polynomials
-Author: Daniel Sabanes Bove <sabanesd@roche.com>
+Author: Daniel Sabanes Bove <sabanesd@roche.com> and Isaac Gravestock <isaac.gravestock@uzh.ch>
 Maintainer: Daniel Sabanes Bove <sabanesd@roche.com>
 Depends: R (>= 2.9.0)
 Imports: Rcpp (>= 0.11.0)
