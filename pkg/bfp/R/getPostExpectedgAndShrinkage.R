@@ -26,7 +26,7 @@ getPostExpectedg <- function (x, # a valid BayesMfp-Object of length 1 (otherwis
     alpha <- attr(x, "priorSpecs")$a
     
     ret <-
-        .Call ("postExpectedg", ## PACKAGE = "bfp",
+        .Call (C_postExpectedg, ## PACKAGE = "bfp",
                as.double(R2),
                as.integer(nObs),
                as.integer(dim),
@@ -51,7 +51,7 @@ getPostExpectedShrinkage <- function (x, # a valid BayesMfp-Object of length 1 (
     alpha <- attr(x, "priorSpecs")$a
     
     ret <-
-        .Call ("postExpectedShrinkage", ## PACKAGE = "bfp",
+        .Call (C_postExpectedShrinkage, ## PACKAGE = "bfp",
                as.double(R2),
                as.integer(nObs),
                as.integer(dim),
