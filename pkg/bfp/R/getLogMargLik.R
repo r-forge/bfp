@@ -31,7 +31,7 @@ getLogMargLik <- function (x,       # a valid BayesMfp-Object of length 1 (other
     sst <- attr(x, "SST")
     
     ret <-
-        .Call ("logMargLik", ## PACKAGE = "bfp",
+        .Call (C_logMargLik, ## PACKAGE = "bfp",
                as.double(R2),
                as.integer(nObs),
                as.integer(dim),

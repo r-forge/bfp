@@ -309,7 +309,7 @@ getNumberPossibleFps <- function (  # computes number of possible univariate fps
 
         ## then go C++
         Ret <-
-            .Call ("samplingGaussian", ## PACKAGE = "bfp",
+            .Call (C_samplingGaussian, ## PACKAGE = "bfp",
                    X,            # design matrix
                    Xcentered,    # centered design matrix
                    Y,            # response vector
@@ -349,7 +349,7 @@ getNumberPossibleFps <- function (  # computes number of possible univariate fps
 
         ## then go C++
         Ret <-
-            .Call ("exhaustiveGaussian", ##  PACKAGE = "bfp",
+            .Call (C_exhaustiveGaussian, ##  PACKAGE = "bfp",
                    X,            # design matrix
                    Xcentered,    # centered design matrix
                    Y,            # response vector

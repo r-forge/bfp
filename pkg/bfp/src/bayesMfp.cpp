@@ -1,4 +1,5 @@
 #include <RnewMat.h>
+#include <R_ext/Visibility.h>
 #include <combinatorics.h>
 #include <dataStructure.h>
 #include <hyperg.h>
@@ -28,9 +29,7 @@ using std::min;
 
 typedef std::vector<long double>::size_type indexType;
 
-// export to C interface ##########################################################################
-extern "C"
-{
+
 SEXP exhaustiveGaussian(// declaration
                         SEXP R_x, // (not centered!) design matrix (with colnames)
                         SEXP R_xcentered, // centered design matrix
@@ -87,7 +86,33 @@ SEXP postExpectedShrinkage( //declaration
                 SEXP R_dim, // number of columns of the design matrix
                 SEXP R_alpha); // hyperparamater for hyper-g prior
 
+
+// export to C interface ##########################################################################
+
+extern "C"
+{
+  
+static const R_CallMethodDef callMethods[] = {
+  {"exhaustiveGaussian", (DL_FUNC) &exhaustiveGaussian, 16},
+  {"samplingGaussian", (DL_FUNC) &samplingGaussian, 17},
+  {"logMargLik", (DL_FUNC) &logMargLik, 5},
+  {"postExpectedg", (DL_FUNC) &postExpectedg, 4},
+  {"postExpectedShrinkage", (DL_FUNC) &postExpectedShrinkage, 4},
+  {NULL, NULL, 0}
+};
+
+  // Register these functions with R:
+  
+void attribute_visible R_init_bfp(DllInfo *dll)
+{
+  R_registerRoutines(dll, NULL, callMethods, NULL, NULL);
+  R_useDynamicSymbols(dll, FALSE);
+  R_forceSymbols(dll, TRUE);
+}
+
 } // extern "C"
+
+
 
 // other functions ##########################################################################
 void permPars(PosInt pos, // current position in parameter vector, starting from 0
