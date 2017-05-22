@@ -100,7 +100,7 @@ default)}
 
 \item{fixedcfactor}{If TRUE sets the c factor assuming alpha is set to 0. Otherwise take alpha=mean(y)}
 
-\item{empiricalgPrior}{If TRUE uses the the observed isnformation matrix instead of X'X in the g prior.}
+\item{empiricalgPrior}{If TRUE uses the the observed isnformation matrix instead of X'X in the g prior. (Experimental)}
 
 \item{centerX}{Center the data before fitting (FALSE)}
 }
