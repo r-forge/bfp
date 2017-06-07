@@ -114,6 +114,8 @@ Iwls::Iwls(const ModelPar &mod,
             
             unscaledPriorPrec.submat(1, 1, nCoefs - 1, nCoefs - 1) = scaledDesignWithoutInterceptCrossprod / config.cfactor;
 
+           //  Rcpp::Rcout << "Prior Prec:\n"<< unscaledPriorPrec << std::endl;
+            
            // if(config.empiricalgPrior) unscaledPriorPrec.submat(1, 1, nCoefs - 1, nCoefs - 1) = infoMatrix.submat(1, 1, nCoefs - 1, nCoefs - 1);
             
 
