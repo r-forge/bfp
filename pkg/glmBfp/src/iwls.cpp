@@ -66,7 +66,7 @@ Iwls::Iwls(const ModelPar &mod,
            unscaledPriorPrec(nCoefs, nCoefs),
            results(linPredStart, nCoefs),
            epsilon(epsilon),
-           verbose(debug),
+           // verbose(debug),
            tbf(tbf)
 {
     // only do additional computations if not the TBF methodology is used

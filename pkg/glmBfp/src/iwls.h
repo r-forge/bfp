@@ -194,7 +194,7 @@ private:
     const double epsilon;
 
     // status messages??
-    const bool verbose;
+    // const bool verbose;
 
     // use TBF methodology?
     const bool tbf;
