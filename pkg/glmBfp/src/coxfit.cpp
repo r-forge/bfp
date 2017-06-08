@@ -132,8 +132,8 @@ int cholesky2(DoubleMatrix& matrix, int n, double toler)
 
 void chinv2(DoubleMatrix& matrix , int n)
      {
-     register double temp;
-     register int i,j,k;
+     double temp;
+     int i,j,k;
 
      /*
      ** invert the cholesky in the lower triangle
@@ -187,8 +187,8 @@ void chinv2(DoubleMatrix& matrix , int n)
 
 void chsolve2(const DoubleMatrix& matrix, int n, AVector& y)
      {
-     register int i,j;
-     register double temp;
+     int i,j;
+     double temp;
 
      /*
      ** solve Fb =y
