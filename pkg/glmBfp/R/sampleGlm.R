@@ -344,6 +344,7 @@ sampleGlm <-
     ## abbreviation for the coefficients sample matrix (nCoefs x nSamples)
     simCoefs <-
         results$coefficients <- cppResults$samples$coefficients
+     
     
     ## so the number of samples is:
     nSamples <- ncol(simCoefs)
@@ -351,6 +352,11 @@ sampleGlm <-
     ## the linear predictor samples for the fitted data:
     fitted <- design %*% simCoefs
 
+    # give some names
+    
+    rownames(results$coefficients) <- colnames(design)
+    if(doGlm) rownames(results$coefficients)[1] <- "(Intercept)"
+    
     ## samples from the predictive distribution for new data,
     ## if this is required
     predictions <-
@@ -415,7 +421,7 @@ sampleGlm <-
     
     ## now we need the colnames of the design matrix:
     colNames <- colnames(attr(object,"data")$x)
-    rownames(results$coefficients) <- colNames
+    
     
     ## invariant: already coefCounter coefficients samples (rows of simCoefs) processed    
     coefCounter <- 0L
