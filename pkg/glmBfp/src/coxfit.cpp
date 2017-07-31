@@ -683,31 +683,32 @@ Coxfit::computeResidualDeviance()
 // 03/07/2013: add offsets
 
 // just an R interface to the coxfit routine, for regression testing purposes.
+// [[Rcpp::export]]
 SEXP
-cpp_coxfit(SEXP R_interface)
+cpp_coxfit(SEXP R_survTimes, SEXP R_censInd, SEXP R_offsets, SEXP R_X, SEXP R_method)
 {
     // ---------------
     // get R objects:
 
-    // extract survival times
-    R_interface = CDR(R_interface);
-    SEXP R_survTimes = CAR(R_interface);
-
-    // censoring status
-    R_interface = CDR(R_interface);
-    SEXP R_censInd = CAR(R_interface);
-
-    // offsets
-    R_interface = CDR(R_interface);
-    SEXP R_offsets = CAR(R_interface);
-
-    // design matrix
-    R_interface = CDR(R_interface);
-    SEXP R_X= CAR(R_interface);
-
-    // and the tie method
-    R_interface = CDR(R_interface);
-    SEXP R_method = CAR(R_interface);
+    // // extract survival times
+    // R_interface = CDR(R_interface);
+    // SEXP R_survTimes = CAR(R_interface);
+    // 
+    // // censoring status
+    // R_interface = CDR(R_interface);
+    // SEXP R_censInd = CAR(R_interface);
+    // 
+    // // offsets
+    // R_interface = CDR(R_interface);
+    // SEXP R_offsets = CAR(R_interface);
+    // 
+    // // design matrix
+    // R_interface = CDR(R_interface);
+    // SEXP R_X= CAR(R_interface);
+    // 
+    // // and the tie method
+    // R_interface = CDR(R_interface);
+    // SEXP R_method = CAR(R_interface);
 
     // ---------------
     // unpack R objects:

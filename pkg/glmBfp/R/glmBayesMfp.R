@@ -728,15 +728,13 @@ glmBayesMfp <-
                                         # the higher-order Laplace correction be used?    
     
     ## then go C++
-    Ret <-
-        .External (cpp_glmBayesMfp,
-                   data,
-                   fpInfos,
-                   ucInfos,
-                   fixInfos,
-                   searchConfig,
-                   distribution,
-                   options)
+    Ret <- cpp_glmBayesMfp(data,
+                           fpInfos,
+                           ucInfos,
+                           fixInfos,
+                           searchConfig,
+                           distribution,
+                           options)
 
     ## C++ attaches the following attributes:
 

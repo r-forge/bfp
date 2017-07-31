@@ -1173,34 +1173,35 @@ glmExhaustive(const DataValues& data,
 //               searchConfig,
 //               distribution,
 //               options)
-
+// [[Rcpp::export]]
 SEXP
-cpp_glmBayesMfp(SEXP r_interface)
+cpp_glmBayesMfp(List rcpp_data, List rcpp_fpInfos, List rcpp_ucInfos, List rcpp_fixInfos,
+                List rcpp_searchConfig, List rcpp_distribution, List rcpp_options )
 {
     // ----------------------------------------------------------------------------------
     // extract arguments
     // ----------------------------------------------------------------------------------
 
-    r_interface = CDR(r_interface);
-    List rcpp_data(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_fpInfos(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_ucInfos(CAR(r_interface));
-
-	  r_interface = CDR(r_interface);
-	  List rcpp_fixInfos(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_searchConfig(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_distribution(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_options(CAR(r_interface));
+//     r_interface = CDR(r_interface);
+//     List rcpp_data(CAR(r_interface));
+// 
+//     r_interface = CDR(r_interface);
+//     List rcpp_fpInfos(CAR(r_interface));
+// 
+//     r_interface = CDR(r_interface);
+//     List rcpp_ucInfos(CAR(r_interface));
+// 
+// 	  r_interface = CDR(r_interface);
+// 	  List rcpp_fixInfos(CAR(r_interface));
+// 
+//     r_interface = CDR(r_interface);
+//     List rcpp_searchConfig(CAR(r_interface));
+// 
+//     r_interface = CDR(r_interface);
+//     List rcpp_distribution(CAR(r_interface));
+// 
+//     r_interface = CDR(r_interface);
+//     List rcpp_options(CAR(r_interface));
 
 
     // ----------------------------------------------------------------------------------

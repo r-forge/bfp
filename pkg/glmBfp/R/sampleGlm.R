@@ -285,16 +285,16 @@ sampleGlm <-
     }
     
     ## then call C++ to do the rest:
-    cppResults <- .External(cpp_sampleGlm,
-                            model,
-                            attrs$data,
-                            attrs$fpInfos,
-                            attrs$ucInfos,
-                            attrs$fixInfos,
-                            attrs$distribution,
-                            attrs$searchConfig,
-                            options,
-                            marginalz)
+    cppResults <- cpp_sampleGlm(
+      model,
+      attrs$data,
+      attrs$fpInfos,
+      attrs$ucInfos,
+      attrs$fixInfos,
+      attrs$distribution,
+      attrs$searchConfig,
+      options,
+      marginalz)
 
     ## start return list
     results <- list()

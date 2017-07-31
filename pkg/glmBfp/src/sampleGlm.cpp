@@ -303,39 +303,45 @@ unif()
 //                         options,
 //                         marginalz)
 
+
+
+
+// [[Rcpp::export]]
 SEXP
-cpp_sampleGlm(SEXP r_interface)
+cpp_sampleGlm(      List rcpp_model,List rcpp_data, List rcpp_fpInfos, List rcpp_ucInfos,
+                    List rcpp_fixInfos, List rcpp_distribution, List rcpp_searchConfig,
+                    List rcpp_options, List rcpp_marginalz)
 {
     // ----------------------------------------------------------------------------------
     // extract arguments
     // ----------------------------------------------------------------------------------
 
-    r_interface = CDR(r_interface);
-    List rcpp_model(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_data(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_fpInfos(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_ucInfos(CAR(r_interface));
-    
-    r_interface = CDR(r_interface);
-    List rcpp_fixInfos(CAR(r_interface));
-    
-    r_interface = CDR(r_interface);
-    List rcpp_distribution(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_searchConfig(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_options(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_marginalz(CAR(r_interface));
+    // r_interface = CDR(r_interface);
+    // List rcpp_model(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_data(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_fpInfos(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_ucInfos(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_fixInfos(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_distribution(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_searchConfig(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_options(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_marginalz(CAR(r_interface));
 
     // ----------------------------------------------------------------------------------
     // unpack the R objects
