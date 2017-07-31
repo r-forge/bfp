@@ -415,6 +415,7 @@ sampleGlm <-
     
     ## now we need the colnames of the design matrix:
     colNames <- colnames(attr(object,"data")$x)
+    rownames(results$coefficients) <- colNames
     
     ## invariant: already coefCounter coefficients samples (rows of simCoefs) processed    
     coefCounter <- 0L
@@ -422,11 +423,24 @@ sampleGlm <-
     ## the fixed covariate (and intercept samples)
     fixCoefs <- list ()
         
+    if(doGlm){
+      fixName <- attrs$termNames$fixed[1]
+      mat <- simCoefs[1, ,
+                      drop=FALSE]   
+      coefCounter <- coefCounter + 1
+      
+      ## and also get the names
+      rownames(mat) <- colNames[1]
+      
+      ## and this is located in the list
+      fixCoefs[[fixName]] <- mat
+    }
+    
     ## start processing all fixed terms
     for (i in seq_along(fixList <- attrs$indices$fixed))
     {
       ## get the name of the fixed term
-      fixName <- attrs$termNames$fixed[i]
+      fixName <- attrs$termNames$fixed[i+doGlm]
       
       ## check if this fixed covariate is included in the model
       if (i %in% config$fixTerms)
