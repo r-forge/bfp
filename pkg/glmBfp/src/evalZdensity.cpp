@@ -28,34 +28,35 @@ using namespace Rcpp;
 //                         attrs$fixInfos,
 //                         attrs$distribution,
 //                         options)
-
+// [[Rcpp::export]]
 SEXP
-cpp_evalZdensity(SEXP r_interface)
+cpp_evalZdensity(List rcpp_config, List rcpp_data, List rcpp_fpInfos, List rcpp_ucInfos,
+                List rcpp_fixInfos, List rcpp_distribution, List rcpp_options)
 {
     // ----------------------------------------------------------------------------------
     // extract arguments
     // ----------------------------------------------------------------------------------
 
-    r_interface = CDR(r_interface);
-    List rcpp_config(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_data(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_fpInfos(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_ucInfos(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_fixInfos(CAR(r_interface));
-    
-    r_interface = CDR(r_interface);
-    List rcpp_distribution(CAR(r_interface));
-
-    r_interface = CDR(r_interface);
-    List rcpp_options(CAR(r_interface));
+    // r_interface = CDR(r_interface);
+    // List rcpp_config(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_data(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_fpInfos(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_ucInfos(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_fixInfos(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_distribution(CAR(r_interface));
+    // 
+    // r_interface = CDR(r_interface);
+    // List rcpp_options(CAR(r_interface));
 
     // ----------------------------------------------------------------------------------
     // unpack the R objects
