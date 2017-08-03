@@ -19,7 +19,8 @@ Authors@R: c(person("Isaac","Gravestock", role=c("aut","cre"), email="isaac.grav
             )
 Description: Implements the Bayesian paradigm
     for fractional polynomials in generalized linear
-    models. See package 'bfp' for the treatment of normal
+    models, described by Held, Gravestock, Sabanes Bove (2015) <doi:10.1214/14-STS510>.
+    See package 'bfp' for the treatment of normal
     models.
 Version: 0.0-51
 Date: 2017-07-31
