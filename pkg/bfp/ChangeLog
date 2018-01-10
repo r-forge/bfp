@@ -1,5 +1,9 @@
 2017-08-01  Daniel Sabanes Bove  <sabanesd@roche.com>
     
+    * Fixed DESCRIPTION file
+
+2017-08-01  Daniel Sabanes Bove  <sabanesd@roche.com>
+    
     * Fixed makefile issue reported by R-Core
 
 2017-03-04  Daniel Sabanes Bove  <sabanesd@roche.com>
