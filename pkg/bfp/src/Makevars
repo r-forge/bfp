@@ -26,11 +26,11 @@ sublib: subclean
 	(cd newmat && CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" MAKE="$(MAKE) -f \"$(MkInclude)\" -f Makefile" $(MAKE) -f "$(MkInclude)" -f Makefile library) || exit 1;
 
 clean: subclean
-	$(RM) -r .libs _libs
-	$(RM) *.o $(SHLIB)
+	@-rm -r .libs _libs
+	@-rm *.o $(SHLIB)
 
 subclean:
-	$(RM) *.a
+	@-rm *.a
 	(cd newmat && MkInclude="$(MkInclude)" $(MAKE) clean) || exit 1;
 
 
