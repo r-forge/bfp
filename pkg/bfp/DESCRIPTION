@@ -3,7 +3,7 @@ Version: 0.0-39
 Date: 2018-05-14
 Title: Bayesian Fractional Polynomials
 Authors@R: c(person("Daniel", "Sabanes Bove", 
-             email="sabanesd@roche.com", role = c("aut", "cre")),
+             email="daniel.sabanesbove@gmx.net", role = c("aut", "cre")),
              person("Isaac", "Gravestock",
              email="isaac.gravestock@uzh.ch", role="aut"),
              person("Robert", "Davies", role="cph"),
