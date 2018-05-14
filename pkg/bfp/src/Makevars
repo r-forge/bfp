@@ -4,6 +4,7 @@
 MkInclude = ${R_HOME}/etc${R_ARCH}/Makeconf
 RCPP_FLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"`
 RCPP_LIBS=`${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"`
+CXX_STD = CXX11
 
 # flags are needed:
 PKG_CPPFLAGS = -D R_NO_REMAP

@@ -1833,7 +1833,7 @@ class MatrixInput
 public:
    MatrixInput(const MatrixInput& mi) : n(mi.n), r(mi.r) {}
    MatrixInput(int nx, Real* rx) : n(nx), r(rx) {}
-   ~MatrixInput();
+   ~MatrixInput() noexcept(false);
    MatrixInput operator<<(double);
    MatrixInput operator<<(float);
    MatrixInput operator<<(int f);
