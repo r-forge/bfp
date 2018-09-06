@@ -1,7 +1,8 @@
-%%\VignetteIndexEntry{glmBfp: Bayesian fractional polynomials for GLMs} 
-%%\VignetteKeywords{fractional polynomials, Bayesian variable selection, g-prior, hyper-g prior}
-%%\VignettePackage{glmBfp}
-%%\VignetteDepends{MASS,glmBfp}
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{glmBfp: Bayesian fractional polynomials for GLMs} 
+%\VignetteKeywords{fractional polynomials, Bayesian variable selection, g-prior, hyper-g prior}
+%\VignettePackage{glmBfp}
+%\VignetteDepends{MASS,glmBfp}
 
 \documentclass[british]{scrreprt}
 
@@ -16,7 +17,6 @@
 \usepackage[caption = true]{subfig}
 \usepackage[longnamesfirst,round]{natbib} 
 \usepackage{tikz}  
-\usepackage[nogin]{Sweave} 
 
 
 \begin{document}
@@ -211,7 +211,7 @@ head(mapFit)
 %$
 We can also analyse the MCMC output in greater detail by applying the functions
 in the \texttt{coda} package:
-<<pima-coda, fig=TRUE>>=
+<<pima-coda>>=
 library(coda)
 
 coefMcmc <- mcmc(data=t(mapSamples$coefficients),
@@ -227,7 +227,7 @@ autocorr(coefMcmc)
 plot(coefMcmc) 
 @ 
 
-<<pima-coda-2, fig=TRUE>>=
+<<pima-coda-2>>=
 ## samples of z:
 zMcmc <- mcmc(data=mapSamples$samples@z,
               start=mcmcOptions@burnin + 1,
@@ -242,7 +242,7 @@ plot(zMcmc)
 Now we can use the samples to plot the estimated effects of the MAP model
 covariates, with the \texttt{plotCurveEstimate} function. For example:
 
-<<pima-plot-ex, fig=TRUE>>=
+<<pima-plot-ex>>=
 plotCurveEstimate(termName="skin",
                   samples=mapSamples$samples)
 @ 
