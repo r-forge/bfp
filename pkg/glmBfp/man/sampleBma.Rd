@@ -64,4 +64,3 @@ included in the BMA sample or not.
 }
 \keyword{models}
 \keyword{regression}
-

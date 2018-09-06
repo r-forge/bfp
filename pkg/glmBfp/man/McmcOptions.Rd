@@ -26,4 +26,3 @@ Note that the argument \code{samples} is included for convenience only -
 you can specify it instead of \code{iterations}.
 }
 \keyword{classes}
-

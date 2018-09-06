@@ -35,4 +35,3 @@ Based on the result list from \code{\link{glmBayesMfp}}, for the first model
 in the list, the marginal z density can be evaluated.
 }
 \keyword{internal}
-

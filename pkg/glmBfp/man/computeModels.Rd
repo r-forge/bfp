@@ -34,4 +34,3 @@ Daniel Sabanes Bove \email{daniel.sabanesbove@ifspm.uzh.ch}
 }
 \keyword{models}
 \keyword{regression}
-

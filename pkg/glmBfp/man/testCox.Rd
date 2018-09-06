@@ -35,4 +35,3 @@ Daniel Sabanes Bove
 }
 \keyword{internal}
 \keyword{utilities}
-
