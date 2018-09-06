@@ -1,0 +1,116 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{glmBfp: Cox models with test based Bayes Factors} 
+%\VignetteKeywords{Bayesian variable selection, g-prior, hyper-g prior, empirical Bayes}
+%\VignettePackage{glmBfp}
+%\VignetteDepends{glmBfp}
+
+\documentclass{article}
+\usepackage[a4paper, total={6.5in, 10in}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{hyperref}
+ 
+\usepackage{natbib}
+\bibliographystyle{unsrtnat}
+
+
+\chardef\bslash=`\\ % p. 424, TeXbook
+\newcommand{\ntt}{\normalfont\ttfamily}
+\newcommand{\cn}[1]{{\protect\ntt\bslash#1}}
+\newcommand{\pkg}[1]{{\protect\ntt#1}}
+\newcommand{\code}[1]{{\protect\ntt#1}}
+
+\begin{document}
+\author{Isaac Gravestock}
+\title{Using \pkg{glmBfp}: Cox models with test based Bayes Factors}
+
+\maketitle
+The \pkg{glmBfp} package implements a new approach to model fitting and variable selection which are described in two articles, \citet{held2015approximate} and \citet{held2016objective}.
+This vignette shows how to use the simplified interface for fitting Cox models with \pkg{glmBfp}.
+We use the SMART data described in \citet{Steyerberg2009} and available at \url{http://www.clinicalpredictionmodels.org}. The package includes a processed copy of this data with the missing values imputed and variables transformed as in the example code on that site
+<<setup, echo=FALSE>>=
+
+@
+
+<<cache=TRUE>>=
+library(glmBfp)
+data(SMARTfull)
+@
+
+The workhorse function of the package is \code{glmBayesMfp()} which does all the model fitting and returns a large list of possible models, which then need to be evaluated and selected from. To make things easier, \code{coxTBF()} is a simplified formula based interface to \code{glmBayesMfp()} that fits and chooses Cox models.
+   
+We first need to define the formula, using \code{Surv(time,event)}. The function needs to know which variables must be included in the model and which are ``uncertain'' should tested for inclusion. These are wrapped in the formula with \code{uc()}.
+<<formulas, cache=TRUE>>=
+f1 <- Surv(TEVENT, EVENT) ~ AGE.TRANS + SEX +  uc(SMOKING) + 
+  uc(ALCOHOL) + uc(BMI) + uc(SYSTH) + uc(HDL) + uc(DIABETES) + 
+  uc(HISTCAR2)
+@
+Using this we can fit a model. We choose \code{type="MAP"} to select the model with maximum posterior probability. Other possibilities are the median probability model (\code{MPM}) and Bayesian model averages (\code{BMA}).
+<<message=FALSE, warning=FALSE, cache=TRUE>>=
+f1_MAP <- coxTBF(f1, data = SMARTfull, type="MAP", 
+                 useOpenMP=FALSE, chainlength=200)
+@
+The resulting object contains the formula of selected model and the coefficient estimates.
+<< cache=TRUE>>=
+f1_MAP$formula
+f1_MAP$coefs
+@
+Also included is the survivor function, so we can predict survival probabilities at specified times.
+<< cache=TRUE>>=
+predict(f1_MAP, times = c(100,1000,2000,3000), newdata = SMARTfull[1:3,])
+@
+
+
+Other parameters given to \code{coxTBF} are passed through to \code{glmBayesMfp}. This can be used to specify new $g$-priors and change MCMC options. We can also save the models found in the search for later investigation with \code{keepModelList=TRUE}.
+<<message=FALSE,  cache=TRUE>>=
+# Hyper g/n.obs
+prior <- InvGammaGPrior(a=1/2, b=sum(SMARTfull$EVENT)/2)
+f1_MPM <- coxTBF(f1, data = SMARTfull, type="MPM", useOpenMP=FALSE,
+                 chainlength=500, nModels=50, keepModelList=TRUE, 
+                 priorSpecs=list(gPrior=prior, modelPrior="sparse"))
+@
+
+<< cache=TRUE>>=
+f1_MPM$formula
+f1_MPM$coefs
+@
+
+
+% Here we sample from the list of models and check the MCMC diagnostics. For more details see the vignette Using the package \texttt{glmBfp}: a binary regression example.
+% <<>>=
+% samples <- sampleBma(f1_MPM$model.list[1:5])
+% 
+% samples <- sampleGlm(f1_MPM$model.object)
+% 
+% @
+
+
+
+
+
+<<eval=FALSE, include=FALSE>>=
+# str(all_MPM)
+# names(all_MPM)
+# all_MAP$formula
+# all_MPM$formula
+# all_MPM$coefs
+# 
+# all_MPM$survival(runif(10))
+# class(all_MPM$model.object)
+# predict(all_MPM, newdata = SMARTfull[c(1,3,5),], times = c(100,1000,3000) )
+
+
+# 
+# all_uc <- Surv(TEVENT, EVENT) ~ uc(AGE.TRANS) + uc(SEX) + uc(SMOKING) + 
+#     uc(ALCOHOL) + uc(BMI) + uc(SYSTH) + uc(HDL) + uc(DIABETES) + 
+#     uc(HISTCAR2) + uc(HOMOC) + uc(logCREAT) + uc(ALBUMIN) + uc(STENOSIS) + 
+#     uc(IMT)
+# all_MAP <- coxTBF(all_uc, data = SMARTfull, type="MAP", chainlength = 500, verbose=TRUE)
+# all_MPM <- coxTBF(all_uc, data = SMARTfull, type="MPM", chainlength = 500, verbose=TRUE)
+@
+
+
+\bibliography{examples}
+
+
+\end{document}
