@@ -40,7 +40,7 @@
 ##' @import stats
 ##' @export
 
-coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FALSE, sep=FALSE, keepModelList = FALSE, ..., overrideConfig){
+coxTBF <- function(formula, data, type="MAP", baseline='shrunk', globalEB=FALSE, IC=FALSE, sep=FALSE, keepModelList = FALSE, ..., overrideConfig){
  
   formula <- as.formula(formula)
   
@@ -48,8 +48,8 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
   RHS <- paste(attr(terms(formula),"term.labels"),collapse=" + ")
   selection.formula  <- formula(paste(LHS,"~",RHS))
   
-  tryCatch(type<-match.arg(type,c("MAP","MPM","BMA","BMAfull")), error= function(e) print("Invalid type specification"))
-  tryCatch(baseline<-match.arg(baseline,c("cox","shrunk")), error= function(e) print("Invalid baseline specification"))
+  tryCatch(type<-match.arg(type,c("MAP","MPM","BMA","BMAfull")), error= function(e) stop(paste("Invalid value for type: ",type)))
+  tryCatch(baseline<-match.arg(baseline,c("cox","shrunk")), error= function(e) stop("Invalid baseline specification"))
   
   time.var = as.character(formula[[2]][[2]])
   status.var = as.character(formula[[2]][[3]])
@@ -231,7 +231,7 @@ coxTBF <- function(formula, data, type, baseline='shrunk', globalEB=FALSE, IC=FA
 
       new.models <- computeModels(list(mpm.model.config), models)
       model.listpart <- new.models[1]
-      print("Success.s")
+      # print("Success.s")
     } else {
       model.listpart <- models[mpm.index]
     }
