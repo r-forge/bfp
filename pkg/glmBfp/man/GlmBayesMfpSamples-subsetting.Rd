@@ -27,4 +27,3 @@ does not have enough samples to be subset by \code{i} !
 \code{\linkS4class{GlmBayesMfpSamples}}
 }
 \keyword{methods}
-

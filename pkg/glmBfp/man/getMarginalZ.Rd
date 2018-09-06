@@ -42,4 +42,3 @@ Construct a (smooth) marginal z density approximation from a model
 information list
 }
 \keyword{internal}
-

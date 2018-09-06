@@ -26,4 +26,3 @@ list with resulting \dQuote{estimate} and \dQuote{standardError}.
 Compute the Chib-Jeliazkov log marginal likelihood estimate from the MCMC output
 }
 \keyword{internal}
-

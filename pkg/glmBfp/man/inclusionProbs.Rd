@@ -21,4 +21,3 @@ Compute (model averaged) posterior inclusion probabilites for the uncertain
 variables (including FP variables) based on a GlmBayesMfp object.
 }
 \keyword{utilities}
-

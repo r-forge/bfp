@@ -28,4 +28,3 @@ bfp GLM model.
 }
 \keyword{internal}
 \keyword{utilities}
-

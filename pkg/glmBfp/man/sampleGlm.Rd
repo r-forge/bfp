@@ -86,4 +86,3 @@ samples from an approximate posterior distribution are obtained.
 }
 \keyword{models}
 \keyword{regression}
-

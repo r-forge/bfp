@@ -53,4 +53,3 @@ Plot a fractional polynomial curve estimate using samples from a single
 GLM / Cox model or a model average.
 }
 \keyword{regression}
-

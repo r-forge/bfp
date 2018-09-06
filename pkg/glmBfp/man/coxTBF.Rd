@@ -4,7 +4,7 @@
 \alias{coxTBF}
 \title{Fit Cox models using glmBayesMfp}
 \usage{
-coxTBF(formula, data, type, baseline = "shrunk", globalEB = FALSE,
+coxTBF(formula, data, type = "MAP", baseline = "shrunk", globalEB = FALSE,
   IC = FALSE, sep = FALSE, keepModelList = FALSE, ..., overrideConfig)
 }
 \arguments{
@@ -40,4 +40,3 @@ Provides global empirical Bayes and AIC/BIC based model inference.
 }
 \keyword{models}
 \keyword{regression}
-
