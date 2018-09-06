@@ -6,7 +6,8 @@ Imports:
     methods,
     coda,
     Runuran (>= 0.12),
-    Rcpp (>= 0.11.6)
+    Rcpp (>= 0.11.6),
+    knitr
 License: GPL (>= 2)
 Title: Bayesian Fractional Polynomials for GLMs
 LinkingTo: Rcpp, RcppArmadillo
