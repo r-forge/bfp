@@ -117,19 +117,3 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-
-static const R_CallMethodDef CallEntries[] = {
-    {"_glmBfp_cpp_bfgs", (DL_FUNC) &_glmBfp_cpp_bfgs, 6},
-    {"_glmBfp_cpp_coxfit", (DL_FUNC) &_glmBfp_cpp_coxfit, 5},
-    {"_glmBfp_cpp_evalZdensity", (DL_FUNC) &_glmBfp_cpp_evalZdensity, 7},
-    {"_glmBfp_cpp_glmBayesMfp", (DL_FUNC) &_glmBfp_cpp_glmBayesMfp, 7},
-    {"_glmBfp_cpp_optimize", (DL_FUNC) &_glmBfp_cpp_optimize, 4},
-    {"_glmBfp_predBMAcpp", (DL_FUNC) &_glmBfp_predBMAcpp, 3},
-    {"_glmBfp_cpp_sampleGlm", (DL_FUNC) &_glmBfp_cpp_sampleGlm, 9},
-    {NULL, NULL, 0}
-};
-
-RcppExport void R_init_glmBfp(DllInfo *dll) {
-    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-    R_useDynamicSymbols(dll, FALSE);
-}
