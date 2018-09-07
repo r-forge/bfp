@@ -61,8 +61,8 @@ predict(f1_MAP, times = c(100,1000,2000,3000), newdata = SMARTfull[1:3,])
 @
 
 
-Other parameters given to \code{coxTBF} are passed through to \code{glmBayesMfp}. This can be used to specify new $g$-priors and change MCMC options. We can also save the models found in the search for later investigation with \code{keepModelList=TRUE}.
-<<message=FALSE,  cache=TRUE>>=
+Other parameters given to \code{coxTBF} are passed through to \code{glmBayesMfp}. This can be used to specify new $g$-priors and change MCMC options. We can also save the models found in the search for later investigation with \code{keepModelList=TRUE}. This time we select the MPM (median probability model). If this model is not one of the models found in the Monte Carlo search, then it is constructed and returned.
+<<message=FALSE,  cache=TRUE, warning=FALSE>>=
 # Hyper g/n.obs
 prior <- InvGammaGPrior(a=1/2, b=sum(SMARTfull$EVENT)/2)
 f1_MPM <- coxTBF(f1, data = SMARTfull, type="MPM", useOpenMP=FALSE,
