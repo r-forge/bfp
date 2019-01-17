@@ -2,14 +2,12 @@
 
 # use makefile variables from the R installation
 MkInclude = ${R_HOME}/etc${R_ARCH}/Makeconf
-RCPP_FLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"`
-RCPP_LIBS=`${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"`
 CXX_STD = CXX11
 
 # flags are needed:
 PKG_CPPFLAGS = -D R_NO_REMAP
-PKG_CXXFLAGS = -I. -Inewmat $(RCPP_FLAGS)
-PKG_LIBS = -Lnewmat -lnewmat $(RCPP_LIBS)
+PKG_CXXFLAGS = -I. -Inewmat
+PKG_LIBS = -Lnewmat -lnewmat
 
 # what are the C and C++ source files?
 include scripts/SOURCES.mkf
