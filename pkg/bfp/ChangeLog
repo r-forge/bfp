@@ -1,3 +1,7 @@
+2019-01-17  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
+    
+    * Fixed DESCRIPTION file and Makevars for Rcpp linking issues
+
 2017-08-23  Daniel Sabanes Bove  <sabanesd@roche.com>
     
     * Fixed DESCRIPTION file and Makevars for Solaris problems
