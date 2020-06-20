@@ -7,7 +7,6 @@ SOURCES_CPP =  \
 		conversions.cpp
 
 SOURCES_C = \
-		const.c \
 		hyp2f1.c \
 		mtherr.c
 
