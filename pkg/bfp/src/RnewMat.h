@@ -5,8 +5,8 @@
 #include <Rinternals.h>
 #include <Rmath.h>
 
-#include <newmat.h>  // For Newmat
-#include <newmatap.h> // for cholesky decomposition
+#include "newmat.h"  // For Newmat
+#include "newmatap.h" // for cholesky decomposition
 
 #include <set>   
 

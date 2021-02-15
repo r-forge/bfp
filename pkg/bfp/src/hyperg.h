@@ -9,11 +9,6 @@
 extern "C" {
 #endif 		
 
-// 	#include "mconf.h"
-// 	#include <math.h> 
-// 	#include <string.h>
-// 	#include <float.h>
-
 double hyp2f1(double a, double b, double c, double x);
 	
 #ifdef __cplusplus
