@@ -1,7 +1,7 @@
 #include "combinatorics.h"
 #include <iostream>
 #include <cstdlib>
-#include <types.h>
+#include "mytypes.h"
 
 using std::cout;
 

@@ -1,8 +1,8 @@
-#include <RnewMat.h>
+#include "RnewMat.h"
 #include <R_ext/Visibility.h>
-#include <combinatorics.h>
-#include <dataStructure.h>
-#include <hyperg.h>
+#include "combinatorics.h"
+#include "dataStructure.h"
+#include "hyperg.h"
 #include <map>
 #include <vector>
 #include <algorithm>
@@ -11,9 +11,9 @@
 #include <iostream>
 #include <cassert>
 #include <climits>
-#include <conversions.h>
+#include "conversions.h"
 #include <cmath>
-#include <types.h>
+#include "mytypes.h"
 
 // using pretty much:
 using std::map;

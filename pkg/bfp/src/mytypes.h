@@ -1,5 +1,5 @@
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef MYTYPES_H_
+#define MYTYPES_H_
 
 #include <set>
 #include <vector>
@@ -7,7 +7,7 @@
 #include <string>
 
 #include <R.h>
-#include <newmat.h>
+#include "newmat.h"
 
 // common type defs:
 
@@ -79,4 +79,4 @@ typedef std::vector<std::vector<ColumnVector> > ColumnVectorArray;
 
 
 
-#endif /* TYPES_H_ */
+#endif /* MYTYPES_H_ */

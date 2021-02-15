@@ -2,12 +2,12 @@
 #include "RnewMat.h"
 #include "sum.h"
 #include <set>
-#include <types.h>
+#include "mytypes.h"
 
 #include <cassert>
 #include <algorithm>
 #include <numeric>
-#include <rcppExport.h>
+#include "rcppExport.h"
 
 using std::lexicographical_compare;
 using std::pair;

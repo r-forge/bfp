@@ -6,7 +6,7 @@ CXX_STD = CXX11
 
 # flags are needed:
 PKG_CPPFLAGS = -D R_NO_REMAP
-PKG_CXXFLAGS = -I. -Inewmat
+PKG_CXXFLAGS = -Inewmat
 PKG_LIBS = -Lnewmat -lnewmat
 
 # what are the C and C++ source files?
