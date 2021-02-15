@@ -14,7 +14,7 @@
 #include <vector>
 #include <string>
 
-#include <mytypes.h>
+#include "mytypes.h"
 
 
 // convert an INTSXP to a std::vector of (unsigned) integers

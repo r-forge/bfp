@@ -1,4 +1,4 @@
-#include <hyperg.h>
+#include "hyperg.h"
 #include <cmath>
 
 // 22/02/2012: corrected Laplace approximation formula
