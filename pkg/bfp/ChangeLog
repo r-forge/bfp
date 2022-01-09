@@ -1,3 +1,10 @@
+2022-01-09  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
+
+    * Do not use mfp package anymore in the demo.
+    * Include mfp authors since we have derived the `fpScale` function from their
+      package.
+    * Remove URL which causes problems in `R CMD check` for `scrBesag`.
+
 2020-06-20  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
     
     * Fixed link time optimization (LTO) issue.

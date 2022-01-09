@@ -145,33 +145,6 @@ bmaPredictions <- bmaPredict (ozoneModels, newdata = ozoneTest)
 bmaRMSE <- sqrt (mean ((bmaPredictions - ozoneTest$hourAverageMax)^2))
 bmaRMSE
 
-
-
-## try a corresponding analysis with the mfp package:
-library (mfp)
-ozoneMfp <- mfp (hourAverageMax ~
-                 fp (dayOfYear) +
-                 fp (pressure500Height) +
-                 fp (windSpeed) +
-                 fp (humidity) +
-                 fp (tempSandburg) +
-                 fp (inversionBaseHeight) +
-                 fp (pressureGradientDaggett) +
-                 fp (inversionBaseTemp) +
-                 fp (visibility),
-                 data = ozoneTraining)
-ozoneMfp
-str (ozoneMfp)
-
-sumMfp <- summary (ozoneMfp)
-str (sumMfp)
-
-## get predictions from the found model:
-ozoneMfpLm <- lm(ozoneMfp$formula, data = ozoneTraining)
-mfpPredictions <- predict (ozoneMfpLm, newdata = ozoneTest)
-mfpRMSE <- sqrt (mean ((mfpPredictions - ozoneTest$hourAverageMax)^2))
-
-
 ## and finally another model proposed by Casella & Moreno (for the full dataset admittedly)
 
 casella <- lm (hourAverageMax ~ humidity + I (windSpeed^2) + I (tempSandburg^2) + I (pressureGradientDaggett^2) +
@@ -185,10 +158,10 @@ casellaRMSE <- sqrt (mean ((casellaPredictions - ozoneTest$hourAverageMax)^2))
 
 
 ## make a graph comparing the prediction performance of the different approaches
-predMat <- cbind(casellaPredictions, mfpPredictions, bmaPredictions, mapPredictions)
+predMat <- cbind(casellaPredictions, bmaPredictions, mapPredictions)
 
-myPch <- c (3, 4, 19, 19)
-myCol <- c (rep("black", 2), "grey", "black")
+myPch <- c (3, 19, 19)
+myCol <- c ("black", "grey", "black")
 
 table (ozoneTest$hourAverageMax)
 x <- jitter (ozoneTest$hourAverageMax)
@@ -204,7 +177,7 @@ matplot (x,
          ylab = "predicted value")
 rug (x)
 abline (0, 1)
-legend ("bottomright", pch = myPch, col = myCol, legend = c ("Casella", "mfp", "BMA", "MAP"), bty = "n")
+legend ("bottomright", pch = myPch, col = myCol, legend = c ("Casella", "BMA", "MAP"), bty = "n")
 
 
 

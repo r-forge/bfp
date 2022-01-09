@@ -12,7 +12,7 @@
 #####################################################################################
 
 `fpScale` <-
-    function (x, scaling = TRUE) # copy of mfp:::fp.scale
+    function (x, scaling = TRUE)
 {
     scale <- 1
     shift <- 0
