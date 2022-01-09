@@ -3,7 +3,7 @@
 
 \title{Internal function for shifting and rescaling a fractional polynomial covariate}
 \description{
-  This function is a copy of mfp:::fp.scale, see its description.
+  This function is derived from mfp:::fp.scale written by Gareth Ambler and Axel Benner.
 }
 \usage{
 fpScale(x, scaling = TRUE)
