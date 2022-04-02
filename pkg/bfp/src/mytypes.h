@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <cfloat>
 
 #include <R.h>
 #include "newmat.h"
@@ -12,7 +13,7 @@
 // common type defs:
 
 // the machine precision
-static const double EPS = sqrt(DOUBLE_EPS);
+static const double EPS = sqrt(DBL_EPSILON);
 
 
 

@@ -1,3 +1,8 @@
+2022-04-02  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
+     
+    * Avoid use of legacy S-compatibility macro DOUBLE_EPS to comply with 
+      R 4.2.0.
+
 2022-01-09  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
 
     * Do not use mfp package anymore in the demo.
