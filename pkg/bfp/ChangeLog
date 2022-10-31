@@ -1,3 +1,8 @@
+2022-10-31  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
+     
+    * Correct C function definitions to comply with clang 15.
+    * Avoid escaped LaTeX special in documentation.
+
 2022-04-02  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
      
     * Avoid use of legacy S-compatibility macro DOUBLE_EPS to comply with 

@@ -117,8 +117,7 @@ static double hys2f1();
 double hyp2f1();
 #endif
 
-double hyp2f1( a, b, c, x )
-double a, b, c, x;
+double hyp2f1(double a, double b, double c, double x)
 {
 double d, d1, d2, e;
 double p, q, r, s, y, ax;
@@ -285,9 +284,7 @@ return(R_PosInf);
 /* Apply transformations for |x| near 1
  * then call the power series
  */
-static double hyt2f1( a, b, c, x, loss )
-double a, b, c, x;
-double *loss;
+static double hyt2f1(double a, double b, double c, double x, double* loss)
 {
 double p, q, r, s, t, y, d, err, err1;
 double ax, id, d1, d2, e, y1;
@@ -429,9 +426,7 @@ return(y);
 
 /* Defining power series expansion of Gauss hypergeometric function */
 
-static double hys2f1( a, b, c, x, loss )
-double a, b, c, x;
-double *loss; /* estimates loss of significance */
+static double hys2f1(double a, double b, double c, double x, double* loss)
 {
 double f, g, h, k, m, s, u, umax;
 int i;
