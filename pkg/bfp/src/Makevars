@@ -2,7 +2,6 @@
 
 # use makefile variables from the R installation
 MkInclude = ${R_HOME}/etc${R_ARCH}/Makeconf
-CXX_STD = CXX11
 
 # flags are needed:
 PKG_CPPFLAGS = -D R_NO_REMAP

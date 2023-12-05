@@ -307,9 +307,9 @@ exhaustiveGaussian(// definition
 	permPars(0, currentFpInfo, nUcGroups, startModel, orderedModels, hyp, data, ucTermList, fixedCols, bookkeep);
 
 	if (bookkeep.verbose){
-		Rprintf("\nActual number of possible models:  %d ", bookkeep.modelCounter);
-		Rprintf("\nNumber of non-identifiable models: %d", bookkeep.nanCounter);
-		Rprintf("\nNumber of saved possible models:   %d\n", orderedModels.size());
+		Rprintf("\nActual number of possible models:  %lu ", bookkeep.modelCounter);
+		Rprintf("\nNumber of non-identifiable models: %lu", bookkeep.nanCounter);
+		Rprintf("\nNumber of saved possible models:   %llu\n", orderedModels.size());
 	}
 
 	// normalize posterior probabilities and correct log marg lik and log prior of the models to return
@@ -563,7 +563,7 @@ samplingGaussian(// definition
 	// a) length of chain
 	double chainlength = REAL(R_chainlength)[0];
 	if (ULONG_MAX < chainlength){
-		Rf_warning("\nchainlength too high - reducing to %d \n", ULONG_MAX);
+		Rf_warning("\nchainlength too high - reducing to %lu \n", ULONG_MAX);
 		bookkeep.chainlength = ULONG_MAX;
 	} else {
 		bookkeep.chainlength = static_cast<PosLargeInt>(chainlength);
@@ -858,7 +858,7 @@ samplingGaussian(// definition
 	Rf_setAttrib(ret, Rf_install("logNormConst"), Rf_ScalarReal(logNormConst));
 
 	if (bookkeep.verbose){
-	    Rprintf("\nNumber of non-identifiable model proposals:     %d", bookkeep.nanCounter);
+	    Rprintf("\nNumber of non-identifiable model proposals:     %lu", bookkeep.nanCounter);
 	    Rprintf("\nNumber of total cached models:                  %d", modelCache.size());
 	    Rprintf("\nNumber of returned models:                      %d\n", Rf_length(ret));
 	}
