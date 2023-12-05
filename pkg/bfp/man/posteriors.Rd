@@ -35,8 +35,6 @@ test <- BayesMfp (y ~ bfp (x1, max = 2) + bfp (x2, max = 2) + uc (x3), nModels =
 ## this works:
 posteriors(test)
 
-## this must not work:
-## SoDA::muststop(posteriors(test, ind=2))
 
 ## only if we do model sampling there are model frequencies:
 test2 <- BayesMfp (y ~ bfp (x1, max = 2) + bfp (x2, max = 2) + uc (x3), nModels = 100,

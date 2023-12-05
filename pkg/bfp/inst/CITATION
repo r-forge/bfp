@@ -1,9 +1,9 @@
 citHeader(paste("Please cite the R-package 'bfp' in publications",
                 "as follows when you use it:")) 	  
 
-citEntry(entry="article",
+bibentry(bibtype="Article",
 	 title="Bayesian Fractional Polynomials",
-	 author=personList(person(given="Daniel", family="Sabanes Bove", 
+	 author=c(person(given="Daniel", family="Sabanes Bove", 
 	 			  email="sabanesd@roche.com"),
 	 	           person(given="Leonhard", family="Held")), 
  	 journal="Statistics and Computing",

@@ -1,5 +1,5 @@
 \name{getFpTransforms}
-\alias{'\%bt\%'}
+\alias{\%bt\%}
 \alias{getFpTransforms}
 \alias{getTransformName}
 
@@ -10,7 +10,7 @@ proper names to the resulting design matrix. The binary function
 \code{bt} is the Box-Tidwell transform.
 }
 \usage{
-'\%bt\%'(x, pow)
+x \%bt\% pow
 getFpTransforms(vec, powers, center=TRUE)
 getTransformName(name, pow)
 }
