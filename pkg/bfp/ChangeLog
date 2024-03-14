@@ -1,3 +1,7 @@
+2024-03-14  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
+
+    * Corrected the title of the Besag, Green et al paper referenced in the `scrBesag()` documentation. Clarified that the algorithm was invented by Peter Green.
+
 2023-12-06  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
 
     * Fixed several warnings due to incorrect formatting flags.
