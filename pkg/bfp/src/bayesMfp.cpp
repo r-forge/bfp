@@ -309,7 +309,7 @@ exhaustiveGaussian(// definition
 	if (bookkeep.verbose){
 		Rprintf("\nActual number of possible models:  %lu ", bookkeep.modelCounter);
 		Rprintf("\nNumber of non-identifiable models: %lu", bookkeep.nanCounter);
-		Rprintf("\nNumber of saved possible models:   %llu\n", orderedModels.size());
+		Rprintf("\nNumber of saved possible models:   %zu\n", orderedModels.size());
 	}
 
 	// normalize posterior probabilities and correct log marg lik and log prior of the models to return

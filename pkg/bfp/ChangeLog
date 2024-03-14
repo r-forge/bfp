@@ -1,3 +1,8 @@
+2023-12-06  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
+
+    * Fixed several warnings due to incorrect formatting flags.
+    * Fixed several notes from `R CMD check`.
+    
 2022-10-31  Daniel Sabanes Bove  <daniel.sabanesbove@gmx.net>
      
     * Correct C function definitions to comply with clang 15.
