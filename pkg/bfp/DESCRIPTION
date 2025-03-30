@@ -1,6 +1,6 @@
 Package: bfp
-Version: 0.0-48
-Date: 2024-03-14
+Version: 0.0-49
+Date: 2025-03-30
 Title: Bayesian Fractional Polynomials
 Authors@R: c(person("Daniel", "Sabanes Bove", 
              email="daniel.sabanesbove@gmx.net", role = c("aut", "cre")),

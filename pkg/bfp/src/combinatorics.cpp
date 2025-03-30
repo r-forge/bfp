@@ -3,8 +3,6 @@
 #include <cstdlib>
 #include "mytypes.h"
 
-using std::cout;
-
 void ksub_next ( int n, int k, IntVector& a, bool *more, int &m, int &m2)
 
 //****************************************************************************80

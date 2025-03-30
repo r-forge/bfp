@@ -12,6 +12,8 @@
 
 #include "newmatap.h"
 #include "newmatnl.h"
+#include <Rcpp.h>
+using Rcpp::Rcout;
 
 #ifdef use_namespace
 namespace NEWMAT {
@@ -146,8 +148,8 @@ void NonLinearLeastSquares::Value
    if (!Pred.IsValid()) { oorg=true; return; }  // check afterwards as well
    Y = *DataPointer - Y; Real ssq = Y.SumSquare();
    errorvar =  ssq / (n_obs - n_param);
-   cout << endl;
-   cout << setw(15) << setprecision(10) << " " << errorvar;
+   Rcout << endl;
+   Rcout << setw(15) << setprecision(10) << " " << errorvar;
    Derivs = Y.t() * X;          // get the derivative and stash it
    oorg = false; v = -0.5 * ssq;
 }
@@ -157,7 +159,7 @@ bool NonLinearLeastSquares::NextPoint(ColumnVector& Adj, Real& test)
    Tracer tr("NonLinearLeastSquares::NextPoint");
    QRZ(X, U); QRZ(X, Y, M);     // do the QR decomposition
    test = M.SumSquare();
-   cout << " " << setw(15) << setprecision(10)
+   Rcout << " " << setw(15) << setprecision(10)
       << test << " " << Y.SumSquare() / (n_obs - n_param);
    Adj = U.i() * M;
    if (test < errorvar * criterion) return true;
@@ -174,7 +176,7 @@ void NonLinearLeastSquares::Fit(const ColumnVector& Data,
    n_param = Parameters.Nrows(); n_obs = Data.Nrows();
    DataPointer = &Data;
    FindMaximum2::Fit(Parameters, Lim);
-   cout << "\nConverged" << endl;
+   Rcout << "\nConverged" << endl;
 }
 
 void NonLinearLeastSquares::MakeCovariance()
@@ -210,8 +212,8 @@ void MLE_D_FI::Value
    if (!LL.IsValid(Parameters,wg)) { oorg=true; return; }
    v = LL.LogLikelihood();
    if (!LL.IsValid()) { oorg=true; return; }     // check validity again
-   cout << endl;
-   cout << setw(20) << setprecision(10) << v;
+   Rcout << endl;
+   Rcout << setw(20) << setprecision(10) << v;
    oorg = false;
    Derivs = LL.Derivatives();                    // Get derivatives
 }
@@ -224,7 +226,7 @@ bool MLE_D_FI::NextPoint(ColumnVector& Adj, Real& test)
    ColumnVector Adj1 = LT.i() * Derivs;
    Adj = LT.t().i() * Adj1;
    test = SumSquare(Adj1);
-   cout << "   " << setw(20) << setprecision(10) << test;
+   Rcout << "   " << setw(20) << setprecision(10) << test;
    return (test < Criterion);
 }
 
@@ -235,7 +237,7 @@ void MLE_D_FI::Fit(ColumnVector& Parameters)
 {
    Tracer tr("MLE_D_FI::Fit");
    FindMaximum2::Fit(Parameters,Lim);
-   cout << "\nConverged" << endl;
+   Rcout << "\nConverged" << endl;
 }
   
 void MLE_D_FI::MakeCovariance()

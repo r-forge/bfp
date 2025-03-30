@@ -3,10 +3,15 @@
 
 // Copyright (C) 1992,3,4,7: R B Davies
 
+// Modification 2025 Daniel Sabanes:
+// Replace Rcout by Rcpp::Rcout
+
 #define WANT_STREAM                  // include.h will get stream fns
 
 #include "include.h"                 // include standard files
 #include "newmat.h"
+#include <Rcpp.h>
+using Rcpp::Rcout;
 
 #ifdef use_namespace
 namespace NEWMAT {
@@ -289,7 +294,7 @@ ExeCounter::ExeCounter(int xl, int xf) : line(xl), fileid(xf), nexe(0) {}
 ExeCounter::~ExeCounter()
 {
    nreports++;
-   cout << "REPORT  " << setw(6) << nreports << "  "
+   Rcout << "REPORT  " << setw(6) << nreports << "  "
       << setw(6) << fileid << "  " << setw(6) << line
       << "  " << setw(6) << nexe << "\n";
 }

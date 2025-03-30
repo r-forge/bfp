@@ -12,6 +12,10 @@
 
 // Copyright (C) 1993,4,6: R B Davies
 
+// Modification 2025 Daniel Sabanes: 
+// Replace Rcout by Rcpp::Rcout
+// Replace exit() by Rcpp::stop()
+
 
 #define WANT_STREAM                    // include.h will get stream fns
 #define WANT_STRING
@@ -20,6 +24,9 @@
 
 
 #include "myexcept.h"                  // for exception handling
+#include <Rcpp.h>
+using Rcpp::Rcout;
+using Rcpp::stop;
 
 #ifdef use_namespace
 namespace RBD_COMMON {
@@ -108,9 +115,9 @@ void BaseException::AddInt(int value)
 
 void Tracer::PrintTrace()
 {
-   cout << "\n";
+   Rcout << "\n";
    for (Tracer* et = last; et; et=et->previous)
-      cout << "  * " << et->entry << "\n";
+      Rcout << "  * " << et->entry << "\n";
 }
 
 void Tracer::AddTrace()
@@ -137,14 +144,14 @@ Janitor::Janitor()
    {
       do_not_link = false; NextJanitor = 0; OnStack = false;
 #ifdef CLEAN_LIST
-      cout << "Not added to clean-list " << (unsigned long)this << "\n";
+      Rcout << "Not added to clean-list " << (unsigned long)this << "\n";
 #endif
    }
    else
    {
       OnStack = true;
 #ifdef CLEAN_LIST
-      cout << "Add to       clean-list " << (unsigned long)this << "\n";
+      Rcout << "Add to       clean-list " << (unsigned long)this << "\n";
 #endif
       NextJanitor = JumpBase::jl->janitor; JumpBase::jl->janitor=this;
    }
@@ -157,7 +164,7 @@ Janitor::~Janitor()
    if (OnStack)
    {
 #ifdef CLEAN_LIST
-      cout << "Delete from  clean-list " << (unsigned long)this << "\n";
+      Rcout << "Delete from  clean-list " << (unsigned long)this << "\n";
 #endif
       Janitor* lastjan = JumpBase::jl->janitor;
       if (this == lastjan) JumpBase::jl->janitor = NextJanitor;
@@ -225,10 +232,10 @@ Tracer* Tracer::last;               // will be set to zero
 
 void Terminate()
 {
-   cout << "\n\nThere has been an exception with no handler - exiting";
+   Rcout << "\n\nThere has been an exception with no handler - exiting";
    const char* what = BaseException::what();
-   if (what) cout << what << "\n";
-   exit(1);
+   if (what) Rcout << what << "\n";
+   stop("terminated");
 }
 
 
@@ -251,44 +258,44 @@ FreeCheckLink* FreeCheck::next;
 int FreeCheck::BadDelete;
 
 void FCLClass::Report()
-{ cout << "   " << ClassName << "   " << (unsigned long)ClassStore << "\n"; }
+{ Rcout << "   " << ClassName << "   " << (unsigned long)ClassStore << "\n"; }
 
 void FCLRealArray::Report()
 {
-   cout << "   " << Operation << "   " << (unsigned long)ClassStore <<
+   Rcout << "   " << Operation << "   " << (unsigned long)ClassStore <<
       "   " << size << "\n";
 }
 
 void FCLIntArray::Report()
 {
-   cout << "   " << Operation << "   " << (unsigned long)ClassStore <<
+   Rcout << "   " << Operation << "   " << (unsigned long)ClassStore <<
       "   " << size << "\n";
 }
 
 void FreeCheck::Register(void* t, char* name)
 {
    FCLClass* f = new FCLClass(t,name);
-   if (!f) { cout << "Out of memory in FreeCheck\n"; exit(1); }
+   if (!f) { Rcout << "Out of memory in FreeCheck\n"; stop("terminated"); }
 #ifdef REG_DEREG
-   cout << "Registering   " << name << "   " << (unsigned long)t << "\n";
+   Rcout << "Registering   " << name << "   " << (unsigned long)t << "\n";
 #endif
 }
 
 void FreeCheck::RegisterR(void* t, char* o, int s)
 {
    FCLRealArray* f = new FCLRealArray(t,o,s);
-   if (!f) { cout << "Out of memory in FreeCheck\n"; exit(1); }
+   if (!f) { Rcout << "Out of memory in FreeCheck\n"; stop("terminated"); }
 #ifdef REG_DEREG
-   cout << o << "   " << s << "   " << (unsigned long)t << "\n";
+   Rcout << o << "   " << s << "   " << (unsigned long)t << "\n";
 #endif
 }
 
 void FreeCheck::RegisterI(void* t, char* o, int s)
 {
    FCLIntArray* f = new FCLIntArray(t,o,s);
-   if (!f) { cout << "Out of memory in FreeCheck\n"; exit(1); }
+   if (!f) { Rcout << "Out of memory in FreeCheck\n"; stop("terminated"); }
 #ifdef REG_DEREG
-   cout << o << "   " << s << "   " << (unsigned long)t << "\n";
+   Rcout << o << "   " << s << "   " << (unsigned long)t << "\n";
 #endif
 }
 
@@ -296,7 +303,7 @@ void FreeCheck::DeRegister(void* t, char* name)
 {
    FreeCheckLink* last = 0;
 #ifdef REG_DEREG
-   cout << "Deregistering " << name << "   " << (unsigned long)t << "\n";
+   Rcout << "Deregistering " << name << "   " << (unsigned long)t << "\n";
 #endif
    for (FreeCheckLink* fcl = next; fcl; fcl = fcl->next)
    {
@@ -307,18 +314,18 @@ void FreeCheck::DeRegister(void* t, char* name)
       }
       last = fcl;
    }
-   cout << "\nRequest to delete non-existent object of class and location:\n";
-   cout << "   " << name << "   " << (unsigned long)t << "\n";
+   Rcout << "\nRequest to delete non-existent object of class and location:\n";
+   Rcout << "   " << name << "   " << (unsigned long)t << "\n";
    BadDelete++;
    Tracer::PrintTrace();
-   cout << "\n";
+   Rcout << "\n";
 }
 
 void FreeCheck::DeRegisterR(void* t, char* o, int s)
 {
    FreeCheckLink* last = 0;
 #ifdef REG_DEREG
-   cout << o << "   " << s << "   " << (unsigned long)t << "\n";
+   Rcout << o << "   " << s << "   " << (unsigned long)t << "\n";
 #endif
    for (FreeCheckLink* fcl = next; fcl; fcl = fcl->next)
    {
@@ -327,28 +334,28 @@ void FreeCheck::DeRegisterR(void* t, char* o, int s)
 	 if (last) last->next = fcl->next; else next = fcl->next;
 	 if (s >= 0 && ((FCLRealArray*)fcl)->size != s)
 	 {
-	    cout << "\nArray sizes do not agree:\n";
-	    cout << "   " << o << "   " << (unsigned long)t
+	    Rcout << "\nArray sizes do not agree:\n";
+	    Rcout << "   " << o << "   " << (unsigned long)t
 	       << "   " << ((FCLRealArray*)fcl)->size << "   " << s << "\n";
 	    Tracer::PrintTrace();
-	    cout << "\n";
+	    Rcout << "\n";
 	 }
 	 delete fcl; return;
       }
       last = fcl;
    }
-   cout << "\nRequest to delete non-existent real array:\n";
-   cout << "   " << o << "   " << (unsigned long)t << "   " << s << "\n";
+   Rcout << "\nRequest to delete non-existent real array:\n";
+   Rcout << "   " << o << "   " << (unsigned long)t << "   " << s << "\n";
    BadDelete++;
    Tracer::PrintTrace();
-   cout << "\n";
+   Rcout << "\n";
 }
 
 void FreeCheck::DeRegisterI(void* t, char* o, int s)
 {
    FreeCheckLink* last = 0;
 #ifdef REG_DEREG
-   cout << o << "   " << s << "   " << (unsigned long)t << "\n";
+   Rcout << o << "   " << s << "   " << (unsigned long)t << "\n";
 #endif
    for (FreeCheckLink* fcl = next; fcl; fcl = fcl->next)
    {
@@ -357,35 +364,35 @@ void FreeCheck::DeRegisterI(void* t, char* o, int s)
 	 if (last) last->next = fcl->next; else next = fcl->next;
 	 if (s >= 0 && ((FCLIntArray*)fcl)->size != s)
 	 {
-	    cout << "\nArray sizes do not agree:\n";
-	    cout << "   " << o << "   " << (unsigned long)t
+	    Rcout << "\nArray sizes do not agree:\n";
+	    Rcout << "   " << o << "   " << (unsigned long)t
 	       << "   " << ((FCLIntArray*)fcl)->size << "   " << s << "\n";
 	    Tracer::PrintTrace();
-	    cout << "\n";
+	    Rcout << "\n";
 	 }
 	 delete fcl; return;
       }
       last = fcl;
    }
-   cout << "\nRequest to delete non-existent int array:\n";
-   cout << "   " << o << "   " << (unsigned long)t << "   " << s << "\n";
+   Rcout << "\nRequest to delete non-existent int array:\n";
+   Rcout << "   " << o << "   " << (unsigned long)t << "   " << s << "\n";
    BadDelete++;
    Tracer::PrintTrace();
-   cout << "\n";
+   Rcout << "\n";
 }
 
 void FreeCheck::Status()
 {
    if (next)
    {
-      cout << "\nObjects of the following classes remain undeleted:\n";
+      Rcout << "\nObjects of the following classes remain undeleted:\n";
       for (FreeCheckLink* fcl = next; fcl; fcl = fcl->next) fcl->Report();
-      cout << "\n";
+      Rcout << "\n";
    }
-   else cout << "\nNo objects remain undeleted\n\n";
+   else Rcout << "\nNo objects remain undeleted\n\n";
    if (BadDelete)
    {
-      cout << "\nThere were " << BadDelete << 
+      Rcout << "\nThere were " << BadDelete << 
          " requests to delete non-existent items\n\n";
    }
 }
