@@ -575,7 +575,7 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
     }
     else
     {
-        Rf_error("Distribution not implemented");
+        Rcpp::stop("Distribution not implemented");
     }
 
     if (linkString == "logit")
@@ -604,7 +604,7 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
     }
     else
     {
-        Rf_error("Link not implemented!");
+        Rcpp::stop("Link not implemented!");
     }
 
 
@@ -630,7 +630,7 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
     // ensure that this is positive
     if(! (cfactor > 0.0))
     {
-        Rf_error("cfactor equal to %f, so not positive", cfactor);
+        Rcpp::stop("cfactor equal to %f, so not positive", cfactor);
     }
     
     //we don't need c if we use the empirical prior
@@ -662,7 +662,7 @@ GlmModelConfig::GlmModelConfig(List& rcpp_family,
     }
     else
     {
-        Rf_error("g-prior not implemented!");
+        Rcpp::stop("g-prior not implemented!");
     }
 }
 
@@ -752,7 +752,7 @@ ModelCache::insert(const ModelPar& par, const GlmModelInfo& info)
     else
     {
         return false;
-        Rf_error("Should not happen: model already contained in model cache!");
+        Rcpp::stop("Should not happen: model already contained in model cache!");
     }
 }
 

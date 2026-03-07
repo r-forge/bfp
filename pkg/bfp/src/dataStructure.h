@@ -1,14 +1,14 @@
 #ifndef DATASTRUCTURE_H_
 #define DATASTRUCTURE_H_
 
+#include "rcppExport.h"
+
 #include <set>
 #include <map>
 #include <vector>
 #include "RnewMat.h"
 #include <iterator>
 #include "mytypes.h"
-
-#include "rcppExport.h"
 
 
 struct safeSum

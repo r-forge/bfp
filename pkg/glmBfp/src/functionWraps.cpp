@@ -207,7 +207,7 @@ Cache::Cache(List& rcpp_list) :
 {
     if(args.size() != vals.size())
     {
-        Rf_error("Lengths of args and vals vectors in R list converted to Cache object not equal!");
+        Rcpp::stop("Lengths of args and vals vectors in R list converted to Cache object not equal!");
     }
 }
 

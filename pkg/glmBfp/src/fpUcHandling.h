@@ -142,7 +142,7 @@ template<class T>
     {
         if (container.empty())
         {
-            Rf_error("\ncontainer in call to discreteUniform is empty!\n");
+            Rcpp::stop("\ncontainer in call to discreteUniform is empty!\n");
         }
 
         double u = unif_rand();
@@ -169,7 +169,7 @@ discreteUniform(const INT& lower, const INT& upper)
 {
     if (lower >= upper)
     {
-        Rf_error("\nlower = %d >= %d = upper in discreteUniform call\n", lower,
+        Rcpp::stop("\nlower = %d >= %d = upper in discreteUniform call\n", lower,
                  upper);
     }
 

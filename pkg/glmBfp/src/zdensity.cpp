@@ -263,7 +263,7 @@ NegLogUnnormZDens::operator()(double z)
                     }
                     else
                     {
-                        Rf_error("Higher order correction not implemented for this family.");
+                        Rcpp::stop("Higher order correction not implemented for this family.");
                     }
 
                     // add to the sums:

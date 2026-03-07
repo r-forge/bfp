@@ -1,5 +1,4 @@
 #include "RnewMat.h"
-#include "dataStructure.h"
 #include <vector>
 #include <numeric>
 #include <algorithm>

@@ -1,3 +1,4 @@
+#include "rcppExport.h"
 #include "combinatorics.h"
 #include <iostream>
 #include <cstdlib>
@@ -45,7 +46,7 @@ void ksub_next ( int n, int k, IntVector& a, bool *more, int &m, int &m2)
 
   if ( k < 0 || n < k )
   {
-      Rf_error("\nKSUB_NEXT - Fatal error!\nN = %d\nK = %d\nbut 0 <= K <= N is required!\n",
+      Rcpp::stop("\nKSUB_NEXT - Fatal error!\nN = %d\nK = %d\nbut 0 <= K <= N is required!\n",
                n,
                k);
   }

@@ -267,7 +267,7 @@ Bfgs<Fun>::minimize(double x0, double& xMin, double& invHessMin)
     const bool insideBounds = (x0 >= lowerBound) && (x0 <= upperBound);
     if(! insideBounds)
     {
-        Rf_error("Start value x0=%f for BFGS minimization not in admissible interval [%f, %f]", x0, lowerBound, upperBound);
+        Rcpp::stop("Start value x0=%f for BFGS minimization not in admissible interval [%f, %f]", x0, lowerBound, upperBound);
     }
 
     // initialization

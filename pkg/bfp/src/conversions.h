@@ -8,7 +8,6 @@
 #ifndef CONVERSIONS_H_
 #define CONVERSIONS_H_
 
-#include <R.h>
 #include <Rinternals.h>
 
 #include <vector>

@@ -68,7 +68,7 @@ Copyright 1984, 1987, 1992, 2000 by Stephen L. Moshier
 
 
 #include "mconf.h"
-#include <R.h>
+#include <R_ext/Arith.h>
 #include <Rmath.h>
 
 #define gamma gammafn

@@ -402,7 +402,7 @@ ModelCache::insert(const modelPar& par, const modelInfo& info)
     else
     {
         return false;
-        Rf_error("Should not happen: model already contained in model cache!");
+        Rcpp::stop("Should not happen: model already contained in model cache!");
     }
 }
 

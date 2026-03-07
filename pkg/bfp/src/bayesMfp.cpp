@@ -1,3 +1,4 @@
+#include "rcppExport.h"
 #include "RnewMat.h"
 #include <R_ext/Visibility.h>
 #include "combinatorics.h"
@@ -282,7 +283,7 @@ exhaustiveGaussian(// definition
 
 	// compute marginal likelihood for every model ###
 	if (orderedModels.max_size() < totalNumber)
-		Rf_error("\nmodel space is too large - cannot compute every model\n");
+		Rcpp::stop("\nmodel space is too large - cannot compute every model\n");
 
 	// start model
 	modelPar startModel(currentFpInfo.nFps, 0, 0);
@@ -939,7 +940,7 @@ T discreteUniform (	// return random element of myset; should be enclosed in get
 					)
 {
 	if (myset.empty())
-		Rf_error("\nmyset is empty!\n");
+		Rcpp::stop("\nmyset is empty!\n");
 
 	double u = unif_rand();
 	typename set<T>::size_type size = myset.size();
@@ -958,7 +959,7 @@ typename T::iterator dU (	// return iterator of random element of myset; should 
 					)
 {
 	if (container.empty())
-		Rf_error("\ncontainer is empty!\n");
+		Rcpp::stop("\ncontainer is empty!\n");
 
 	double u = unif_rand();
 	typename T::size_type size = container.size();
@@ -978,7 +979,7 @@ int discreteUniform ( // get random int x with lower <= x < upper; should be enc
 					)
 {
 	if (lower >= upper)
-		Rf_error("\nlower = %d >= %d = upper in discreteUniform call\n", lower, upper);
+		Rcpp::stop("\nlower = %d >= %d = upper in discreteUniform call\n", lower, upper);
 
 	int size = upper - lower;
 	int ret = lower;

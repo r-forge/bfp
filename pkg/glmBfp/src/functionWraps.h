@@ -178,7 +178,7 @@ template<class Fun>
         {
             if(eps <= 0)
             {
-                Rf_error("eps must be positive in AccurateNumericDerivative");
+                Rcpp::stop("eps must be positive in AccurateNumericDerivative");
             }
         }
 

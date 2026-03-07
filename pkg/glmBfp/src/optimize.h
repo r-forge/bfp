@@ -71,13 +71,13 @@ public:
         {
             // check arguments
             if (R_finite(lowerBound) == FALSE || R_finite(upperBound) == FALSE)
-                Rf_error("Brent: bounds must be finite");
+                Rcpp::stop("Brent: bounds must be finite");
 
             if (lowerBound >= upperBound)
-                Rf_error("Brent: lowerBound not smaller than upperBound");
+                Rcpp::stop("Brent: lowerBound not smaller than upperBound");
 
             if (precision <= 0.0)
-                Rf_error("Brent: precision not positive");
+                Rcpp::stop("Brent: precision not positive");
         }
 
     // minimize the function

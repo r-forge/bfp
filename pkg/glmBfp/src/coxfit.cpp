@@ -245,7 +245,7 @@ Coxfit::checkResults() const
 
     if(results.flag < nCovs)
     {
-        Rf_error("Singular model!");
+        Rcpp::stop("Singular model!");
     }
 
     AVector infs = results.imat * results.u;
@@ -254,7 +254,7 @@ Coxfit::checkResults() const
     {
         if (results.flag == 1000)
         {
-            Rf_error("Ran out of iterations and did not converge");
+            Rcpp::stop("Ran out of iterations and did not converge");
         }
         else
         {

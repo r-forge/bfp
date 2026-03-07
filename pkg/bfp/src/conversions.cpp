@@ -5,6 +5,7 @@
  *      Author: daniel
  */
 
+#include "rcppExport.h"
 #include "conversions.h"
 #include "mytypes.h"
 
@@ -173,7 +174,7 @@ ReturnMatrix getMatrix(const SEXP& m) // R-Matrix to Newmat-Matrix
 ColumnVector vec2col(const SEXP& v) // R-Vector to Newmat-column vector
 {
         if (Rf_isMatrix(v))
-                Rf_error("Argument of vec2col is a matrix\n");
+                Rcpp::stop("Argument of vec2col is a matrix\n");
 
         ColumnVector V(Rf_length(v));
         double *a = REAL(v);

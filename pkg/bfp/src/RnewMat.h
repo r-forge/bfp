@@ -1,7 +1,6 @@
 #ifndef RNEWMAT_H_
 #define RNEWMAT_H_
 
-#include <R.h> // in /usr/lib/R/include. For R
 #include <Rinternals.h>
 #include <Rmath.h>
 

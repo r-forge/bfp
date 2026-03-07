@@ -60,7 +60,7 @@ private:
     static double x_d_omx(double x)
     {
         if (x < 0 || x > 1)
-            Rf_error("Value %d out of range (0, 1)", x);
+            Rcpp::stop("Value %d out of range (0, 1)", x);
         return x / (1 - x);
     }
 

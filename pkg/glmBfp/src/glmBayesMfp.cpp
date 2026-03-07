@@ -531,7 +531,7 @@ glmModelsInList(const DataValues& data,
 
     // check that the set is large enough for all models in the list
     if (orderedModels.max_size() < static_cast<set<Model>::size_type >(rcpp_modelConfigs.size()))
-        Rf_error("\nlist of model space is too large - cannot compute every model\n");
+        Rcpp::stop("\nlist of model space is too large - cannot compute every model\n");
 
     // ------------
     // process all models in the list:
@@ -1070,7 +1070,7 @@ glmExhaustive(const DataValues& data,
 
     // check that the set is large enough for all models
     if (orderedModels.max_size() < data.totalNumber)
-        Rf_error("\nmodel space is too large - cannot compute every model\n");
+        Rcpp::stop("\nmodel space is too large - cannot compute every model\n");
 
     // start model
     ModelPar startModel(fpInfo.nFps);

@@ -7,7 +7,6 @@
 #include <string>
 #include <cfloat>
 
-#include <R.h>
 #include "newmat.h"
 
 // common type defs:

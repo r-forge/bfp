@@ -1,7 +1,6 @@
 #ifndef HYPERG_H_
 #define HYPERG_H_
 
-#include <R.h> 
 #include <Rmath.h>
 #include <Rdefines.h>
 
